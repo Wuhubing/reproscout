@@ -92,7 +92,7 @@ an unchanged CORE-Bench Medium score. Model and limits are recorded in the freez
 Average B-minus-A solved count: **{result["average_solved_difference_B_minus_A"]:+.1f}**.
 All **{len(runs)}** planned records are present; no missing cells. Total formal model
 cost: **${cost:.5f}**. A receives no lessons; B receives the original frozen rules.
-No earlier prepared-v1 run is counted in these totals. Costs exclude image
+No earlier experiment run is counted in these totals. Costs exclude image
 preparation, host compute, and development assistance.
 
 ## Group breakdown
@@ -102,8 +102,8 @@ preparation, host compute, and development assistance.
 {chr(10).join(groups)}
 
 Counts combine two repetitions; repeats are not independent scientific tasks.
-The two previously evaluated capsules are explicitly separated from the thirteen
-newly evaluated capsules. No lessons or agent policy were changed after their
+Previously evaluated capsules: {len(prior)}; newly evaluated capsules: {len(cohort["heldout"]) - len(prior)}.
+Prior exposure is disclosed rather than treating repeated evaluation as new data. No lessons or agent policy were changed after their
 previous outcomes were observed. Task modality labels do not establish image-tool use.
 
 ## Per-task records

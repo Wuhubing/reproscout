@@ -46,8 +46,18 @@ def environment_checks(output: Path, manual: bool = False):
         except TimeoutError:
             checks["timeout_raised"] = {"passed": True}
         await sandbox().exec(["sleep", "6"], timeout=10)
-        remaining = await sandbox().exec(["test", "!", "-e", "/tmp/timeout-escaped"], timeout=10)
-        checks["timed_out_process_terminated"] = {"passed": remaining.returncode == 0}
+        # Use the shell builtin: the old image's standalone /usr/bin/test can
+        # crash under amd64 emulation (139), which is not evidence of a live child.
+        remaining = await sandbox().exec(
+            ["bash", "-c", "test ! -e /tmp/timeout-escaped"], timeout=10
+        )
+        checks["timed_out_process_terminated"] = {
+            "passed": remaining.returncode == 0,
+            "exit_code": remaining.returncode,
+            "stdout": remaining.stdout,
+            "stderr": remaining.stderr,
+            "probe": "bash builtin test after delayed marker command",
+        }
         if manual:
             result = await sandbox().exec(
                 ["bash", "run.sh"], cwd="/code", timeout=180, timeout_retry=False

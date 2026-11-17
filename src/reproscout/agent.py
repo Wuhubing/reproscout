@@ -8,11 +8,12 @@ from pathlib import Path
 
 from inspect_ai.agent import AgentPrompt, AgentState, AgentSubmit, react
 from inspect_ai.model import GenerateConfig, get_model
-from inspect_ai.tool import ContentImage, ContentText, Tool, ToolDef, ToolError, tool
+from inspect_ai.tool import ContentImage, ContentText, Tool, ToolError, tool
 from inspect_ai.util import sandbox
 
 from .budget import Budget
 from .evidence import validate_submission
+from .request_count import count_request
 from .tasks import digest, write_json
 
 INSTRUCTIONS = """You are ReproScout, a scientific reproduction agent.
@@ -236,44 +237,25 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
         """
         if len(budget.calls) >= max_calls:
             raise ValueError("Maximum model calls reached")
-        messages = [m.model_dump(mode="json") for m in state.messages]
-        schemas = []
-        for item in tools:
-            definition = ToolDef(item)
-            schemas.append(
-                {
-                    "name": definition.name,
-                    "description": definition.description,
-                    "parameters": definition.parameters.model_dump(mode="json"),
-                }
-            )
-
-        def bound_images(value):
-            if isinstance(value, str) and value.startswith("data:image/"):
-                # Controlled thumbnails are <=1024 square. Reserve 8192 text-token
-                # equivalents per image, deliberately above normal image usage.
-                return "X" * 8192
-            if isinstance(value, list):
-                return [bound_images(v) for v in value]
-            if isinstance(value, dict):
-                return {k: bound_images(v) for k, v in value.items()}
-            return value
-
-        serialized = json.dumps(
-            bound_images({"messages": messages, "tools": schemas}), ensure_ascii=False
-        ).encode()
-        budget.reserve(len(serialized))
-        write_json(run / "budget.json", budget.__dict__)
-        output = await get_model().generate(
-            state.messages,
-            tools=tools,
-            config=GenerateConfig(
-                max_tokens=budget.max_output,
-                max_retries=0,
-                parallel_tool_calls=False,
-                reasoning_effort=config["reasoning_effort"],
-            ),
+        generation_config = GenerateConfig(
+            max_tokens=budget.max_output,
+            max_retries=0,
+            parallel_tool_calls=False,
+            reasoning_effort=config["reasoning_effort"],
         )
+        try:
+            counts = await count_request(get_model(), state.messages, tools, generation_config)
+        except Exception as exc:
+            budget.request_checks.append(
+                {"status": "count_failed", "error_type": type(exc).__name__}
+            )
+            write_json(run / "budget.json", budget.__dict__)
+            raise ValueError("Native request token counting failed; generation refused") from exc
+        try:
+            budget.reserve(counts["native_input_tokens"], counts)
+        finally:
+            write_json(run / "budget.json", budget.__dict__)
+        output = await get_model().generate(state.messages, tools=tools, config=generation_config)
         if output.usage is None:
             raise ValueError("Provider returned no usage; reserved cost retained and run stopped")
         budget.settle(output.usage.model_dump(), output.model)

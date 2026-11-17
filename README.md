@@ -23,6 +23,20 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
+## Controller repair validated; new comparison pending
+
+Native full-request token counting replaces the historical byte proxy. Five
+training tasks completed A/B validation before the new formal freeze. The
+accounting gate passed; one development B attempt changed its original data
+loader and is explicitly retained as a source-integrity failure. The new report
+will separate answer correctness from unchanged-input audits.
+
+See [repair protocol](docs/controller-repair-protocol.md),
+[lesson analysis](docs/lessons-analysis.md), and
+[development evidence](reports/development-v3-validation.json).
+The published metrics below remain the historical v0.2.0 result until all sixty
+fresh formal attempts are complete.
+
 ## Expanded release: v0.2.0
 
 All 15 selected held-out author images were recovered and verified. The expanded

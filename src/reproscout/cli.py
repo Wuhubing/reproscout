@@ -60,7 +60,12 @@ def execute(
     write_json(run / "config.json", config)
     config.update(condition=condition, repeat=repeat, experiment_id=experiment_id)
     write_json(run / "config.json", config)
-    budget = Budget(limit=config["model_budget_usd"], max_output=config["max_output_tokens"])
+    budget = Budget(
+        limit=config["model_budget_usd"],
+        max_output=config["max_output_tokens"],
+        max_input_tokens=config.get("max_input_tokens", 60000),
+        framing_allowance=config.get("token_count_margin", 2048),
+    )
     question_text = json.dumps(manifest["questions"], indent=2)
     sample = Sample(
         id=manifest["task_id"],
