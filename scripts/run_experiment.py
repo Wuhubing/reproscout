@@ -1,0 +1,63 @@
+"""Run missing planned cells with freeze verification and no silent reruns."""
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from reproscout.experiment import aggregate, verify_freeze
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("experiment", type=Path)
+    parser.add_argument("--key-file", type=Path, required=True)
+    args = parser.parse_args()
+    payload = verify_freeze(ROOT, args.experiment)
+    completed = set()
+    for path in (ROOT / "runs").glob("*/summary.json"):
+        record = json.loads(path.read_text())
+        if record.get("experiment_id") == payload["experiment_id"]:
+            task = json.loads((path.parent / "manifest.json").read_text())["task_id"]
+            completed.add((task, record["condition"], record["repeat"]))
+    # Reverse A/B order across repetitions; serial execution avoids resource interference.
+    for repeat in [1, 2]:
+        for task in payload["cohort"]["heldout"]:
+            for condition in ["A", "B"] if repeat == 1 else ["B", "A"]:
+                verify_freeze(ROOT, args.experiment)
+                if (task, condition, repeat) in completed:
+                    continue
+                command = [
+                    sys.executable,
+                    "-m",
+                    "reproscout",
+                    "run",
+                    "--manifest",
+                    str(ROOT / "manifests" / f"{task}.json"),
+                    "--condition",
+                    condition,
+                    "--repeat",
+                    str(repeat),
+                    "--experiment-id",
+                    payload["experiment_id"],
+                    "--key-file",
+                    str(args.key_file),
+                ]
+                if condition == "B":
+                    command.extend(["--lessons", str(args.experiment / "lessons.md")])
+                print(f"Running {task} {condition}{repeat}", flush=True)
+                result = subprocess.run(command, cwd=ROOT, check=False)
+                if result.returncode:
+                    raise RuntimeError(
+                        "Runner process failed; preserve evidence and inspect before resuming"
+                    )
+                aggregate(ROOT, args.experiment)
+    result = aggregate(ROOT, args.experiment)
+    print(json.dumps(result["totals"], indent=2))
+
+
+if __name__ == "__main__":
+    main()
