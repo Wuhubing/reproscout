@@ -30,3 +30,12 @@ See the exported environment-checks.json for machine-readable observations.
   offline policy; this is retained as a meaningful environment constraint.
 - The registry rate-limited bulk image pulls with HTTP 429. Preparation attempts
   and final cohort membership are retained separately from evaluation outcomes.
+
+## Expanded recovery on November 17, 2026
+
+The local Colima VM was restarted with an 80 GiB virtual data disk after the
+previous disk remained at 40 GiB. CPU allocation stayed at four and memory at
+8 GiB; individual task containers still receive two CPUs and 2 GiB memory.
+Recovery checks host free space before downloading additional uncached images.
+The old HTTP 429 failure records remain available. Successful authenticated
+manifest requests and verified digest pulls are recorded in recovery-v2.json.

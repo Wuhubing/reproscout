@@ -60,3 +60,21 @@ walkthrough. The video describes saved real runs; it is not presented as a live
 recording of model execution. AI-generated narration is disclosed. Review course
 submission requirements separately; this repository does not submit anything to
 the class signup sheet or send messages to instructors.
+
+## Expanded image recovery
+
+```bash
+uv run python scripts/recover_cohort.py --target 15
+```
+
+This preserves the original selection ledger, records the expanded fixed selection,
+resolves public author images through standard registry authentication, verifies
+manifest digests, and pulls serially. Resuming skips locally verified ready images
+without additional registry requests. Upstream rate limits may require a cooldown;
+there is no assumed reset window or identity rotation. Archive downloads and
+reference answer extraction require GnuPG when the local cache is absent.
+
+The original release remains available at tag v0.1.0. To verify its historical
+freeze, check out that tag; current manifests and package version belong to the
+expanded study. The expanded freeze records that all agent source files, model
+configuration, and lessons are byte-identical to the original release.

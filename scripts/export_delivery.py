@@ -41,6 +41,8 @@ def main():
                 shutil.copyfile(p, target / p.name)
         if (run / "artifacts").exists():
             shutil.copytree(run / "artifacts", target / "artifacts", dirs_exist_ok=True)
+        if not (target / "artifact-index.json").exists():
+            write_json(target / "artifact-index.json", {})
         if not (target / "source-audit.json").exists():
             write_json(
                 target / "source-audit.json",
@@ -65,7 +67,7 @@ def main():
             (target / "trajectory.json").write_text(encoded, encoding="utf-8")
         manifest = json.loads((run / "manifest.json").read_text())
         score = summary.get("evaluation", {})
-        group = "held-out" if summary.get("experiment_id") else "development"
+        group = summary.get("experiment_id") or "development"
         result = f"{score.get('correct_questions', 0)}/{len(manifest['questions'])}"
         link = f"runs/{run.name}/report.html"
         rows.append(
@@ -83,12 +85,24 @@ def main():
     lessons_panel = ""
     if args.experiment:
         results = json.loads((args.experiment / "results.json").read_text())
-        shutil.copytree(args.experiment, destination / "experiment", dirs_exist_ok=True)
+        experiment_target = destination / "experiment"
+        if experiment_target.exists():
+            old_freeze = experiment_target / "freeze.json"
+            if old_freeze.exists():
+                old_id = json.loads(old_freeze.read_text())["experiment_id"]
+                shutil.copytree(
+                    experiment_target, destination / "experiments" / old_id, dirs_exist_ok=True
+                )
+            shutil.rmtree(experiment_target)
+        shutil.copytree(args.experiment, experiment_target)
+        shutil.copytree(
+            args.experiment, destination / "experiments" / args.experiment.name, dirs_exist_ok=True
+        )
         comparison = "<table><tr><th>Condition / repeat</th><th>Solved capsules</th><th>Model cost</th><th>Total time</th></tr>"
         for label, value in results["totals"].items():
             comparison += f"<tr><td>{label}</td><td>{value['solved']}/{value['planned']}</td><td>${value['cost_estimated_usd']:.5f}</td><td>{value['seconds']:.1f}s</td></tr>"
         comparison += f"</table><p>Average B minus A solved count: <strong>{results['average_solved_difference_B_minus_A']:+.1f}</strong>. Missing planned runs: {len(results['missing'])}.</p>"
-        comparison += '<p>A: baseline. B: frozen development lessons. <a href="experiment/freeze.json">Freeze manifest</a> | <a href="experiment/results.json">Full comparison data</a></p>'
+        comparison += f'<p>Experiment: {html.escape(results["experiment_id"])}. A: baseline. B: frozen development lessons. <a href="experiment/freeze.json">Freeze manifest</a> | <a href="experiment/results.json">Full comparison data</a></p>'
         formal = [r for r in run_records if r.get("experiment_id") == results["experiment_id"]]
         groups = "<h2>Language and modality</h2><table><tr><th>Group</th><th>A solved / runs</th><th>B solved / runs</th></tr>"
         for field, value in [
@@ -139,10 +153,10 @@ def main():
 <style>body{{font:16px system-ui;max-width:1200px;margin:40px auto;padding:0 24px;color:#172633}}h1{{font-size:38px}}table{{border-collapse:collapse;width:100%}}td,th{{padding:10px;border-bottom:1px solid #ccd6dc;text-align:left}}pre{{background:#f0f4f7;padding:20px;white-space:pre-wrap}}a{{color:#1659a5}}.note{{padding:18px;background:#fff1d6;border-left:4px solid #ba7900}}</style>
 <h1>ReproScout</h1><p>Evidence-linked scientific reproduction with frozen development lessons.</p>
 <p class="note">Prepared author environments, offline execution, small selected subset.
-This is not an unchanged CORE-Bench Medium result. Registry availability constrained cohort size.
+This is not an unchanged CORE-Bench Medium result. Image availability and recovery attempts are documented in the selection and provisioning ledgers.
 Results are empirical observations, not proof of general reproducibility or statistical significance.</p>
 <h2>Frozen comparison</h2>{comparison}
-{groups}{lessons_panel}<h2>Recorded runs</h2><table><tr><th>Split</th><th>Task</th><th>Language</th><th>Condition</th><th>Questions correct</th><th>Model cost</th><th>Time</th><th>Details</th></tr>{"".join(rows)}</table>
+{groups}{lessons_panel}<h2>Recorded runs</h2><table><tr><th>Experiment / split</th><th>Task</th><th>Language</th><th>Condition</th><th>Questions correct</th><th>Model cost</th><th>Time</th><th>Details</th></tr>{"".join(rows)}</table>
 {failure_panel}<h2>Inspect the evidence</h2><p>Each task report links to controller-owned output snapshots.
 A trajectory.json file alongside each report preserves the actual model/tool conversation.
 Costs are usage-based estimates. Failure diagnoses are provisional, not independent human labels.</p>

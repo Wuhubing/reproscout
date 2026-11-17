@@ -23,6 +23,14 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
+## Expanded experiment in progress
+
+All 15 selected held-out author images have been recovered and verified. The
+`prepared-v2` experiment freezes 60 fresh A/B cells with the same agent, model,
+budgets, and development lessons as v0.1.0. See the
+[expanded protocol](docs/expanded-experiment-protocol.md). The published metrics
+below describe the earlier v0.1.0 study until the expanded report is completed.
+
 ## Review the delivered results
 
 Open [the portable results app](reports/index.html) locally. Read the
