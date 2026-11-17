@@ -30,6 +30,14 @@ Open [the portable results app](reports/index.html) locally. Read the
 and [delivery/reproduction guide](docs/delivery-guide.md). The report contains real
 execution evidence and both successful and failed attempts.
 
+Measured release: five development tasks and two held-out tasks, with eight formal
+A/B records. Both conditions solved 1/2 tasks in each repeat; average solved-count
+gain was zero. Model cost for the formal comparison was approximately $0.092.
+The small cohort resulted from recorded registry HTTP 429 preparation failures.
+
+[English demo video](deliverables/reproscout-demo.mp4) ·
+[Demo transcript](docs/demo-script.md) · [Validation limits](docs/validation-and-limitations.md)
+
 ## Install
 
 Requirements: Python 3.12, `uv`, Docker Engine, and Docker Compose v2. The pilot uses

@@ -61,3 +61,13 @@ was preserved. Held-out evaluation uses the frozen prepared inputs.
 
 Project-authored text is English. Unmodified third-party scientific filenames,
 code excerpts, task titles, or tool output may retain the authors' original language.
+
+## Post-evaluation presentation maintenance
+
+After all eight formal cells completed, the exporter received two presentation
+fixes: reading the diagnosis field named `label` and marking the first development
+attempt's absent source audit explicitly as not recorded. The original execution
+freeze is preserved as `experiments/prepared-v1/freeze-execution.json` and in commit
+`3e4e5db`. The delivery freeze records the old/new exporter hashes and reason.
+No agent, runner, scoring, task input, configuration, lesson, or experimental result
+changed. New visual-tool unit tests were added without modifying execution code.

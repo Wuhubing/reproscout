@@ -41,6 +41,15 @@ def main():
                 shutil.copyfile(p, target / p.name)
         if (run / "artifacts").exists():
             shutil.copytree(run / "artifacts", target / "artifacts", dirs_exist_ok=True)
+        if not (target / "source-audit.json").exists():
+            write_json(
+                target / "source-audit.json",
+                {
+                    "status": "not_recorded",
+                    "unchanged": None,
+                    "note": "This early development attempt predates the source hash audit. No unchanged-source claim is made.",
+                },
+            )
         # Export model/tool messages rather than provider headers, environment or raw answers.
         logs = list((run / "logs").glob("*.eval"))
         if logs:
@@ -117,7 +126,7 @@ def main():
     failures = {}
     for r in run_records:
         diagnosis = json.loads((destination / "runs" / r["run_id"] / "diagnosis.json").read_text())
-        label = diagnosis.get("category", "unknown")
+        label = diagnosis.get("label") or "solved"
         failures[label] = failures.get(label, 0) + 1
     failure_panel = (
         "<h2>Provisional diagnoses (all recorded runs)</h2><pre>"
