@@ -1,0 +1,7 @@
+{
+  "command": "python - <<'PY'\nimport nbformat, json, re\nnb=nbformat.read('/results/FS-Filters-executed.ipynb', as_version=4)\nfor i,cell in enumerate(nb.cells):\n    if cell.cell_type=='code':\n        outs=cell.get('outputs',[])\n        txt=''\n        for o in outs:\n            if o.output_type=='stream': txt+=o.get('text','')\n            elif o.output_type in ('execute_result','display_data'):\n                txt+=str(o.get('data',{}).get('text/plain',''))\n            elif o.output_type=='error': txt+='\\n'.join(o.get('traceback',[]))\n        if txt.strip():\n            if re.search(r'accuracy|I-Gain|gain|hybrid', txt, re.I):\n                print('CELL',i)\n                print(txt[:2000])\n                print('---')\nPY",
+  "exit_code": 0,
+  "seconds": 0.5552863329648972,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

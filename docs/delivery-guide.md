@@ -18,12 +18,10 @@ An archived report remains readable even when those external services are unavai
 ## Prepare and run a new comparison
 
 ```bash
-uv run python scripts/provision_cohort.py
-# If selected images are rate-limited, retry the same selection:
-uv run python scripts/retry_provisioning.py
+uv run python scripts/recover_cohort.py --target 15
 ```
 
-Inspect `manifests/selection.json`, `manifests/provisioning.json`, and
+Inspect `manifests/selection-v2.json`, `manifests/recovery-v2.json`, and
 `manifests/cohort.json` before accepting the available cohort. Preparation does not
 promise the same images will be accessible in the future. Do not silently treat a
 changed available cohort as a reproduction of the published experiment.
@@ -52,6 +50,8 @@ The runner resumes missing cells and rejects code/configuration drift and duplic
 formal cells. Do not reuse the published experiment ID for new results. Local raw
 logs, archives, reference answers, and credentials are intentionally excluded from Git.
 Published reports include a portable export of actual model/tool trajectories.
+Opaque encrypted provider reasoning is omitted from the public export; visible
+messages, tool calls, outputs, and returned usage are retained.
 
 ## Presentation
 
@@ -78,3 +78,6 @@ The original release remains available at tag v0.1.0. To verify its historical
 freeze, check out that tag; current manifests and package version belong to the
 expanded study. The expanded freeze records that all agent source files, model
 configuration, and lessons are byte-identical to the original release.
+
+See [registry recovery](registry-recovery.md) for the observed HTTP behavior,
+implemented retry policy, and cache verification evidence.

@@ -21,7 +21,8 @@ billing receipt. Failed or interrupted calls can retain reserved unknown cost.
 
 ## Limits of interpretation
 
-- The available held-out cohort has only two unique capsules. Repeated runs do
+- The expanded held-out cohort has fifteen unique capsules, with two previously
+  evaluated in v0.1.0 and thirteen newly evaluated. Repeated runs do
   not increase the number of independent tasks. Neither significance nor broad
   language/modality performance should be inferred from these counts.
 - Prepared author environments remove the environment-construction burden of
@@ -62,7 +63,7 @@ was preserved. Held-out evaluation uses the frozen prepared inputs.
 Project-authored text is English. Unmodified third-party scientific filenames,
 code excerpts, task titles, or tool output may retain the authors' original language.
 
-## Post-evaluation presentation maintenance
+## Historical prepared-v1 presentation maintenance
 
 After all eight formal cells completed, the exporter received two presentation
 fixes: reading the diagnosis field named `label` and marking the first development
@@ -71,3 +72,43 @@ freeze is preserved as `experiments/prepared-v1/freeze-execution.json` and in co
 `3e4e5db`. The delivery freeze records the old/new exporter hashes and reason.
 No agent, runner, scoring, task input, configuration, lesson, or experimental result
 changed. New visual-tool unit tests were added without modifying execution code.
+
+## Expanded-study metadata
+
+The displayed vision flag is the preparation heuristic used consistently in both
+studies: a question contains the substring `fig`. It is not an independently
+validated taxonomy or proof that the agent inspected an image. The results report
+also counts actual image-tool artifacts separately. The expanded study retains
+five development tasks and frozen lessons; it does not claim ten development tasks
+merely because the original held-out target of fifteen was recovered.
+
+## Application request bound versus model context capacity
+
+`Pilot context limit reached` is raised by ReproScout's own request-reservation
+controller, not by the OpenAI service. It stops when the serialized request byte
+bound plus an 8,192 framing allowance exceeds 60,000. Image payloads are replaced
+with conservative 8,192-character placeholders for this calculation. Other
+serialized message fields, including opaque provider reasoning payloads, remain
+in that bound. This conservative policy can stop an attempt well before the
+model's actual context window or the $1 monetary cap is exhausted. It is unchanged
+between A and B and between the original and expanded study. Interpret failures
+as performance of this bounded application, not a measurement of the model's
+maximum context capacity. The public export omits opaque fields for readability
+and credential-scanner reliability; the execution policy and original private
+logs remain unchanged.
+
+## Expanded presentation-only amendments
+
+All sixty formal records completed before public-export changes. The original
+execution freeze is retained as `experiments/prepared-v2/freeze-execution.json`,
+with execution source commit `068f30b`. The delivery freeze records old and new
+hashes for two presentation scripts: the exporter omits opaque encrypted provider
+reasoning and uses an accurate missing-audit explanation; the demo renderer updates
+the software-test count after two privacy regression tests. Visible model messages,
+tool calls, outputs, and returned usage are retained. Original raw logs stay local.
+No agent, scorer, task input, configuration, lesson, or experimental result changed.
+
+Encrypted provider payloads may contain random strings that resemble credentials.
+The public exporter removes those opaque fields while retaining the conservative
+credential check for visible content. Tests verify that visible evidence survives,
+original in-memory data is not mutated, and a visible key still blocks export.

@@ -23,13 +23,18 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
-## Expanded experiment in progress
+## Expanded release: v0.2.0
 
-All 15 selected held-out author images have been recovered and verified. The
-`prepared-v2` experiment freezes 60 fresh A/B cells with the same agent, model,
-budgets, and development lessons as v0.1.0. See the
-[expanded protocol](docs/expanded-experiment-protocol.md). The published metrics
-below describe the earlier v0.1.0 study until the expanded report is completed.
+All 15 selected held-out author images were recovered and verified. The expanded
+experiment completed **60 fresh runs: 15 tasks × A/B × two repetitions**, with no
+missing cells or score-based task replacements. Thirteen capsules are newly
+evaluated; two have explicitly disclosed prior v0.1.0 results. Five development
+tasks and three frozen lessons remain unchanged.
+
+See the [expanded protocol](docs/expanded-experiment-protocol.md) and
+[registry recovery evidence](docs/registry-recovery.md).
+
+[Download v0.2.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.2.0)
 
 ## Review the delivered results
 
@@ -38,10 +43,13 @@ Open [the portable results app](reports/index.html) locally. Read the
 and [delivery/reproduction guide](docs/delivery-guide.md). The report contains real
 execution evidence and both successful and failed attempts.
 
-Measured release: five development tasks and two held-out tasks, with eight formal
-A/B records. Both conditions solved 1/2 tasks in each repeat; average solved-count
-gain was zero. Model cost for the formal comparison was approximately $0.092.
-The small cohort resulted from recorded registry HTTP 429 preparation failures.
+A solved 6/15 and 5/15 across the two repetitions; B solved 4/15 and 5/15. Average B-minus-A solved-count change was -1.0; estimated model cost for all 60 formal attempts was $0.75550.
+
+The report retains 74 agent records: 60 new formal runs, eight historical formal
+runs, and six development runs. The proposed +2 solved-task improvement was
+not met.
+Failures include 39 application request-bound stops and one zero-call
+initialization failure; these remain in the primary denominator.
 
 [English demo video](deliverables/reproscout-demo.mp4) ·
 [Demo transcript](docs/demo-script.md) · [Validation limits](docs/validation-and-limitations.md)
@@ -121,6 +129,10 @@ are disabled and unknown failed-call costs retain their reservation.
 Standard API prices checked on November 17, 2026: $0.75/M uncached input tokens,
 $0.075/M cached input tokens, and $4.50/M output tokens. See the
 [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
+The controller also has a fixed conservative request-size bound, described in
+[validation limits](docs/validation-and-limitations.md); this is separate from the
+provider model context window.
+
 Amounts are usage-based estimates, not billing receipts. Inspect reports uncached
 input and cache-read tokens separately; both are included correctly in our ledger.
 
@@ -132,6 +144,7 @@ uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 ```
 
+The release passes 18 software tests and 13 deterministic environment checks.
 Tests cover unsafe archives, stale result exclusion, evidence boundaries, original
 numeric scoring, cached-token accounting, pre-dispatch reservations, and freeze
 integrity. Container checks are run separately through `validate`.

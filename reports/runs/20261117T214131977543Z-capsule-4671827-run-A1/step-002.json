@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, json\nnb=nbformat.read('PerformanveEval.ipynb', as_version=4)\nprint('cells', len(nb.cells))\nfor i,c in enumerate(nb.cells):\n    if c.cell_type=='markdown':\n        txt=' '.join(c.source.split())\n        if '44' in txt or 'mapping' in txt.lower() or 'execution time' in txt.lower():\n            print('\\nMD',i,txt[:500])\n    else:\n        src=c.source\n        if '44' in src or 'mapping' in src.lower() or 'execution time' in src.lower():\n            print('\\nCODE',i,src[:700])\nPY",
+  "exit_code": 0,
+  "seconds": 0.8593880829866976,
+  "stdout": "artifacts/step-002.stdout.txt",
+  "stderr": "artifacts/step-002.stderr.txt"
+}

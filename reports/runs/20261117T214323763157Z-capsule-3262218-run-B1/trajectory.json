@@ -1,0 +1,339 @@
+{
+  "messages": [
+    {
+      "id": "VvNWtRsTVS8Lrf8hW2FCMd",
+      "content": "You are ReproScout, a scientific reproduction agent.\nExecute the supplied author's code to answer the task questions. Read /code/README.md\nand /REPRODUCING.md first. The controller has already provisioned the author's image:\nrun commands directly inside this container, not through nested Docker. Work in /code;\ndata are in /data and /results starts empty. Network access is disabled. Do not alter\nexperimental code, hardcode answers, or use remembered/published results.\nIf blocked, submit null values for unanswered questions, with evidence of the blocker\nand an optional explanation field. Do not invent values to complete the report. If a required\ncode change is necessary, explain the blocker instead of silently patching it.\nKeep every response in English. Tool outputs include controller-owned artifact IDs and\n1-based line numbers. Submit each question's value with evidence from THIS execution.\nFor plots, use view_image on generated raster files or PDF pages; cite the returned\nimage artifact without line numbers. Use the submit_report tool with a JSON object keyed by question IDs, for example:\n{\"q1\":{\"value\":12.3,\"evidence\":[{\"artifact\":\"artifacts/step-002.stdout.txt\",\n\"line_start\":2,\"line_end\":2}]}}. The example number is not an answer.\nAn existing file reference does not prove correctness; cite actual computed output.\n\nFrozen development lessons:\n# Frozen development lessons, version 1\n\nThese rules were curated with Codex assistance from official training runs.\nThey contain no task answers and are not updated during held-out evaluation.\n\n## L1: Stop searching after confirming an unavailable external dataset\n\nWhen execution fails on a network request, inspect the loader and check the\nprovided data directory once. If the required dataset is neither bundled nor\ncached, record the failing request and submit unanswered values with blocker\nevidence. Do not repeatedly search the entire filesystem or try alternative\ninternet endpoints in an offline environment.\n\nSource: development capsule-4098236, run\n20261117T200334263866Z-capsule-4098236-run-A1, artifacts/step-003.stdout.txt\n(network failure), step-004.stdout.txt (loader), and step-007.stdout.txt\n(repeated broad search). The run eventually exceeded its context bound.\n\n## L2: Execute a notebook once and inspect its structured outputs\n\nFor notebook reproduction, save an executed notebook in the results directory,\nthen render that executed notebook to the requested presentation format. Locate\nrelevant output cells using the requested metric labels. Print only the needed\noutput segments. Avoid dumping full notebook source or raw HTML into context,\nand avoid executing the whole experiment again merely to read its output.\n\nSource: development capsule-0940461, run\n20261117T200757054830Z-capsule-0940461-run-A1, tool steps 003 through 010.\nSource dumping and repeated executions preceded a context-limit failure.\n\n## L3: Discover documentation filenames before chaining commands\n\nList the task directory before assuming that README.md exists. Read whichever\ninstruction file is actually provided and read REPRODUCING.md separately. A\nmissing optional README should not prevent required instructions from being read.\n\nSource: development capsule-9168639, run\n20261117T200518810509Z-capsule-9168639-run-A1, step-001 and step-002.\nThe first chained command stopped at a missing README; the next inspected the\navailable files and recovered.\n\n## Scope\n\nThese are development-derived workflow heuristics, not verified universal rules.\nThey may reduce wasted calls without improving final accuracy. Report both cost\nand accuracy, and preserve any adverse effects.\n",
+      "source": null,
+      "metadata": null,
+      "role": "system"
+    },
+    {
+      "id": "FonEXScqwYgAXEN4bjGWRz",
+      "content": "Run 'manuscript.Rmd'using Rscript and render it as a pdf. Store the output in the ../results directory. Set clean to 'TRUE'.\nQuestions:\n{\n  \"q1\": \"fig Report the number of methods counter-arguments provided to defend the original study in light of the contradictory replication results.\"\n}",
+      "source": "input",
+      "metadata": null,
+      "role": "user",
+      "tool_call_id": null
+    },
+    {
+      "id": "EEQ4cRzPfnZ5w5Us8aLpUB",
+      "content": [],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_hEoGPxRNA2GlqSooQ618Wl30",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && ls -la && echo '---' && sed -n '1,220p' README.md && echo '---REPRODUCING---' && sed -n '1,260p' /REPRODUCING.md"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "ap9YqRYTQwHEsAuWvqxgpc",
+      "content": "Exit code: 2\nartifacts/step-001.stdout.txt\n1: total 148\n2: drwxr-xr-x 2 root root  4096 Nov 17 21:43 .\n3: drwxr-xr-x 1 root root  4096 Nov 17 21:43 ..\n4: -rwxr-xr-x 1 root root 13147 Jan  1  1970 appendix.Rmd\n5: -rwxr-xr-x 1 root root 21559 Jan  1  1970 functions.R\n6: -rwxr-xr-x 1 root root  1070 Jan  1  1970 LICENSE\n7: -rwxr-xr-x 1 root root 84887 Jan  1  1970 manuscript.Rmd\n8: -rwxr-xr-x 1 root root  6944 Jan  1  1970 preprocessing.R\n9: -rwxr-xr-x 1 root root   126 Jan  1  1970 run.sh\n10: ---\nartifacts/step-001.stderr.txt\n1: sed: can't read README.md: No such file or directory",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_hEoGPxRNA2GlqSooQ618Wl30",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "m9bBwvr67VXffEDiZZSYtg",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_YuVnmUd0BtAKfTjdAO8yF0P2",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && echo '---REPRODUCING---' && sed -n '1,260p' /REPRODUCING.md"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "mNbVajjsgMTZWnfdzgnr2P",
+      "content": "Exit code: 0\nartifacts/step-002.stdout.txt\n1: ---REPRODUCING---\n2: This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.\n3: \n4: <sup>1</sup> You may need access to additional hardware and/or software licenses.\n5: \n6: # Prerequisites\n7: \n8: - [Docker Community Edition (CE)](https://www.docker.com/community-edition)\n9: - MATLAB/MOSEK/Stata licenses where applicable\n10: \n11: # Instructions\n12: \n13: ## The computational environment (Docker image)\n14: \n15: This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:\n16: `registry.codeocean.com/published/809de649-ccef-439d-a867-562e5be6c687:v3`\n17: \n18: ## Running the capsule to reproduce the results\n19: \n20: In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:\n21: ```shell\n22: docker run --platform linux/amd64 --rm \\\n23:   --workdir /code \\\n24:   --volume \"$PWD/data\":/data \\\n25:   --volume \"$PWD/code\":/code \\\n26:   --volume \"$PWD/results\":/results \\\n27:   registry.codeocean.com/published/809de649-ccef-439d-a867-562e5be6c687:v3 bash run.sh\n28: ```\nartifacts/step-002.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_YuVnmUd0BtAKfTjdAO8yF0P2",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "jTDQfQjCbDfCd6FthuMX8a",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Preparing to render manuscript**\n\nI'm focusing on rendering the manuscript with R Markdown using Rscript, and I want to ensure the `clean=TRUE` option is set, so that any temporary files are cleaned up afterward. I think inspecting the `run.sh` script might also provide me with some helpful hints about the process. I want to get this right, so I'll make sure to follow each step carefully!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_3rVVg60nTpBk8gxVR0DGvcz9",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && cat run.sh && echo '---' && grep -n \"clean\" -n manuscript.Rmd | head -20 && echo '---header---' && sed -n '1,120p' manuscript.Rmd"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "9vvxWbRzXPhvgJLviytaPA",
+      "content": "Exit code: 1\nartifacts/step-003.stdout.txt\n1: #!/usr/bin/env bash\n2: set -ex\n3: \n4: Rscript -e \"rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)\"---\nartifacts/step-003.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_3rVVg60nTpBk8gxVR0DGvcz9",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "2ohtzV3QTbeq5eAdePq29k",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_i3bCr7sV6ZkPcEpWIE0JwkJG",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)\"",
+            "timeout": 1200000
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "Np8avBkvahzLKHYsh3PAgb",
+      "content": "",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_i3bCr7sV6ZkPcEpWIE0JwkJG",
+      "function": "shell",
+      "error": {
+        "type": "parsing",
+        "message": "Found 1 validation errors parsing tool input arguments:\n- Additional properties are not allowed ('timeout' was unexpected)"
+      }
+    },
+    {
+      "id": "Ba4fhmucNaF8y23vpJP2cr",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_8Y1vavH21gOCgrcGJdxa7v9R",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "AvPNaZwSYDAJ3ZVPKsbcqS",
+      "content": "Exit code: 1\nartifacts/step-004.stdout.txt\n\nartifacts/step-004.stderr.txt\n1: Killed\n2: Error in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\n3: Calls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\n4: In addition: Warning message:\n5: In system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n6:   running command ''/usr/bin/pandoc' --version' had status 137\n7: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_8Y1vavH21gOCgrcGJdxa7v9R",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "GN3w5cYT6QtLGdzmAgwoE6",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Inspecting installation issues**\n\nI\u2019m thinking there might be an install issue with pandoc, possibly due to memory constraints. Maybe I should explore using rmarkdown with pandoc or consider using quarto instead. I might also need to use Rscript and set the PANDOC environment variable. First, I\u2019ll check if pandoc is already installed on my system. It seems there are a few steps to troubleshoot here, so I\u2019ll take a careful look!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_KCnwEhWRj2kEWC2GnPKfDbHG",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && which pandoc && pandoc --version | head -5 && Rscript -e \"cat('rmarkdown:', as.character(utils::packageVersion('rmarkdown')),'\\n')\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "58KMpDxifGS2x5AQy2wQMN",
+      "content": "Exit code: 137\nartifacts/step-005.stdout.txt\n1: /usr/bin/pandoc\nartifacts/step-005.stderr.txt\n1: bash: line 1:   251 Killed                  pandoc --version\n2:        253 Done                    | head -5",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_KCnwEhWRj2kEWC2GnPKfDbHG",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "7azNTMbKeFsm2dmbQLDvEj",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Considering pandoc issues**\n\nI\u2019m wondering if the pandoc binary issue is due to a corrupt version or memory problems. I might consider using an alternative binary, but I\u2019m not sure if that will work. Another option could be Rmarkdown with self-contained settings, but it still needs pandoc. The user specifically asked for a PDF, so I wonder if tinytex could help, even with the pandoc version problem. I'll check the version and possibly use an environment variable to locate the correct pandoc in RStudio.",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_0aYR8HUoIBpOMXzsQAG9l1Li",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && ls -lh /usr/bin/pandoc && file /usr/bin/pandoc && ldd /usr/bin/pandoc | head -20"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "Tb5Fr4wSFEANLMZJCXHtRw",
+      "content": "Exit code: 1\nartifacts/step-006.stdout.txt\n1: -rwxr-xr-x 1 root root 59M Nov 27  2019 /usr/bin/pandoc\n2: /usr/bin/pandoc: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped\nartifacts/step-006.stderr.txt\n1: ldd: exited with unknown exit code (139)",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_0aYR8HUoIBpOMXzsQAG9l1Li",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "gU2bkgcG5pYHUb2CECGMW8",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Inspecting R Markdown process**\n\nI might use `Rscript -e \"knitr::knit('manuscript.Rmd','manuscript.md')\"` followed by markdown to PDF conversion with `pandoc`. I wonder if there's an issue with the `/usr/bin/pandoc` version, maybe it's missing an environment setup, or a locale is required. It could have crashed due to memory issues. I could also try `Rscript -e \"rmarkdown::find_pandoc(cache = FALSE)\"`. Additionally, I need to search the manuscript for counterarguments, perhaps using `grep` in the Rmd file. Let's check those relevant lines.",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_FkHInl7yy2XgjGJIgvcsrC43",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && grep -n -i \"counter-argument\\|counterargument\\|method\" manuscript.Rmd | head -50"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "aydkYSS8t39AMCic3jP2An",
+      "content": "\nThe output of your call to shell was too long to be displayed.\nHere is a truncated version:\n<START_TOOL_OUTPUT>\nExit code: 0\nartifacts/step-007.stdout.txt\n1: 36:    institution   : \"Department of Methodology and Statistics, Tilburg School of Social and Behavioral Sciences, Tilburg University\"\n2: 143:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer concrete counter-arguments that state why the credibility of the original finding has not been undermined (an explicit defence pattern).\"),\n3: 147:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer no concrete counter-arguments that state why the credibility of the original finding has not been undermined (an absent defence pattern).\")\n4: 154:In the present study, we explored the post-replication citation patterns described above in the context of four case studies in the field of psychology where the findings of a replication study strongly contradicted and outweighed the findings of an original study (Table \\@ref(tab:studyDetails)). In two of the cases, the replication studies were part of a single \u2018Many Labs\u2019 project (Klein et al., 2014) and addressed the \u2018flag priming effect\u2019 (T. J. Carter et al., 2011) and \u2018money priming effect\u2019 (Caruso et al., 2013) respectively. The other two cases involved \u2018Registered Replication Reports\u2019 (Simons et al., 2014), examining influential demonstrations of the \u2018facial feedback effect\u2019 (cf. Strack et al., 1988; Wagenmakers et al., 2016) and the \u2018ego-depletion effect\u2019 (cf. Baumeister et al., 1998; Hagger et al., 2016; Sripada et al., 2014) respectively. For methodological reasons (see Hagger et al., 2016), the ego-depletion replication was aimed at a classic study in the field (Baumeister et al., 1998), but actually employed a modified computer-based version of the original paradigm (Sripada et al., 2014). For this particular case study, we examined citation patterns to both of these original studies. \n5: 160:The present study was exploratory in nature and intended to provide descriptive observations rather than test hypotheses. The three sets of expected citation patterns outlined in Table \\@ref(tab:patterns) were used to guide our study design and interpretation, but we do not claim that this is a comprehensive typology of the post-replication patterns that may occur. Such patterns may be more complex and idiosyncratic in other topic domains. In order to examine belief correction/perpetuation patterns, we downloaded citation histories (a list of citing articles) for each original study and classified the valence (favourable, equivocal, or unfavourable) of a set of pre-replication and post-replication citations. To examine citation balance/bias patterns, we manually checked whether post-replication citations of the original study were accompanied by citations to the replication study. Finally, to examine explicit/absent defence patterns, we extracted and categorised any counter-arguments offered in articles that cited the replication.\n6: 162:# Methods\n7: 164:The study protocol (rationale, methods, and analysis plan) was pre-registered on April 7th 2018 (https://osf.io/eh5qd/). An amended protocol was registered part way through data collection on May 1st 2019, primarily because we extended the sampling frame to cover additional months (https://osf.io/pdvb5/). All deviations from these protocols are explicitly acknowledged in Appendix \\@ref(appA). We report how we determined our sample size, all data exclusions, all manipulations, and all measures in the study.  \n8: 167:This was a retrospective observational study consisting of four case studies. Primary outcome variables were annual citation counts for original studies, citation valence (favourable, equivocal, unfavourable), co-citation of original and replication studies, frequency/type of counter-arguments.\n9: 194:    symbol = c(\"Total citations to the original study between the publication date and 31st December, 2019.\", \"For methodological reasons (see Hagger et al., 2016), the ego-depletion replication was aimed at a classic study in the field (Baumeister et al., 1998), but actually employed a modified computer-based version of the original paradigm (Sripada et al., 2014). We examined post-replication citation patterns for both studies.\"), symbol_manual = c(\"*\", \"**\"),\n10: 207:For each citing article undergoing qualitative assessment, we attempted to retrieve the full text via several methods in the following order: (1) search of at least two of the institutional libraries we are affiliated with; (2) general Internet search for the article title, including the Google and Google Scholar search engines and Research Gate; (3) e-mail requests to the corresponding author; (4) inter-library loan request. Articles that remained inaccessible after all of these methods were exhausted were excluded. Articles written in non-English language were translated by one of the authors or using Google Translate (see Supplementary Information D). For articles for which we could obtain the full text, we classified the research design according to the categories in Table \\@ref(tab:articleTypes) and recorded whether the replication study was cited after manual inspection of the reference section (see Table \\@ref(tab:patterns): citation balance/bias). \n11: 220:To examine the explicit/absent defence pattern (Table \\@ref(tab:patterns)), the primary coder flagged articles that co-cited the original and replication studies and also contained any explicit defence of the original study. Subsequently, two team members (ORA and SC) re-examined all of the flagged cases, extracted verbatim counter-arguments, and developed a post-hoc categorisation scheme that summarised them as concisely and informatively as possible (Table \\@ref(tab:caCategories)). Coding disagreements were resolved through discussion and a third coder (TEH) arbitrated when necessary.\n12: 222:In additional exploratory (not pre-registered) analyses, we examined overlap of authorship for articles that provided counter-arguments with (1) any of the authors of the original studies; and (2) any prior collaborators of the first authors of the original studies. These analyses are complicated by the fact that author names in bibliographic records do not always adhere to the same grammatical standards - for example, whether forenames are initialised or middle names are included - so it is not straightforward to isolate individual authors within bibliographic databases. In order to identify prior collaborators of the first authors of the original studies, we downloaded bibliographic records (on 2nd February, 2021) for all papers published by each of the original study first authors, according to their author record in the Web of Science Core Collection. These author records are automatically generated by an algorithm that attempts to identify all documents likely published by an individual author using several variations of their name (for example, \u201cHardwicke, Tom E.\u201d, \u201cHardwicke, Tom\u201d,  \u201cHardwicke, T. E.\u201d), but errors can still occur and incomplete database coverage means that this method likely misses some of the authors\u2019 prior publications and consequently some of their collaborators. Nevertheless, the method supports a reasonable lower-bound estimate of authorship overlap with articles providing counter-arguments. To identify authorship overlap, we used string manipulation tools in R to extract only author surnames from bibliographic records and then used string matching to automatically detect the presence of original author or collaborator surnames amongst the surnames of authors of articles that provided counter-arguments. When a match was detected, it was verified by manual examination of the authors\u2019 full names.\n13: 388:# prepare table of counter-argument frequency\n14: 393:  group_by(case, counterArguments, .drop = F) %>%\n15: 401:  group_by(counterArguments, .drop = F) %>%\n16: 415:  group_by(case, counterArguments, .drop = F) %>%\n17: 424:  group_by(counterArguments, .drop = F) %>%\n18: 436:  pivot_wider(id_cols = case, names_from = counterArguments, values_from = c(all, fav)) %>%\n19: 441:# for counter-argument categories tterArguments==T) %>% nrow()` citing articles (`r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` of which were unique articles, as `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% count(doi) %>% filter(n>1) %>% nrow()` of them were cited in two of the case studies) and allocated them to one of three categories (Table \\@ref(tab:caCategories)).\n23: 457:  apa_table(caption = \"Categorisation of counter-arguments provided to defend the original study in light of the contradictory replication result. 57 discrete counter-arguments were identified in 50 articles (45 unique articles across cases).\")\n24: 461:# exploratory analyses of articles containing counter-arguments\n25: 465:  filter(counterArguments == T)\n26: 467:# which journals are counter-argument articles published in?\n27: 476:# get article types for counter-argument articles\n28: 513:# author surnames for counter-argument papers\n29: 549:# now we will do some string matching to identify overlap of authorship between counter-argument article (CAA) authors and (1) original authors and (2) collaborators of original first authors.\n30: 603:In additional exploratory analyses (not pre-registered) we examined other characteristics of the `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` unique articles that contained counter-arguments. The articles were published in `r nrow(ca_journals)` individual journals, with *Frontiers in Psychology* publishing `r ca_journals %>% filter(journal == 'FRONTIERS IN PSYCHOLOGY') %>% pull(n)` of the articles, *Social Psychology* publishing `r ca_journals %>% filter(journal == 'SOCIAL PSYCHOLOGY') %>% pull(n)` of the articles, and all other journals publishing only 1 or 2 of the articles. `r ca_noData` of the articles did not involve empirical data, `r ca_existData` involved reanalysis or meta-analysis of existing data, and `r ca_novData` involved collection of novel data. The articles had `r nrow(ca_auth_freq)` individual authors of whom all contributed to a single article except for `r ca_auth_freq %>% filter(Freq > 1) %>% nrow()` individuals who had (co)authored 2 articles. `r org_auths_overlap` articles were (co)authored by one of the original authors and `r co_auths_overlap` articles were (co)authored by at least one prior collaborator of one of the first authors of the original articles. `r overlapArtTypes %>% filter(articleType == \"No empirical data\") %>% pull(n)` of these articles did not involve empirical data and `r overlapArtTypes %>% filter(articleType != \"No empirical data\") %>% pull(n) %>% sum()` of them involved novel data collection.\n31: 653:The second issue of authors ignoring highly relevant replications seems undesirable and implies a biased appraisal or presentation of the evidence. Contradictory replication results do not necessarily nullify the credibility of an original study (Collins, 1985; Earp & Trafimow, 2015; Maxwell et al., 2015), but we would still expect highly relevant replication results to be cited and explicitly debated. In fact, we found that when authors continued to favourably cite original studies despite the replication results, around half did not provide explicit counter-arguments in defence of the original study. Although our study did not examine researchers\u2019 individual beliefs, one recent study reported that when research psychologists were confronted with replication evidence, they often did update their (self-reported) beliefs, albeit modestly (McDiarmid et al., 2021). However, there are several reasons to be uncertain about whether the results from this artificial setting might generalize to real-world settings, including potential participant reactivity (i.e., participants behaving differently because they are under observation and/or responding to the perceived expectations of the research team) and the possibility that individuals may behave differently in settings where they have substantial personal investment and may be publicly scrutinized. Additionally, cognitive psychology studies have obtained some evidence of a \u2018continued influence effect\u2019 wherein an individual's beliefs and behaviour can continue to be influenced by false or misleading information despite subsequent efforts to reject it (Lewandowsky et al., 2012). It is plausible that various cognitive biases, such as confirmation bias (preferentially seeking out and processing evidence that supports pre-existing beliefs) or motivated reasoning (constructing and evaluating arguments based on what is desirable rather than what is rationally justifiable), may partly explain researchers' tendency to ignore or dismiss the replication evidence (Bishop, 2019; Kunda, 1990; Nickerson, 1998). \n32: 655:We observed that when counter-arguments were raised, most of them tried to dismiss the contradictory replication by claiming that the original and the replication studies differed in important ways that moderated the absence/presence of the effect under investigation. In some cases, authors pointed to evidence from other studies as a rationale for their continued belief in the effect. In a minority of cases, the authors challenged the competence of replicators. We found that articles presenting counter-arguments were published in a variety of journals (rather than clustered in a few journals), and involved collection of new data in around half of the cases. They were also published by a sizeable group of investigators, only a minority of whom were one of the original authors or had previously collaborated with one of the original first authors. This suggests that the explicit defence of the original study came from a variety of sources rather than being confined to a small number of investigators. However, note that this analysis may underestimate authorship overlap due to difficulties isolating individual researcher identities (see methods section) and articles published in the same year as the replication were not included.\n33: 657:The findings presented here are inherently limited by the observational nature of the study design, which complicates straightforward conclusions about the causal impact of the replications. Although the use of a reference class enables us to detect the influence of exogenous factors to some extent, we cannot rule out their contribution. For example, the modest decline in favourable citations observed in most cases could be attributable, at least in part, to a more general awareness in the research community about methodological issues (for example, that the sample sizes of the original studies may not have provided adequate statistical power). We have also focused only on the replication study and the original study in each case study, without considering the impact of other potentially relevant events. Notably, meta-research studies have detected signatures of publication bias and other questionable research practices in the fields to which these case studies belong (E. C. Carter et al., 2015; Coles et al., 2019; Vadillo, 2019; Vadillo et al., 2016) and other relevant replication studies contesting prior findings have been published (e.g., Rohrer et al., 2015). \n34: 663:We should also highlight that particular aspects of our study were inherently subjective, specifically, the identification of citation context, the classification of citation valence, and the identification, extraction, and categorisation of counter-arguments. In order to minimize subjectivity, a team of six investigators performed coding in duplicate, with a third investigator arbitrating if necessary. As disagreements between primary and secondary coders were infrequent, we are confident that the classifications are meaningful, but there may be some edge cases when an independent observer might reasonably disagree with our classifications.\n35: 733:Lakatos, I. (1970). Falsification and the methodology of scientific research programmes. In A. Musgrave & I. Lakatos (Eds.), Criticism and the Growth of Knowledge (Vol. 4, pp. 91\u2013196). Cambridge University Press. https://doi.org/10.1017/CBO9781139171434.009\nartifacts/step-007.stderr.txt\n\n<END_TOOL_OUTPUT>\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_FkHInl7yy2XgjGJIgvcsrC43",
+      "function": "shell",
+      "error": null
+    }
+  ],
+  "export_policy": "Encrypted provider reasoning payloads are omitted; visible messages, tool calls, outputs, and usage are retained. Raw Inspect logs remain local.",
+  "model_usage": {
+    "openai/gpt-5.4-mini-2026-03-17": {
+      "input_tokens": 4997,
+      "output_tokens": 1043,
+      "total_tokens": 17816,
+      "input_tokens_cache_write": null,
+      "input_tokens_cache_read": 11776,
+      "reasoning_tokens": 594,
+      "total_cost": 0.009324450000000001
+    }
+  },
+  "sample_error": "ValueError('Pilot context limit reached')"
+}

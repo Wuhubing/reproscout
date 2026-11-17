@@ -1,0 +1,463 @@
+             comb.fixed = FALSE,
+             plotwidth = "11cm",
+             xlim = c(0,1),
+             fontsize = 12
+             )
+dev.off()
+
+```
+
+```{r articles_per_coder}
+# calculate the number of included articles each coder coded.
+RTT <- sum(grepl("RTT", df$coder))
+RC <- sum(grepl("RC", df$coder))
+SW <- sum(grepl("SW", df$coder))
+OvdA <- sum(grepl("OvdA", df$coder))
+```
+
+```{r make_article_characteristics_table}
+# make dataframe with discipline data. We will use this for the characteristics table (Table 1) via kable
+# this code is a bit round-about, but it works.
+
+set_table <- function(df, var_name){
+  df_group <- df %>% 
+    group_by({{var_name}}) %>%
+    summarize(k_articles = n(), n_studies = sum(denom, na.rm = T)) %>%
+    arrange(desc(k_articles), desc(n_studies)) %>% 
+    rename(var1 = {{var_name}})
+  return(df_group)
+}
+
+# 1. disciplines
+disciplineFrame <- set_table(df, discipline)
+# rename items so the table is cleaner
+disciplineFrame$var1 <- c("medicine",
+                "dentistry",
+                "psychology",
+                "economics",
+                "physical therapy")
+
+# 2. Registry assessed
+comparatorFrame <- set_table(df, comparator)
+comparatorFrame$var1<- c("registry",
+                "ethics application",
+                "other protocol",
+                "marketing application",
+                "grant application")
+
+# 3. Source from which the studies were identified
+# Calculate using grepl() rather than set_table() because some artices used multiple sources...On second thought, I'm just gonna present this with each category
+sourceFrame <- set_table(df, source)
+sourceFrame$var1 <- c("journals",
+                "registries",
+                "search engines",
+                "ethics boards",
+                "funders",
+                "registries and search engines",
+                "regulators",
+                "research group",
+                "registries and journals"
+                )
+
+# 4. Observational
+observationalFrame <- set_table(df, observational)
+observationalFrame$var1 <- c("solely observational",
+                "observational and study authors were contacted",
+                "observational and interventional"
+                )
+
+# 5. registration version compared to
+versionFrame <- set_table(df, version)
+# move 'not reported' row to the bottom of the dataframe
+versionFrame <- versionFrame %>% slice(-1) %>% bind_rows(versionFrame[1,])
+  
+versionFrame$var1 <- c("original",
+                "most recent",
+                "other version/unclear",
+                "not reported"
+                )
+
+# 6. disclosures
+disclosedFrame <- set_table(df, disclosed)
+# move 'not reported' row to the bottom of the dataframe
+disclosedFrame <- disclosedFrame %>% slice(-1) %>% bind_rows(disclosedFrame[1,])
+
+disclosedFrame$var1 <- c("one or more",
+                         "none",
+                         "article excluded publications with disclosed discrepancies",
+                         "not reported"
+                )
+
+# create dataframe that combines the dataframes above that will be used to produce Table 1
+charFrame <- bind_rows(disciplineFrame,
+                       comparatorFrame,
+                       sourceFrame,
+                       observationalFrame,
+                       versionFrame,
+                       disclosedFrame)
+# name columns to appear in table
+colnames(charFrame) <- c("Article characteristic", paste("k = ", nrow(df)), paste("n = ", sum(df$denom, na.rm = T)))
+
+# This code provides the numbers that insert table sections in the right spot for Table 1
+g1 <- nrow(disciplineFrame)
+g2 <- g1 + nrow(comparatorFrame)
+g3 <- g2 + nrow(sourceFrame)
+g4 <- g3 + nrow(observationalFrame)
+g5 <- g4 + nrow(versionFrame)
+g6 <- g5 + nrow(disclosedFrame)
+```
+
+```{r years}
+# calculate data on the year range that the *studies* were published (not when the *articles* were published). 
+
+# Filter to only include the articles which report the year the *studies* were *published* (rather than registered)
+yearPub <- dfAll %>% filter(yearItem=="pub")
+
+# using dfAll because I will run a correlation with the results from the two main figures later.
+# calculate median and IQR for the oldest studies that were included in each article ('firstYear')
+
+# some years are coded as '0'. This was done when there appeared to be no limit on the earliest year. Remove rows coded as '0' before calculating the median and IQR. 
+yearFirst <- yearPub %>% filter(yearFirst > 0)
+yearFirstMedian <- median(yearFirst$yearFirst)
+yearFirstQ1 <- round(quantile(yearFirst$yearFirst)[2],0)
+yearFirstQ3 <- round(quantile(yearFirst$yearFirst)[4],0)
+# median and IQR for last year
+yearLast <- yearPub %>% filter(yearLast > 0)
+yearLastMedian <- median(yearLast$yearLast)
+yearLastQ1 <- round(quantile(yearLast$yearLast)[2],0)
+yearLastQ3 <- round(quantile(yearLast$yearLast)[4],0)
+# 2 extracts the 25% quartile, and 4 extracts the 75% quartile value.
+
+```
+
+```{r perform_meta_regressions}
+# run meta-regressions on the articles characteristics for the two main analyses
+
+# set the reference categories for the meta-regressions
+dfAll$discipline <- relevel(dfAll$discipline, ref = "Medicine (MEDI)") 
+dfAll$source<- relevel(as.factor(dfAll$source), ref = "journal") 
+dfAll$disclosed <- relevel(as.factor(dfAll$disclosed), ref = "Yes, and SOME or ALL of the discrepancies were disclosed") 
+dfAll$comparator <- relevel(as.factor(dfAll$comparator), ref = "reg") 
+dfAll$version <- relevel(as.factor(dfAll$version), ref = "Original version") 
+
+# make dfs that only contain non-NA rows for the two main analyses. This is necessary to run the meta-regressions
+df1 <- filter(dfAll, !is.na(disc1))
+df2 <- filter(dfAll, !is.na(disc2))
+
+# remove levels with no data
+df1$source <- droplevels(df1$source)
+df1$comparator <- droplevels(df1$comparator)
+df2$source <- droplevels(df2$source)
+df2$comparator <- droplevels(df2$comparator)
+df2$discipline <- droplevels(df2$discipline)
+
+# extract the two main meta-analyses from larger list of meta-analyses
+meta1 <- metaListAll[grep("disc1", colnames(df))[[1]]][[1]]
+meta2 <- metaListAll[grep("disc2", colnames(df))[[1]]][[1]]
+
+# 1. perform a meta-regression to test whether the publication year of an article impacts the proportion of discrepancies
+modPubYear1 <- metareg(meta1, ~df1$pubYear)
+modPubYear2 <- metareg(meta2, ~df2$pubYear)
+
+---
+
+temp <- metaRR(dfMeta$proDisc, 
+               dfMeta$proDisc + dfMeta$proNonDisc, 
+               dfMeta$retroDisc, 
+               dfMeta$retroDisc + dfMeta$retroNonDisc, 
+               dfMeta)
+meta <- temp[[1]]
+CIexpTime <- temp[[2]]
+PIexpTime <- temp[[3]]
+nexpTime <- sum(meta$n.e, meta$n.c)
+
+png("forestExpTime.png", width = 850)
+meta::forest(meta,
+             leftlabs = c("Article", "discrepant", "total", "discrepant", "total"),
+             lab.e = "Prospective",
+             lab.c = "Retrospective",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.1,10),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+             )
+dev.off()
+
+```
+
+```{r exploratory_meta_analyses_table}
+# create table to summarize the exploratory analyses
+#\n is a line break because they become very long and small font when knitted to a pdf
+addTable <- c("Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy",
+              "Percentage of outcome discrepancies that favored statistically significant results",
+              "Likelihood ratio of a study with versus without an outcome discrepancy to contain statistically significant results",
+              "*Likelihood ratio of a study with versus without a statistically significant results to contain an outcome discrepancy",
+              "Likelihood ratio of a study with versus without industry funded to contain an outcome discrepancy",
+              "Likelihood ratio of a prospectively registered study versus retrospectively registered study to contain a primary outcome discrepancy"
+)
+
+addCIs <- c(CIdisclosed,
+                CIexpFavorSig,
+                CIexpStatSig,
+                CIexpStatSig2,
+                CIexpIndustry,
+                CIexpTime)
+
+addPIs <- c(PIdisclosed,
+                PIexpFavorSig,
+                PIexpStatSig,
+                PIexpStatSig2,
+                PIexpIndustry,
+                PIexpTime)
+
+addk <- c(sum(!is.na(df$disclosedNum)),
+          sum(!is.na(df$favorSig)),
+          sum(!is.na(df$sigDisc)),
+          sum(!is.na(df$sigDisc)),
+          sum(!is.na(df$industryDisc)),
+          sum(!is.na(df$proDisc))
+)
+
+addn <- c(ndisclosed,
+          nexpFavorSig,
+          nexpStatSig,
+          nexpStatSig2,
+          nexpIndustry,
+          nexpTime
+          )
+
+addFrame <- data.frame(addTable, addCIs, addPIs, addk, addn)
+colnames(addFrame) <- c("Analysis", "95% CI", "95% PI", "k", "n")
+```
+
+```{r gaps}
+
+gapsIssues <- c("Many studies are never registered",
+                "Registrations are imprecise",
+                "Consumers of research should be aware of outcome switching",
+                "Registration should be mandated or enforced",
+                "Additional initiatives are needed to reduce reporting discrepancies",
+                "Analysis plans should be registered"
+                )
+# "  \n" with 2 spaces at beginning is necessary for a line break.
+gapsQuotes <- c('“The more concerning issue, however, is the lack of registration or provision of registration number for randomized controlled trials within these journals.” (Wiebe et al., 2017)  \n
+“Only 16 per cent of the published orthodontic RCTs had been registered.” (Koufatzidou et al., 2019)',
+'“Our results suggest that [selective outcome reporting] might well be substantial; however, the bias can only be broadly identified as protocols are not sufficiently precise.” (Hahn et al., 2002)  \n
+“Only 5 out of the 109 trials (5%) provided enough information for us to be confident that the outcomes reported in the published trial were consistent with the original registration” (Nankervis et al., 2012)',
+'“If clinicians base their decisions on evidence distorted by primary outcome switching, patient care could be negatively affected” (C. W. Jones et al., 2017)  \n
+“Readers of medical literature should not assume that selective outcome reporting is not present, even if the report has been published in a high IF journal.” (Shinohara et al., 2015)',
+'“there is insufficient quality control of data by data providers, ClinicalTrials.gov administrators, and journal editors, emphasizing much-needed enforcement of complete descriptions of drug interventions.”  (Jurić et al., 2020)  \n
+“Journal editors, regulators, research ethics committees, funders, and sponsors should implement policies mandating prospective registration for all clinical trials” (Chan et al., 2017)  \n
+“Reporting completeness and consistency were significantly better after July 2005. The ICMJE requirement for mandatory registration was associated with significant improvement in reporting quality in infectious diseases trials.” (Shepshelovich et al., 2017)',
+'“Efforts to prevent nonregistration of protocols and selective reporting are needed.” (Krsticevic et al., 2019)  \n
+“To foster credible evidence-based medicine, additional initiatives are needed to minimize selective reporting.” (Raghav et al., 2015)  \n
+“Novel approaches are required to address this problem.” (Fleming et al., 2015)',
+'“More immediate and specific remedies for the deficiencies of diet trial registries include (1) posting a detailed final statistical analysis plan before unmasking random group assignments or beginning data analyses as a minimum quality criterion...” (Ludwig et al., 2019)  \n
+“Definitive judgments regarding credibility of claimed subgroup effects are not possible without access to protocols and analysis plans of randomised controlled trials.” (Kasenda et al., 2014)'
+)
+
+gaps <- data.frame(gapsIssues, gapsQuotes)
+colnames(gaps) <- c("Theme", "Quotes")
+```
+
+# Abstract
+
+**Objectives**. Prospectively registering study plans in a permanent time-stamped and publicly accessible document is becoming more common across disciplines and aims to reduce risk of bias and make risk of bias transparent. Selective reporting persists, however, when researchers deviate from their registered plans without disclosure. This systematic review aimed to estimate the prevalence of undisclosed discrepancies between prospectively registered study plans and their associated publication. We further aimed to identify the research disciplines where these discrepancies have been observed, whether interventions to reduce discrepancies have been conducted, and gaps in the literature.
+
+**Design**. Systematic review and meta-analyses.
+
+**Data sources**. Scopus and Web of Knowledge, published up to 15 December 2019.
+
+**Eligibility criteria**. Articles that included quantitative data about discrepancies between registrations or study protocols and their associated publications.
+
+**Data extraction and synthesis**. Each included article was independently coded by two reviewers using a coding form designed for this review ([osf.io/728ys](https://osf.io/728ys)). We used random-effects meta-analyses to synthesize the results.
+
+**Results**. We reviewed k = `r nrow(df)` articles, which included k = `r nrow(df1)` that reported on primary outcome discrepancies from n = `r sum(df1$discDenom)` studies and, k = `r nrow(df2)` that reported on secondary outcome discrepancies from n = `r sum(df2$discDenom)` studies. Meta-analyses indicated that between `r round(tab["discPro1", "lower.random.2"],2)*100`% to `r round(tab["discPro1", "upper.random.2"],2)*100`% (95% confidence interval) of studies contained at least one primary outcome discrepancy and between `r round(tab["discPro2", "lower.random.2"],2)*100`% to `r round(tab["discPro2", "upper.random.2"],2)*100`% (95% confidence interval) contained at least one secondary outcome discrepancy. Almost all articles assessed clinical literature, and there was considerable heterogeneity. We identified only one article that attempted to correct discrepancies.
+
+**Conclusions**. Many articles did not include information on whether discrepancies were disclosed, which version of a registration they compared publications to, and whether the registration was prospective. Thus, our estimates represent discrepancies broadly, rather than our target of *undisclosed* discrepancies between *prospectively* registered study plans and their associated publications. Discrepancies are common and reduce the trustworthiness of medical research. Interventions to reduce discrepancies could prove valuable.
+
+**Registration**. [osf.io/ktmdg](https://osf.io/ktmdg). Protocol amendments are listed in Supplementary Material A.
+
+\clearpage
+
+# Introduction
+
+In 2000, ClinicalTrials.gov and the ISRCTN Registry were launched with several aims, including aiding participant recruitment, facilitating knowledge synthesis, and reducing duplication, publication bias and selective reporting [@zarin2017]. In 2005, the International Committee of Medical Journal Editors (ICMJE) made *prospective* registration a condition of consideration for publication [@deangelis2004]. Thousands of journals now claim to follow this policy [@icmje2021]. In parallel, the World Health Organization International Clinical Trials Registry Platform established a minimum set of required information for a trial to be considered fully registered, including experimental design elements such as the conditions being studied, intervention, key inclusion and exclusion criteria, sample size, primary outcomes, and key secondary outcomes [@sim2006]. While the relatively widespread uptake of clinical trial registration has substantially improved transparency, many trials remain unregistered, are registered after enrollment of participants begins or analyses are complete (i.e., *retrospective* registration), are never published, or publish outcomes discrepant with those in the registration without disclosing the discrepancy [e.g., @chan2017; @scott2015]. Nevertheless, the existence of registries allows researchers to identify and quantify these issues.
+
+In research disciplines other than clinical trials, study registration is becoming more common, but remains far from standard practice [@hardwicke2020e; @hardwicke2021b; @scoggins2023; @thibault2023]. For example, starting around 2011 the field of psychology has increasingly taken the “replication crisis” seriously and many researchers and journals now use registration to reduce bias and make risk of bias transparent. Other disciplines have created dedicated registries, such as PROSPERO for systematic reviews and the American Economic Association RCT Trial Registry.
+
+In this manuscript, we systematically reviewed articles that quantify the prevalence of discrepancies between registrations or study protocols and their associated publications (e.g., in primary outcome measures). Our analysis extended beyond the three systematic reviews already published on this topic in several ways [@li2018; @dwan2013a; @jones2015]. First, registration has expanded beyond clinical trials; we included all research disciplines and used key word searches for registries including the Open Science Framework, the American Economic Association RCT Trial Registry, and PROSPERO. Second, we extracted more fine-grained information about a wide range of discrepancies (e.g., outcomes, analysis, sample size), as well as which version of the registration was surveyed and whether discrepancies were disclosed (we believe disclosed discrepancies present little reason for concern). Third, our review included over twice as many studies as previous systematic reviews on this topic, provides meta-analytic estimates, and used meta-regression and additional analyses to attempt to identify predictors of discrepancies.
+
+# Methods
+
+## Terminology
+
+We present a systematic review of k = `r nrow(df)` articles that assessed a wide range of outcome discrepancies and non-outcome discrepancies across over n = 7,000 studies. To avoid confusion, this report consistently uses the terms *studies* to refer to the over n = 7,000 individual studies that were *assessed*, and the term *article* to refer to the k = 89 articles that assessed these studies, and that we *reviewed*. We restrict our usage of the term *publication* to refer to the publications stemming from the *studies* (not to refer to the *articles*). 
+
+We use the term *discrepancy* to refer to any incongruity between the content of a publication and its associated registration (e.g., on clinicaltrials.gov) or study protocol (e.g., submitted to an ethics review board or funding agency)---see Box 1 for examples. We use the term *prospective registration* broadly to include terms used in different research disciplines, such as prospective trial registration, preregistration, and pre-analysis plans. All these terms indicate the registration of study details *before* commencing a study, or in some cases, before viewing the data or removing the blind. They are in contrast to *retrospective* registration, which occurs after participant enrollment begins or analyses are complete. We use the term outcome discrepancy to indicate a discrepancy in the outcome measure registered versus the outcome measure reported in a publication (not to indicate a discrepancy in the value of a reported outcome between these documents). 
+
+<!-- the code below is not working to create Box 1 in code ocean. Thus, I've decided to comment it out and include Box 1 as a figure instead
+```{=latex}
+\begin{tcolorbox}[colback=lightgray, colframe=black, width=\textwidth]
+
+\textbf{Box 1. Examples of discrepancies.}
+
+\vspace{0.5\baselineskip}
+
+We coded 10 types of outcome discrepancies (listed in Table 2) and 10 types of non-outcome discrepancies (listed in Table 4). The degree to which the information in a registration is discrepant with the information in a publication can range widely\footnote{Some researchers suggest that people checking for discrepancies should compare publications to clinical trial study protocols instead of registrations (Annals of Internal Medicine Editors, 2016). Study protocols are generally far more thorough and are more likely to be updated when trialists change their plans (which may occur before starting a study, but after registering). Study protocols contain timestamps, yet they often become public only at the time of publication.}. The associated concern about risk of bias can also range widely and often requires domain expertise to assess. We present two examples from Calméjane et al. (2018) in this box. Many more examples are available in the appendix of Calméjane et al. (2018) and at  https://www.compare-trials.org/results.
+
+\vspace{1\baselineskip}
+
+\textbf{Registered}: Primary outcome: Visual Acuity [Time Frame: 6 months].
+
+\vspace{0.5\baselineskip}
+
+\textbf{Published}: Primary outcome: 3-year cumulative incidence rate of myopia. Myopia was defined as a spherical equivalent refractive error (sphere +½ cylinder) of at least -0.50 D
+
+\vspace{0.5\baselineskip}
+
+\textbf{Coded as}: Timing of outcome measurement changed.
+
+\vspace{1\baselineskip}
+
+\textbf{Registered}: Primary outcome: Severity of Device and Procedure related complications [Time Frame: At the time of ExAblate Transcranial thalamotomy procedure]. Secondary outcome: Effectiveness of the ExAblate Transcranial MRgFUS treatment determined using the Clinical Rating Scale for Tremor (CRST) [Time Frame: Participants will be followed from the date of treatment until study completion, approximately up to 12 months].
+
+\vspace{0.5\baselineskip}
+
+\textbf{Published}: Primary outcome: Change from baseline to 3 months in the tremor score for the hand derived from the CRST, Part A (three items: resting, postural, and action or intention components of hand tremor), and the CRST, Part B (five tasks involving handwriting, drawing, and pouring).
+
+\vspace{0.5\baselineskip}
+
+\textbf{Coded as}: Secondary outcome promoted to primary outcome; Timing of outcome measurement changed; Primary outcome omitted.
+\end{tcolorbox}
+```
+-->
+![](preregSR_Box1.JPG)
+
+## Eligibility criteria
+
+We included articles that reported quantitative data about discrepancies between registrations or study protocols and their associated publication. We excluded conference proceedings and articles written in a language other than English (for full inclusion and exclusion criteria, see our preregistered protocol).
+
+## Study selection
+
+We searched Scopus and Web of Science on 15 December 2019 using the queries in Appendix A and Appendix B of our preregistered protocol ([osf.io/ktmdg](https://osf.io/ktmdg)). Briefly, our queries included (1) variations of the terms preregistration, pre-analysis plans, and prospective registration in the title or keyword fields; (2) terms indicating discrepancies such as "outcome switching" in the title, keywords or abstract; (3) names of registration or protocol repositories such as "clinicaltrials.gov" in the title or keywords; and excluded overlapping but irrelevant terms (e.g., "nursing preregistration"). To limit the number of irrelevant articles, we did not search for variations of the term preregistration or for repository names in the abstract field.
+
+Our search returned 4,283 articles after duplicates were removed (see Figure 1 for a PRISMA flowchart). Articles were screened independently by two reviewers in two stages. In Stage One, reviewers screened titles and, if necessary, briefly examined abstracts of articles to determine inclusion in the systematic review or in a scoping review on prospective registration[^1]. If at least one of the reviewers deemed an article potentially relevant, it was included in Stage Two screening. In Stage Two, the reviewers independently examined the remaining `r nrow(screen)` abstracts in greater detail for eligibility. Disagreements were resolved through discussion between the two reviewers and eventual consensus. Inter-rater agreemend for the `r nrow(screen)` articles was Cohen's *k* = `r kSR` for inclusion in the systematic review (the list of articles and coding is available at [osf.io/wa62f](https://osf.io/wa62f)). Inter-rater agreement for all 4,283 articles was Cohen's *k* = `r kSRAll`. We then used a snowball method and identified 33 additional articles that met our inclusion criteria, mostly through citations in @li2018 and @jones2015. These 33 additional articles are not included in the inter-rater agreement scores. After  After full-text review, we included `r nrow(df)` articles in our systematic review.
+
+![Figure 1. PRISMA flowchart of article inclusion](preregSR_prismaFlowchart.JPG)
+
+## Coding items
+
+Each included article was independently coded by two of four reviewers (RTT, RC, OvdA, SW) using a coding form designed for this review. The form consisted of five sections that assessed (1) article characteristics, (2) study registration details, (3) 10 types of outcome discrepancies (listed in Table 2), (4) 10 types of non-outcome discrepancies (listed in Table 4), and (5) any additional descriptive or inferential statistics on discrepancies. The form details the operationalization of each variable we coded, and is available at [osf.io/728ys](https://osf.io/728ys). We chose items to code based on a pilot test of our protocol, as well as the categories used in a seminal paper [@chan2004] and a systematic review on discrepancies [@li2018]. 
+
+The data we extracted was often presented as summary results in a table and sometimes as text in the results section. To be included in our meta-analyses this data had to include at least two of (1) the number of studies assessed (denominator), (2) the number of studies with a given discrepancy (numerator), and (3) the percentage of studies with a given discrepancy—from which we could calculate an unreported numerator or denominator. We did not access the raw data. If an article did not report data for a certain measure (e.g., secondary outcome discrepancies), then we did not include that article in the meta-analysis for that measure (this is why k varies among the meta-analyses we present—see Tables 2 and 4). For the meta-regressions we performed, we could not find data on (1) the version of the registry that publications were compared to for 35 articles, and (2) the number of studies that disclosed discrepancies for 57 articles. We coded these cases as “not reported” and included “not reported” as a factor in the meta-regressions. All other meta-regression data was complete. Further coding details are available in Supplementary Material B.
+
+The complete dataset, including the coding of each reviewer and the resolved coding, is available at [osf.io/ue2c6](https://osf.io/ue2c6). A cleaned dataset with only the resolved coding is available at [osf.io/6cn9m](https://osf.io/6cn9m).
+
+## Statistical analyses
+
+We performed two main random effects meta-analyses: one on the proportion of studies with at least one primary outcome discrepancy, and another on the proportion of studies with at least one secondary outcome discrepancy. We used random effects models because they allow for the true effect to vary across the populations the articles sampled from, and the articles we reviewed differ in their methodologies and the research disciplines that they assess. We used a random intercept logistic regression model with the Knapp-Hartung adjustment for the synthesis of proportions [@hartung2003]. We used the maximum-likelihood method for estimating the between-study heterogeneity (Tau). We also performed meta-regressions to test whether article characteristics are associated with the proportion of studies with at least one primary or secondary outcome discrepancy.
+
+For pooled estimates, we report both confidence intervals and prediction intervals. Whereas researchers are likely more familiar with confidence intervals, interpreting confidence intervals can be unintuitive [@Hoekstra2014], and their pooled-estimate does not incorporate uncertainty due to the between-article heterogeneity. If we assume that we could resample from our population, 95% of the resampled *meta-analyses* would yield a 95% confidence interval that contains the true value of the parameter being estimated (e.g., proportion of articles with at least one primary outcome discrepancy). Alternatively, if we are interested in the results that would come from another *article* assessing discrepancies, we would want a 95% prediction interval. In other words, of 100 articles drawn from the same population, we could expect the results from 95 of them---on average---to fall within the 95% prediction interval. While prediction intervals are not commonly reported, methodologists recommend reporting them for random effects meta-analysis, particularly when few articles are included or, as in our case, included articles are highly heterogeneous [@riley2011; @higgins2009].
+
+Whereas we did not perform a formal risk of bias assessment---because our review differed substantially from the purpose these tools were built for---we shed light on a few potential sources of bias with additional analyses that consider the funding source, statistical significance, and the timing of registration of included *studies*. These additional analyses were not prospectively registered. We made a few amendments to our preregistered study protocol which are listed in Supplementary Material A.
+
+# Results
+
+## Articles characteristics
+
+We identified and reviewed k = `r nrow(df)` articles that report at least one type of discrepancy. Articles that checked for outcome discrepancies assessed a median of `r median(df$denom, na.rm = T)` studies (IQR: `r quantile(df$denom, 0.25, na.rm = T)` to `r quantile(df$denom, 0.75, na.rm = T)`). Article characteristics are outlined in Table 1. All articles except for two, one preprint in economics [@ofosu2019] and one preprint in psychology [@claesen2019], focused on clinical trials or systematic reviews. All but k = `r sum(df$observational!="Observational")` articles were solely observational. Only one article attempted to correct published discrepancies [@goldacre2019a]. The authors assessed all trials published in five journals over a six-week period and sent a letter to the editor for each trial that published a discrepant outcome (for 58 letters in total). In the time since our literature search, at least two more interventional studies were published. One reports a trial that attempted to reduce discrepancies at medical journals by sending peer reviewers information about the study registration [@jones2022]. They found null results. The other was a feasibility study that assigned a peer reviewer to specifically check for discrepancies in manuscripts submitted for publication [@targmeta-researchgroup&collaborators2022].  Further details about article characteristics are available in Supplementary Material C.
+
+```{r, outputCharTable, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(charFrame, caption = "Table 1. Article characteristics", booktabs = T, linesep = "\\addlinespace") %>%
+kable_styling() %>%
+  pack_rows("Discipline", 1, g1) %>%
+  pack_rows("Source of registration or protocol assessed for discrepancies", g1+1, g2) %>%
+  pack_rows("Sources searched to identify studies", g2+1, g3) %>%
+  pack_rows("Type of study", g3+1, g4) %>%
+  pack_rows("Version of registry that publications were compared to", g4+1, g5) %>%
+  pack_rows("Number of studies within each article that disclose discrepancies", g5+1, g6) %>%
+  kable_styling(latex_options = "striped")
+```
+
+### Registration timing
+
+Articles varied in the level of detail they provided about whether and when studies were registered. For example, whereas some articles presented their sample only after selecting for prospectively registered studies, other articles detailed their selection process including how many studies were registered and if so, when they were registered. Using the terminology in the articles we reviewed, articles identified studies that were registered retrospectively (k = `r sum(df$regRetro != 0)`), registered during participant enrollment (k = `r sum(df$regDuringEnrol != 0)`), registered after participant enrollment was complete (k = `r sum(df$regAfterEnrol != 0)`), and studies that were not registered (k = `r sum(df$regNo != 0)`)[^2]. Many articles were ambiguous regarding when some studies were registered (k = `r sum(df$regUnclearWhen != 0)`) and whether or not some studies were registered at all (k = `r sum(df$regUnclearIf != 0)`). While these data do not provide fine-grained detail, they highlight two overarching issues: many studies are not registered, and many registered studies are registered retrospectively. These studies fail to meet the Declaration of Helsinki [@worldmedicalassociation2013] (item 35) requirement that "Every research study involving human subjects must be registered in a publicly accessible database before recruitment of the first subject" and the equivalent International Committee of Medical Journal Editors (ICMJE) policy [@icmje2019], which thousands of journals claim to follow [@icmje2021].
+
+<!--article we reviewed presented as prospective or unclear, for (1) outcomes, and (2) other aspects.-->
+
+`r Words(sum(df$discOutcome != "no"))` of the k = `r nrow(df)` articles we reviewed report at least one type of outcome discrepancy. Of these, `r sum(df$discOutcome == "pro")` report only on studies that were unambiguously prospectively registered, `r sum(df$discOutcome == "unclear")` do not unambiguously distinguish between prospectively and retrospectively registered studies, and `r sum(df$discOutcome == "both")` report outcome discrepancies separately for each of prospectively and retrospectively registered studies. Separate meta-analyses for unambiguously prospectively registered studies and studies with unclear timing of registration are presented in Supplementary Material D.
+
+`r Words(sum(df$discOther != "no"))` of the k = `r nrow(df)` articles report at least one non-outcome discrepancy (e.g., in sample size or analyses). Of these, `r sum(df$discOther == "pro")` report only on studies that were unambiguously prospectively registered, `r sum(df$discOther == "unclear")` do not unambiguously distinguish between prospectively and retrospectively registered studies, and `r words(sum(df$discOther == "both"))` reports non-outcome discrepancies separately for each of prospectively and retrospectively registered studies.
+
+## Primary outcome discrepancies
+
+An estimated `r tabOut["Any primary outcome discrepancy", "95% CI (all)"]` (95% confidence interval) of the population of studies contained at least one primary outcome discrepancy (Figure 2). This equates to a 95% prediction interval of `r tabOut["Any primary outcome discrepancy", "95% PI (all)"]`.
+
+![Figure 2. Forest plot of articles reporting the proportion of assessed studies with at least one primary outcome discrepancy.](forest1.png)
+
+<!--be sure to NOT put a period after the "(forest1.png)", it will stop the caption from being knitted to the output-->
+
+This meta-analysis had high heterogeneity (*I*^2^ = `r round(meta1$I2, 2)*100`%), suggesting that the broad range of estimates across the articles stem largely from differences in the methodology of the articles or populations they sample from, rather than from chance. Heterogeneity could not be explained by meta-regression of any of the following article-level characteristics: discipline (p = `r round(modDiscipline1$QMp, 2)`)[^3], whether the publications were compared to registry entries versus other protocol formats (e.g., ethics applications) (p = `r round(modComparator1$QMp, 2)`), sources searched to identify studies (p = `r round(modSource1$QMp, 2)`), version of the registry analyzed (p = `r round(modVersion1$QMp, 2)`), whether discrepancies were disclosed (p = `r round(modDisclosed1$QMp, 2)`), and year of article publication (p = `r round(modPubYear1$QMp, 2)`). The meta-regression on discipline had low power because `r sum(df1$discipline == "Medicine (MEDI)")` articles assessed medical research and `r sum(df1$discipline != "Medicine (MEDI)")` assessed studies across dentistry, psychology, physical therapy, and economics. To increase statistical power, we reran this meta-regression after dichotomizing discipline and found that non-medical disciplines may have a greater proportion of studies with at least one primary outcome discrepancy (p = `r round(modDiscipline1binary$QMp, 2)`; OR 95% CI: `r round(exp(modDiscipline1binary$ci.lb[2]), 2)`-`r round(exp(modDiscipline1binary$ci.ub[2]), 2)`). We ran another meta-regression after dichotomizing the source which publications were compared to into registrations versus other protocols and did not find evidence to suggest this moderator played a role (p = `r round(modComparator1binary$QMp, 2)`). We also conducted a sensitivity analysis that included all six article-level characteristics in a single meta-regression. We found that publications compared to the most recent version of a registration may have a smaller proportion of studies with at least one primary outcome discrepancy, realtive to publications that were compared to the original version of a registration (p = `r round(modDiscipline1binary$QMp, 2)`; OR 95% CI: `r round(exp(modAll1$ci.lb[13]), 2)`-`r round(exp(modAll1$ci.ub[13]), 2)`). All meta-regression model summaries are presented in Supplementary Material E.
+
+The high heterogeneity in this meta-analysis may stem from genuine differences among the articles, including the sub-disciplines surveyed, specific sources searched, definition of a discrepancy (e.g., whereas some articles considered a change in the timing of an outcome as a discrepancy, others did not), and other article characteristics that may or may not have been reported. Our dataset contains more fine-grained information about the specific sub-discipline surveyed and specific sources searched. While we do not further explore these potential moderators in the present report, we note that, whereas some sub-disciplines and sources were highly specific (e.g., cystic fibrosis, lung cancer immunotherapy, Global Resource of Eczema Trials database), others were broad (e.g., medicine, clinicaltrials.gov, core clinical MEDLINE journals). We did not collect information on the exact definitions an article used to identify a primary outcome discrepancy. However, we did collect information on the proportion of articles with sub-categories of outcome discrepancies, which are more strictly defined and listed in Table 2 (e.g., promoting a secondary outcome to a primary outcome). We ran meta-analyses on these sub-categories of outcome discrepancies and found they also had high heterogeneity (Table 2). Thus, varying definitions are unlikely to be the main driver of the high heterogeneity in the present analysis on primary outcome discrepancies.
+
+## Secondary outcome discrepancies
+
+An estimated `r tabOut["Any secondary outcome discrepancy", "95% CI (all)"]` (95% confidence interval) of the population of studies contained at least one secondary outcome discrepancy (Figure 3). This equates to a 95% prediction interval of `r tabOut["Any secondary outcome discrepancy", "95% PI (all)"]`.
+
+![Figure 3. Forest plot of articles reporting the proportion of assessed studies with at least one secondary outcome discrepancy.](forest2.png)
+
+This meta-analysis also had high heterogeneity (*I*^2^ = `r round(meta2$I2, 2)*100`%) which could not be explained by meta-regression of the version of the registry analyzed (p = `r round(modVersion2$QMp, 2)`) or the year of article publication (p = `r round(modPubYear2$QMp, 2)`). Meta-regression of the sources searched to identify studies explained some heterogeneity, in that searches stemming from journals, compared to registries, had a greater proportion of publications with at least one secondary outcome discrepancy (p = `r round(modSource2$QMp, 2)`; OR 95% CI: `r round(exp(modSource2$ci.lb[2]), 2)`-`r round(exp(modSource2$ci.ub[2]), 2)`). Meta-regressions on discipline (p = `r round(modDiscipline2$QMp, 2)`), whether discrepancies were disclosed (p = `r round(modDisclosed2$QMp, 2)`), and whether the publications were compared to registry entries versus other protocol formats (p = `r round(modComparator2$QMp, 2)`) had very low statistical power because almost all articles had the same characteristic. All meta-regression model summaries are included in Supplementary Material E.
+
+Descriptively, omitting secondary outcomes and adding secondary outcomes appears to occur more frequently than omitting primary outcomes, adding primary outcomes, or demoting primary outcomes, which in turn appear to occur more frequently than promoting a secondary outcome (see Table 2).
+
+```{r outputTable1, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tabOutMain1, caption = "Table 2. Meta-analytic estimates for the proportion of studies that contain various types of outcome discrepancies", booktabs = T, linesep = "") %>% 
+      column_spec(1, width = "9cm") %>%
+        column_spec(2:3, width = "2cm") %>%
+          column_spec(4:5, width = "1cm") %>%
+            kable_styling(latex_options = c("striped", "hold_position")) %>%
+    add_footnote("We only coded 'any outcome discrepancy' for articles that checked for both primary and secondary outcome discrepancies in the studies they assessed. Forest plots for all meta-analyses in this table are in Supplementary Material F.", notation = "none", threeparttable = T)
+```
+
+## Parameters potentially related to outcome discrepancies
+
+A subset of articles contained information on parameters potentially related to the proportion of outcome discrepancies. These include the disclosure of discrepancies, presence of a 'statistically significant' result, funding source, and timing of registration (Table 3).
+
+```{r, outputAddTable, include = TRUE, echo = FALSE, results = "asis"}
+  knitr::kable(addFrame, caption = "Table 3. Additional analyses regarding discrepancies", booktabs = T, linesep = "\\addlinespace") %>%
+    kable_styling(latex_options = "striped") %>%
+       column_spec(1, width = "10cm") %>%
+        column_spec(2:3, width = "1.5cm") %>%
+          column_spec(4:5, width = "1cm") %>%
+    add_footnote("This analysis uses the same data as the likelihood ratio analysis before it. Forest plots for all meta-analyses in this table are in Supplementary Material G.", notation = "symbol", threeparttable = T)
+```
+
+## Non-outcome discrepancies
+
+The meta-analyses for the non-outcome discrepancies had high heterogeneity, and wide confidence intervals and prediction intervals (Table 4). Articles varied in the criteria they used to identify non-outcome discrepancies and there were fewer articles than for outcome discrepancies. Prediction intervals can be particularly imprecise when few articles are included in a meta-analysis [@inthout2016]. Whereas our coding procedure divided outcome discrepancies into 10 sub-categories, it did not employ the same level of granularity for non-outcome discrepancies. Supplementary Material H contains additional information on non-outcome discrepancies.
+
+```{r outputTable2, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tabOutMain2, caption = "Table 4. Meta-analytic estimates for the proportion of studies that contain various types of non-outcome discrepancies", booktabs = T, linesep = "") %>% 
+  kable_styling(latex_options = c("striped", "hold_position")) %>%          
+  column_spec(4:5, width = "1cm") %>%
+  add_footnote("Values less than 0.5% and greater than 99.5% are rounded to one significant digit from 0 or 100. Forest plots for all meta-analyses in this table are in Supplementary Material I. These results are best interpreted alongside the information provided in Supplementary Material H. ", notation = "none", threeparttable = T)
+```
+
+## Gaps in the literature
+
+We identified several gaps in the literature on discrepancies. There exists little research on: (1) the prevalence of discrepancies in fields other than clinical research, (2) the prevalence of discrepancies in a representative sample across clinical disciplines, (3) the level of specificity in registrations, and (4) interventions to reduce undisclosed discrepancies (see Supplementary Material J for additional information about these gaps). We also identified several themes from surveying the conclusions of the articles we reviewed. These include the need for awareness surrounding discrepancies, the need for mandates, enforcement, and/or new initiatives to address discrepancies, and the benefit of registering additional information such as analysis plans (Supplementary Table J1 contains additional details).
+
+# Discussion
+
+We found that outcome measures in registrations and study protocols often differ from published outcome measures, that these discrepancies are rarely disclosed, that the prevalence of discrepancies varies substantially across the articles we reviewed, and that this heterogeneity is not easily assigned to specific article characteristics. 
+
+## Limitations
+
+Given the wide range of discrepancy prevalence across individual articles, point estimates and confidence intervals may provide false precision when extrapolating our findings to the registered literature at large. Moreover, because heterogeneity could not be explained by meta-regression of article characteristics, more precise estimates cannot be derived for subsets of the literature. The prediction intervals can reasonably be used to extrapolate to another article in the registered medical literature at large, although the included studies do not necessarily form a representative sample.
+
+## Comparisons to previous research

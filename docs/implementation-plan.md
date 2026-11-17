@@ -11,8 +11,8 @@ existing benchmark task. All project-authored content is in English.
 1. Establish the independent repository and pinned dependencies.
 2. Validate Docker, model access, sandbox boundaries, and termination behavior.
 3. Execute one official training capsule with original author code and evidence.
-4. Extend the same application to a fixed small Python/R cohort, if archived
-   images and local resources permit. Preserve all selection exclusions.
+4. Extend the same application to fifteen size-ranked eligible held-out Python/R
+   capsules. Recover rate-limited original images and preserve all selection exclusions.
 5. Derive development lessons, freeze code/configuration/data membership, and
    run both conditions twice without updating lessons on held-out outcomes.
 6. Export reports, failure records, cost accounting, and a reproducible release.
@@ -33,3 +33,24 @@ A task is successful only when all questions pass the fixed scorer. Evidence
 availability is evaluated separately from answer correctness. A complete release
 must preserve failed runs and known limitations, not only successful screenshots.
 No hypothesis improvement or diagnostic agreement is claimed without measurement.
+
+## Expanded delivery acceptance
+
+The v0.2.0 target is fifteen held-out tasks, both conditions, and two repetitions:
+sixty fresh formal records. Five development tasks supply the original three frozen
+lessons. Two held-out capsules have prior v0.1.0 results; thirteen are newly evaluated.
+Report these groups separately and preserve v0.1.0 as historical evidence.
+
+The registry recovery uses public bearer authentication, manifest digest checks,
+serial pulls, bounded backoff, and verified local caches. No task is replaced based
+on its score, and no image is rebuilt to make it pass. An unavailable service is
+not evidence of an incorrect scientific answer. Retained initialization failures
+are identified separately even though the primary all-attempt score counts them
+as unsolved.
+
+Delivery requires a complete frozen run matrix, portable evidence for every record,
+artifact hash verification, an updated English results narrative and video, browser
+navigation checks, and a source release with no credentials or private answer keys.
+The success criterion is a complete and auditable experiment, not a positive A/B
+effect. The original proposed improvement of two solved tasks is tested rather
+than assumed.

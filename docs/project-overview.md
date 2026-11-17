@@ -75,13 +75,16 @@ See research-references.md for the source map and attribution.
 ## Changes from the original proposal
 
 The original ambition was 25 capsules and a Medium environment-building task.
-The executed fallback uses prepared author environments and the smaller cohort
-recorded in the experiment manifest. Runtime networking is disabled completely;
+The implementation uses prepared author environments. After the first fallback
+release, registry recovery enabled the original target of fifteen official test
+capsules, with five development tasks and the same frozen lessons. Runtime networking is disabled completely;
 there is no PyPI/CRAN whitelist. One verified model handles the agent tools rather
 than the unverified model lineup in the proposal. Image/PDF inspection is available,
 but a vision-labelled task can also be answered by inspecting executed data output.
 
-Registry HTTP 429 failures constrained image availability before formal evaluation.
+Registry HTTP 429 failures initially constrained the first release to two test
+capsules. The expanded release recovered those images and completed preparation
+of a fifteen-task cohort before freezing a new sixty-cell experiment.
 The selection ledger records all considered tasks and provisioning outcomes. The
 experiment neither replaces tasks based on held-out scores nor derives new rules
 from held-out traces. Conclusions apply only to the selected available subset.

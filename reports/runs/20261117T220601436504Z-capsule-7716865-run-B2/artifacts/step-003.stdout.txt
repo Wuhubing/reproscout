@@ -1,0 +1,132 @@
+33:library(tidyverse) # for cleaner code
+45:# create a function to output the power and sensitivity of each study included in the reviews.
+50:# calculate power for small, medium, and large cohen's effect sizes, using d = f*2. Also calculate sensitivity for power = 0.8 and 0.95. The type of anova to run is coded in the data, where type = 2 is for interactions, and type = 1 is for between groups. 
+161:# Recalculate power and sensitivity using the funcion output() we defined earlier
+184:# calculate the 'overestimation factor'. It is inversed for the sensitivity calucations
+194:# calculate the mean overestimation factor across all the sensitivity calculations 
+235:# effect size calculation (cohen's d) for height in US adults from Table 9 and Table 11 of https://www.cdc.gov/nchs/data/series/sr_03/sr03-046-508.pdf
+257:Recent systematic reviews of neurofeedback with functional magnetic resonance imaging (fMRI-nf) [@tursic2020] and neurofeedback with functional near infrared spectroscopy (fNIRS-nf) [@kohl2020] miscalculate the statistical power and statistical sensitivity of several studies they review. The fMRI-nf review overestimates the mean and median statistical power of included studies by about `r difMRIPower %>% round(0)` times and the statistical sensitivity by about `r difMRISensitivity %>% round(0)` times (see Table 1 for recalculated values and comparisons). The fNIRS-nf review, on which I (RTT) was a coauthor, overestimates power by about `r difNIRSPower %>% round(0)` times and sensitivity by about `r round(difNIRSSensitivity/.5)*.5` times (see Table 2). 
+261:We recalculated the statistical power and sensitivity of the studies from @tursic2020 and @kohl2020 using the WebPower package in R^[We performed our calculations in R. They are all available in our open code (osf.io/rcqfm). We reproduce Table 3 from Tursic et al. and Table 5 from Kohl et al. using the sample sizes and statistical tests which each review provides in their supplementary material (i.e., we did not re-extract this information from the original studies or check if the statistical tests in the original studies were appropriate). The WebPower package we used assumes a correlation of 0.7 for repeated measures for ANOVAs, which is slightly more conservative than the 0.8 correlation used in the reviews.]. Our recalculations show that the median study in the fMRI-nf review has only `r tMRIbeh$medium[2] %>% round(2) %>% percent()` power to detect clinical effects of Cohen’s *d* = 0.5 and the median study in the fNIRS-nf review has `r tNIRSbeh$medium[2] %>% round(2) %>% percent()` power to detect behavioural effects of the same size. The median studies in fMRI-nf and fNIRS-nf have 80% power to detect large to very large effect sizes (d = `r rbind(tMRIout, tNIRSout)[c(2,4,6,8),5] %>% min() %>% round(2)` to `r rbind(tMRIout, tNIRSout)[c(2,4,6,8),5] %>% max() %>% round(2)`)^[Although these reviews calculate power and sensitivity based on the analyses used in each study, an independent sample t-test would be sufficient to answer the basic question “do neurofeedback participants improve more than control participants”. The median size fMRI-nf study has 80% power to detect an effect size of *d* = `r medMRI80 %>% round(2)` and the median size fNIRS-nf study *d* = `r medNIRS80 %>% round(2)` for this analysis, with $\alpha$ = .05. The effect size *f* used for ANOVAs in GPower depends on $\eta$^2^~p~ which varies depending on the study design, unlike Cohen’s d. Given the less intuitive nature of *f* and that a t-test directly answers the main question in most trials, t-tests can be preferable.]  (see the sensitivity columns in Table 1 & 2). The fMRI-nf review overestimates power to a greater degree than the fNIRS-nf review because more of the studies they reviewed used repeated measures (mixed) ANOVAs, where the consequential default option exists.
+284:    add_footnote(c("The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for clinical measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample sizes in the review differ slightly from ours, possibly due to a calculation error. We used the data provided in the review's supplementary material for these calculations."
+302:    add_footnote(c("The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for behavioural measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample size in the review differ slightly from ours---whereas we calculated these valuse based on the sample size used in the statistical tests, Kohl et al. calculated them based on the total number of participants. We removed one study from our calculations because it only ran binomial tests within each participant but did not test for group effects. One study used biserial correlation, for which we calculated power as for a Pearson’s correlation. One study used an ANCOVA, for which we calculated power using a 2x2 repeated measures (mixed) ANOVA."
+---head---
+---
+title             : "Excess significance and power miscalculations in neurofeedback research"
+author: |
+  | Robert T. Thibault^1,2^ (0000-0002-6561-3962) & Hugo Pedder^3^ (0000-0002-7813-3749)
+  | </br>
+  | ^1^Meta-Research Innovation Center at Stanford (METRICS), Stanford University
+  | ^2^School of Psychological Science, University of Bristol
+  | ^3^Department Population Health Sciences, Bristol Medical School, University of Bristol
+  | </br>
+  | Address correspondence to robert.thibault@stanford.edu
+  | </br>
+  | This manuscript has been accepted for publication in *NeuroImage: Clinical* 
+  | This is the authors' version of the mauscript which was accepted for publication
+
+output: 
+  pdf_document:
+    citation_package: natbib
+  
+header-includes:
+    - \usepackage{setspace}
+  
+bibliography: references.bib
+csl: apa.csl
+---
+
+\onehalfspacing
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r packages}
+library(tidyverse) # for cleaner code
+library(knitr) # for knitting and kable function
+library(kableExtra) # for kable table styling
+library(WebPower) # for power calculations
+library(scales) # to output numbers as percentages
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r output}
+# create a function to output the power and sensitivity of each study included in the reviews.
+output <- function(d){
+  
+for (i in 1:nrow(d)){
+  
+# calculate power for small, medium, and large cohen's effect sizes, using d = f*2. Also calculate sensitivity for power = 0.8 and 0.95. The type of anova to run is coded in the data, where type = 2 is for interactions, and type = 1 is for between groups. 
+  if (d$test[i] == "anova"){
+    d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.1, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$medium[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.25, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$large[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.4, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$p80[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .80, type = d$type[i])$f*2
+    d$p95[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .95, type = d$type[i])$f*2
+    #the *2 is to convert effect sizes of type "f" to effect sizes in Cohen's d
+    
+  # as for above for independent sample t-tests.  
+  # floor() rounds down and ceiling() rounds up for studies with an uneven number of participants
+  } else if (d$test[i] == "ttest2") {
+    d$small[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for one sample t-tests and paired sample t-tests
+  } else if (d$test[i] == "ttest1"){
+    d$small[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for correlations, using d = 2*r / sqrt(1 - r^2)
+  } else if (d$test[i] == "corr"){
+    d$small[i] <- wp.correlation(n = d$n[i], r = 0.1, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$medium[i] <- wp.correlation(n = d$n[i], r = 0.243, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$large[i] <- wp.correlation(n = d$n[i], r = 0.371, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .80, alpha = 0.05, alternative = d$tails[i])$r
+    d$p80[i] <- 2*r / sqrt(1 - r^2)
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .95, alpha = 0.05, alternative = d$tails[i])$r
+    d$p95[i] <- 2*r / sqrt(1 - r^2)
+    
+    
+  # as for above for linear regression, using f2 small medium and large effect size according to Cohen 1992
+  } else if (d$test[i] == "regression"){
+    d$small[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.1^2, power = NULL, alpha = 0.05)$power
+    d$medium[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.25^2, power = NULL, alpha = 0.05)$power
+    d$large[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.4^2, power = NULL, alpha = 0.05)$power
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .80, alpha = 0.05)$f2
+    d$p80[i] <- sqrt(f2) * 2 
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .95, alpha = 0.05)$f2
+    d$p95[i] <-  sqrt(f2) * 2
+    
+    
+  } else {
+    warning(paste("The test for", d$Publication, "cannot be identified"))
+  }
+}
+
+# return the dataframe with all the powers and sensitivities filled in
+  return(d)
+}
+
+```
+
+```{r tableMRI}
+#create function to make a the table output for the fMRI summary data.
+tableMRI <- function(d){
+  
+# t for table  
+  t <- data.frame(matrix(ncol = 6, nrow = 4))
+  # distinguish between summary data that includes vs excludes studies marker as "pilot"
+  rownames(t) <- c("mean no pilot", "median no pilot", "mean all", "median all")
+  colnames(t) <- c("n", "small", "medium", "large", "p80", "p95")
+  
+  # filter out pilot studies
+  dTrial <- d %>% filter(pilot=="N")

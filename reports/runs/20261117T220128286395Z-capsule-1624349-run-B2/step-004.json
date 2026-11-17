@@ -1,0 +1,7 @@
+{
+  "command": "python - <<'PY'\nimport nbformat, json\nnb=nbformat.read('/results/FS-Filters.executed.ipynb', as_version=4)\nfor idx in [7,8,10,13,17,19,22,23]:\n    c=nb.cells[idx]\n    print('\\nCELL',idx,c.cell_type)\n    if c.cell_type=='code':\n        for out in c.get('outputs',[]):\n            if out.output_type=='execute_result':\n                print('EXEC',out['data'].get('text/plain',''))\n            elif out.output_type=='stream':\n                print('STREAM',out['text'])\n            elif out.output_type=='error':\n                print('ERROR',out['ename'],out['evalue'])\nPY",
+  "exit_code": 0,
+  "seconds": 0.600761333014816,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

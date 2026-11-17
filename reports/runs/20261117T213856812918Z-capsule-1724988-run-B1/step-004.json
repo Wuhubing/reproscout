@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript -e 'library(tidyverse); ds<-read_csv(\"/data/summary_stats_LSS2.csv\", na=\"NaN\"); ds<-ds %>% filter(id != 212 & id != 203); cat(\"LSS2 walking speed medians\\n\"); print(ds %>% gather(task, speed, walk_path_speed, search_path_speed) %>% group_by(task) %>% summarise(median=median(speed, na.rm=TRUE), .groups=\"drop\")); cat(\"LSS2 straightness medians\\n\"); print(ds %>% gather(task, speed, walk_straightness, search_straightness) %>% group_by(task) %>% summarise(median=median(speed, na.rm=TRUE), .groups=\"drop\")); ds1<-read_csv(\"/data/summary_stats_LSS1.csv\", na=\"NaN\") %>% filter(id != 35); cat(\"LSS1 walking speed medians\\n\"); print(ds1 %>% gather(task, speed, walk_path_speed, search_path_speed) %>% group_by(task) %>% summarise(median=median(speed, na.rm=TRUE), .groups=\"drop\")); cat(\"LSS1 straightness medians\\n\"); print(ds1 %>% gather(task, speed, walk_straightness, search_straightness) %>% group_by(task) %>% summarise(median=median(speed, na.rm=TRUE), .groups=\"drop\"));' > /results/medians.txt 2>&1 && sed -n '1,200p' /results/medians.txt",
+  "exit_code": 0,
+  "seconds": 4.675864208955318,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

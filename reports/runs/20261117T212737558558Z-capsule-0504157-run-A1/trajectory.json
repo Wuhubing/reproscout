@@ -1,0 +1,387 @@
+{
+  "messages": [
+    {
+      "id": "eiUcDerDbN7RETmcjru3fp",
+      "content": "You are ReproScout, a scientific reproduction agent.\nExecute the supplied author's code to answer the task questions. Read /code/README.md\nand /REPRODUCING.md first. The controller has already provisioned the author's image:\nrun commands directly inside this container, not through nested Docker. Work in /code;\ndata are in /data and /results starts empty. Network access is disabled. Do not alter\nexperimental code, hardcode answers, or use remembered/published results.\nIf blocked, submit null values for unanswered questions, with evidence of the blocker\nand an optional explanation field. Do not invent values to complete the report. If a required\ncode change is necessary, explain the blocker instead of silently patching it.\nKeep every response in English. Tool outputs include controller-owned artifact IDs and\n1-based line numbers. Submit each question's value with evidence from THIS execution.\nFor plots, use view_image on generated raster files or PDF pages; cite the returned\nimage artifact without line numbers. Use the submit_report tool with a JSON object keyed by question IDs, for example:\n{\"q1\":{\"value\":12.3,\"evidence\":[{\"artifact\":\"artifacts/step-002.stdout.txt\",\n\"line_start\":2,\"line_end\":2}]}}. The example number is not an answer.\nAn existing file reference does not prove correctness; cite actual computed output.\n",
+      "source": null,
+      "metadata": null,
+      "role": "system"
+    },
+    {
+      "id": "4mHK9yq9psrwqG3yxAfRNS",
+      "content": "Run 'manuscript.Rmd' using Rscript and render it as a pdf. Store the output in the ../results directory. Set clean to 'TRUE'.\nQuestions:\n{\n  \"q1\": \"fig From figure 1, report the CS presentation time with the greatest mean EC effect (ignore units).\"\n}",
+      "source": "input",
+      "metadata": null,
+      "role": "user",
+      "tool_call_id": null
+    },
+    {
+      "id": "h48wCPPGLs6b3Y6qs5BcL5",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_gQK1Vdnsn14Us8wKSELcP4Wk",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && sed -n '1,200p' README.md && echo '---REPRODUCING---' && sed -n '1,200p' /REPRODUCING.md"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "9V2VtFnxxdxoPXaSTXuizD",
+      "content": "Exit code: 0\nartifacts/step-001.stdout.txt\n1: # Read Me\n2: \n3: If you have any questions concerning this manuscript or R script, please contact Tobias Heycke (tobias.heycke@gesis.org).\n4: \n5: ## Citation\n6: \n7: This manuscript /script is part of the following manuscript:\n8: \n9: Heycke, T. & Stahl, C. (in press). No evaluative conditioning effects with briefly presented stimuli.\n10: Psychological Research. https://doi.org/10.1007/s00426-018-1109-1\n11: \n12: \n13: ## Settings data analysis\n14: \n15: The script manuscript_croco4_5.Rmd includes all text and analyses to reproduce the original manuscript.\n16: Currently the data is loaded from R Data frames, as it takes a few minutes to load the data directly from github.\n17: If you wish to load the original (unedited) data files from github please set:\n18: \n19: cacheGitData <- FALSE # row 57 in the Rmd files\n20: \n21: Also some analyses will be loaded from cache, as the computation time is substantial. \n22: If you wish to calculate all analyses, please set:\n23: \n24: cacheBF <- FALSE # row 54 in the Rmd file\n25: \n26: ## Additional material\n27: \n28: In order to facilitate replication of this research project, the following files can be found in a public Open Science Framework repository:\n29: - video of an example learning phase [https://osf.io/eyfxs/]\n30: - python script used for the data collection [https://osf.io/3dn7e/]\n31: - images and sounds used for the data collection [https://osf.io/3dn7e/]\n32: \n33: \n34: ### Raw data files\n35: \n36: All data files were uploaded after every day of data collection under a born-open data protocol (see Rouder, 2016).\n37: The data files can be found in the following folders:\n38: \n39: - https://github.com/methexp/rawdata/tree/master/croco4\n40: - https://github.com/methexp/rawdata/tree/master/croco4b\n41: - https://github.com/methexp/rawdata/tree/master/croco5\n42: \n43: [A copy of all data files can also be found in the open science Framework repository mentioned above]\n44: \n45: \n46: ## Sources\n47: \n48: Rouder, J. N. (2016). The what, why, and how of born-open data. Behavior Research Methods, 48 (3), 1062\u20131069. doi:10.3758/s13428-015-0630-z\n49: ---REPRODUCING---\n50: This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.\n51: \n52: <sup>1</sup> You may need access to additional hardware and/or software licenses.\n53: \n54: # Prerequisites\n55: \n56: - [Docker Community Edition (CE)](https://www.docker.com/community-edition)\n57: - MATLAB/MOSEK/Stata licenses where applicable\n58: \n59: # Instructions\n60: \n61: ## The computational environment (Docker image)\n62: \n63: This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:\n64: `registry.codeocean.com/published/26389ff0-ea56-467d-a550-b96cb9a31e04:v1`\n65: \n66: ## Running the capsule to reproduce the results\n67: \n68: In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:\n69: ```shell\n70: docker run --platform linux/amd64 --rm \\\n71:   --workdir /code \\\n72:   --volume \"$PWD/data\":/data \\\n73:   --volume \"$PWD/code\":/code \\\n74:   --volume \"$PWD/results\":/results \\\n75:   registry.codeocean.com/published/26389ff0-ea56-467d-a550-b96cb9a31e04:v1 bash run.sh\n76: ```\nartifacts/step-001.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_gQK1Vdnsn14Us8wKSELcP4Wk",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "3a5YMpzw9KSgdtkaayXXHo",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_aOBj7nVDpOadnOeW5IcXXupu",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && ls -la && find . -maxdepth 2 -name 'manuscript.Rmd' -o -name '*.Rmd' -o -name 'run.sh'"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "Jo39s4iCeh3q2KA3nHxSVn",
+      "content": "Exit code: 0\nartifacts/step-002.stdout.txt\n1: total 128\n2: drwxr-xr-x 2 root root  4096 Nov 17 21:27 .\n3: drwxr-xr-x 1 root root  4096 Nov 17 21:27 ..\n4: -rwxr-xr-x 1 root root 37938 Jan  1  1970 Croco5.bib\n5: -rwxr-xr-x 1 root root  1069 Jan  1  1970 LICENSE\n6: -rwxr-xr-x 1 root root 60289 Jan  1  1970 manuscript_croco4_5.Rmd\n7: -rwxr-xr-x 1 root root  1924 Jan  1  1970 README.md\n8: -rwxr-xr-x 1 root root  5820 Jan  1  1970 r-references5.bib\n9: -rwxr-xr-x 1 root root   106 Jan  1  1970 run.sh\n10: ./manuscript_croco4_5.Rmd\n11: ./run.sh\nartifacts/step-002.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_aOBj7nVDpOadnOeW5IcXXupu",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "LdPuA4kykkuCQfYa3YuGxf",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Investigating Rscript run**\n\nI need to run the Rscript, but I\u2019m wondering if perhaps the file name is different. It feels like I should inspect the run.sh script and check the Rmd header to figure out what's going on. I hope I can sort this out quickly! It\u2019s just a matter of making sure everything is lined up properly so the script executes as it should. Let\u2019s see what I can find there!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_TfQIIe6XOJqLURqMmXk5TD3F",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && sed -n '1,120p' run.sh && echo '---RMD HEAD---' && sed -n '1,120p' manuscript_croco4_5.Rmd"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "2dvXDfDXLpRXRLQxDvxd2s",
+      "content": "Exit code: 0\nartifacts/step-003.stdout.txt\n1: Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\"---RMD HEAD---\n2: ---\n3: title             : \"No Evaluative Conditioning Effects with Briefly Presented Stimuli\"\n4: shorttitle        : \"EC with brief stimulus presentation\"\n5: \n6: author: \n7:   - name          : \"Tobias Heycke\"\n8:     affiliation   : \" \"\n9:     corresponding : yes    # Define only one corresponding author\n10:     address       : \"Herbert-Lewin-Str. 2, 50931 Cologne, Germany\"\n11:     email         : \"t.heycke@uni-koeln.de\"\n12:   - name          : \"Christoph Stahl\"\n13:     affiliation   : \" \"\n14: \n15: affiliation:\n16:   - id            : \" \"\n17:     institution   : \"University of Cologne\"\n18: \n19: \n20: author_note: >\n21:   TH (orcid: 0000-0001-6358-6713) & CS (orcid: 0000-0002-9033-894X) planned and conducted the experiment, analyzed the data, and wrote the article. The study was funded by a grant awarded to the first author by the Graduate School of the Faculty of Human Sciences, University of Cologne, and by Deutsche Forschungsgemeinschaft Grant 1269/3-1 awarded to the second author. The data presented here is part of the dissertation of the first author. We thank N. Becker, K. Mattonet, L. Moerschbacher, P. Musfeld, & L. Spitzer for their help with the data collection of the pilot studies and the experiment and J. Berkessel for her help with the data collection of the online pilot study. Additional material, data files, and analysis scripts are provided at osf.io/3dn7e/.\n22: \n23: note: |\n24:   Please cite this article as: Heycke, T. & Stahl, C. (in press). No evaluative conditioning effects with briefly presented stimuli.Psychological   Research. https://doi.org/10.1007/s00426-018-1109-1\n25: \n26: abstract: >\n27:   Evaluative conditioning (EC) changes the preference towards a formerly neutral stimulus (Conditioned Stimulus; CS), by pairing it with a valent stimulus (Unconditioned Stimulus; US), in the direction of the valence of the US. When the CS is presented suboptimally (i.e., too briefly to be consciously perceived), contingency awareness between CS and US can be ruled out. Hence, EC effects with suboptimally presented CSs would support theories claiming that contingency awareness is not necessary for EC effects to occur. Recent studies reported the absence of EC with briefly presented CSs when both CS and US were presented in the visual modality, even though the CSs were identified at above-chance levels. Challenging this finding, Heycke and colleagues (2017) found some evidence for an EC effect with briefly presented visual stimuli in a cross-modal paradigm with auditory USs, but that study did not assess CS visibility. The present study realized a close replication of this study, while deviated from it by using different stimuli, introducing a brief practice phase for the surveillance task, and adding a CS visibility check. Overall EC for briefly presented stimuli was absent, and results from the visibility check show that an EC effect with briefly presented CSs was only found, when the CSs were identified at above-chance levels.\n28:   \n29:   \n30: keywords          : \"evaluative conditioning, implicit learning, subliminal learning, cross-modal conditioning, awareness\"\n31: \n32: bibliography:\n33:   - r-references5.bib\n34:   - Croco5.bib\n35: \n36: figsintext        : yes\n37: figurelist        : no\n38: tablelist         : no\n39: footnotelist      : no\n40: lineno            : no\n41: mask              : no\n42: \n43: class             : \"jou\"\n44: output            : papaja::apa6_pdf\n45: ---\n46: \n47: ```{r include = FALSE}\n48: library(\"papaja\")\n49: ```\n50: \n51: ```{r init, message = FALSE, warning = FALSE, results = \"hide\"}\n52: # #################################################################################################################################\n53: \n54: #Set the following 3 parameters when running the analysis script\n55: \n56: # if True, BF results will be loaded from cache, if false all analyses will be recalculated and cached results will be overwritten (a subfolder called cachedResults needs to be present). \n57: cacheBF <- TRUE\n58: \n59: #if True, data will not be loaded from git but from cache, set FALSE if loading data directly from git (may take several minutes per data set, set to FALSE if you run this script fo the first time, subfolder \"cachedResults\" needs to be present)\n60: cacheGitData <- TRUE\n61: \n62: #if TRUE, multicore will be used in all BayesFactor analyses. Does not work under MS Windows. Analyses will take longer when set to FALSE.\n63: mcore <- FALSE\n64: \n65: # #################################################################################################################################\n66: \n67: # load all librarys\n68: library(\"BayesFactor\")\n69: library(\"rvest\")\n70: library(\"RCurl\")\n71: library(\"tidyr\")\n72: library(\"yarrr\")\n73: library(\"afex\")\n74: \n75: #theme_set(theme_apa(box = TRUE))\n76: knitr::opts_chunk$set(dev = c(\"pdf\", \"tiff\"))\n77: \n78: options(contrasts = c(\"contr.sum\", \"contr.poly\"))\n79: \n80: #ransforming R scientific numbers into x times 10 to power LaTeX Output\n81: as.scientific <- function(number){\n82:   num <- format(number, scientific = TRUE, digits = 3)\n83:   p <- as.integer(gsub(\".*e+\", \"\", num))\n84:   b <- as.numeric(gsub( \"e+.*\", \"\", num))\n85:   paste0('\\\\mathit{', b, '}', '\\\\times', '{',10, '}', '^', '{', p, '}')\n86: }\n87: \n88: #Anova BF print function\n89: printBF <- function(BF, Hypothesis = 1, index = 1, OutputSize = 99999.99, HStyle = 0, N = FALSE, id = NULL){\n90:  if(Hypothesis == \"1\" & as.vector(BF[index]) >= 1) return(\"\\\\linebreak  __BayesFactor larger 1, but Output for H1 selected__ \\\\linebreak \")\n91:  if(Hypothesis == \"0\" & as.vector(BF[index]) < 1 & HStyle == 0) return(\"\\\\linebreak  __BayesFactor smaller 1, but Output for H0 selected__ \\\\linebreak \")\n92:  s <- \" \"\n93:  if(N == TRUE) s <- paste0(\"(\", as.character(length(unique(aovBF5@data[, id]))), \") \")\n94:  if(Hypothesis == \"0\") return(ifelse(as.vector(BF[index])>OutputSize, paste0('$\\\\mathit{BF}_{01}', s, '= ', as.scientific(as.vector(BF[index])), '$'), paste0('$\\\\mathit{BF}_{01}', s, '= ', printnum(as.vector(BF[index])), '$')))\n95:  if(Hypothesis == \"1\") return(ifelse(1/as.vector(BF[index])>OutputSize, paste0('$\\\\mathit{BF}_{10}', s, '= ', as.scientific(1/as.vector(BF[index])), '$'), paste0('$\\\\mathit{BF}_{10}', s, '= ', printnum(1/as.vector(BF[index])), '$')))\n96: }\n97: \n98: #t test print function\n99: printBFt <- function(BF, HStyle = 0, index = 1, OutputSize = 99999.99 , postit = 1000000, N = FALSE){\n100:   if(as.vector(BF[index]) < 1 & HStyle == 0){\n101:     b <- 1/as.vector(BF[index])\n102:     num <- \"01\"\n103:   }else{\n104:     b <- as.vector(BF[index])\n105:     num <- \"10\"\n106:   }\n107:   s <- \" \"\n108:   if(N == TRUE) s <- paste0('(', nrow(BF@data), ') ') \n109:   if(as.character(class(BF@numerator[[names(BF@numerator)[index]]])) == \"BFoneSample\"){\n110:     rBF <- BayesFactor::ttestBF(BF@data[,1], mu = BF@numerator[[names(BF@numerator)[index]]]@prior$mu, rscale = BF@numerator[[names(BF@numerator)[index]]]@prior$rscale)\n111:   }\n112:   if(as.character(class(BF@numerator[[names(BF@numerator)[1]]])) == \"BFindepSample\"){\n113:       rBF <- BayesFactor::ttestBF(subset(BF@data, BF@data[,2] == \"x\")[,1] , subset(BF@data, BF@data[,2] == \"y\")[,1], rscale = BF@numerator[[names(BF@numerator)[index]]]@prior$rscale, paired = FALSE)\n114:     }\n115:   post <- BayesFactor::posterior(rBF, index = index, iterations = postit)\n116:   d <- median(post[, \"delta\"])\n117:   HDI <- coda::HPDinterval(post[, \"delta\"])\n118:   ifelse(b > OutputSize, paste0('$\\\\mathit{BF}_{', num, '}', s, '= ', as.scientific(b), '$', ', ', '$d = ', printnum(d), '$', ', ', '95% HDI [', printnum(HDI[1]), ', ', printnum(HDI[2]), ']'), paste0('$\\\\mathit{BF}_{', num, '}', s, '= ', printnum(b), '$', ', ', '$d = ', printnum(d), '$', ', ', '95% HDI [', printnum(HDI[1]), ', ', printnum(HDI[2]), ']'))\n119: }\n120: \n121: #Function reading data from github (does not work for main Experiment, as there are more than 1000 data files in the folder and not all are shown on git)\nartifacts/step-003.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_TfQIIe6XOJqLURqMmXk5TD3F",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "NKwp4vco758qhCmcZps9XQ",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Identifying rendering issues**\n\nI need to render something, but it seems like there might be some packages missing. I should probably check to see what dependencies are required to ensure everything runs smoothly. It\u2019s kind of a hassle when that happens, but I can troubleshoot it! I\u2019ll look into running the necessary checks to find what\u2019s missing and get everything set up properly. Let\u2019s make sure I can get this to render correctly!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_i11xXUzoMmXX5YczylZsMeP9",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\"",
+            "timeout": 1200000
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "LgLvcNLMaKbrBRZHpDFjQY",
+      "content": "",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_i11xXUzoMmXX5YczylZsMeP9",
+      "function": "shell",
+      "error": {
+        "type": "parsing",
+        "message": "Found 1 validation errors parsing tool input arguments:\n- Additional properties are not allowed ('timeout' was unexpected)"
+      }
+    },
+    {
+      "id": "aBtpJATGEVvpQZTyGivoNo",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_XHeJJQX08ihKFUeZzyhuWVYb",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "HUh9RoNPo5LDm5qy7aoyVH",
+      "content": "Exit code: 1\nartifacts/step-004.stdout.txt\n1: \n2:   |                                                                       \n3:   |                                                                 |   0%\n4:   |                                                                       \n5:   |..                                                               |   3%\n6:   ordinary text without R code\n7: \n8: \n9:   |                                                                       \n10:   |....                                                             |   6%\n11: label: unnamed-chunk-1 (with options) \n12: List of 1\n13:  $ include: logi FALSE\n14: \n15: \n16:   |                                                                       \n17:   |......                                                           |   9%\n18:   ordinary text without R code\n19: \n20: \n21:   |                                                                       \n22:   |.......                                                          |  11%\n23: label: init (with options) \n24: List of 3\n25:  $ message: logi FALSE\n26:  $ warning: logi FALSE\n27:  $ results: chr \"hide\"\n28: \n29: \n30:   |                                                                       \n31:   |.........                                                        |  14%\n32:   ordinary text without R code\n33: \n34: \n35:   |                                                                       \n36:   |...........                                                      |  17%\n37: label: StimTest\n38: \n39:   |                                                                       \n40:   |.............                                                    |  20%\n41:    inline R code fragments\n42: \n43: \n44:   |                                                                       \n45:   |...............                                                  |  23%\n46: label: cite_r\n47: \n48:   |                                                                       \n49:   |.................                                                |  26%\n50:    inline R code fragments\n51: \n52: \n53:   |                                                                       \n54:   |...................                                              |  29%\n55: label: getPPN\n56: \nartifacts/step-004.stderr.txt\n1: \n2: \n3: processing file: manuscript_croco4_5.Rmd\n4: Loading required package: coda\n5: Loading required package: Matrix\n6: ************\n7: Welcome to BayesFactor 0.9.12-4.2. If you have questions, please contact Richard Morey (richarddmorey@gmail.com).\n8: \n9: Type BFManual() to open the manual.\n10: ************\n11: Loading required package: xml2\n12: Loading required package: methods\n13: Loading required package: bitops\n14: \n15: Attaching package: 'tidyr'\n16: \n17: The following object is masked from 'package:RCurl':\n18: \n19:     complete\n20: \n21: The following object is masked from 'package:Matrix':\n22: \n23:     expand\n24: \n25: Loading required package: jpeg\n26: Loading required package: circlize\n27: ========================================\n28: circlize version 0.4.4\n29: CRAN page: https://cran.r-project.org/package=circlize\n30: Github page: https://github.com/jokergoo/circlize\n31: Documentation: http://jokergoo.github.io/circlize_book/book/\n32: \n33: If you use it in published research, please cite:\n34: Gu, Z. circlize implements and enhances circular visualization \n35:   in R. Bioinformatics 2014.\n36: ========================================\n37: \n38: yarrr v0.1.5. Citation info at citation('yarrr'). Package guide at yarrr.guide()\n39: Email me at Nathaniel.D.Phillips.is@gmail.com\n40: Loading required package: lme4\n41: ************\n42: Welcome to afex. For support visit: http://afex.singmann.science/\n43: - Functions for ANOVAs: aov_car(), aov_ez(), and aov_4()\n44: - Methods for calculating p-values with mixed(): 'KR', 'S', 'LRT', and 'PB'\n45: - 'afex_aov' and 'mixed' objects can be passed to emmeans() for follow-up tests\n46: - NEWS: library('emmeans') now needs to be called explicitly!\n47: - Get and set global package options with: afex_options()\n48: - Set orthogonal sum-to-zero contrasts globally: set_sum_contrasts()\n49: - For example analyses see: browseVignettes(\"afex\")\n50: ************\n51: \n52: Attaching package: 'afex'\n53: \n54: The following object is masked from 'package:lme4':\n55: \n56:     lmer\n57: \n58: t is large; approximation invoked.\n59: t is large; approximation invoked.\n60: t is large; approximation invoked.\n61: t is large; approximation invoked.\n62: t is large; approximation invoked.\n63: t is large; approximation invoked.\n64: t is large; approximation invoked.\n65: t is large; approximation invoked.\n66: Quitting from lines 398-408 (manuscript_croco4_5.Rmd) \n67: Error in open.connection(x, \"rb\") : Could not resolve host: github.com\n68: Calls: <Anonymous> ... withVisible -> eval -> eval -> read_html -> read_html.default\n69: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_XHeJJQX08ihKFUeZzyhuWVYb",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "NGQErgX6kejAh3MHJg67Tw",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_6037918d8c7b4dfbba5919b3dd373551",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && grep -n \"github.com\\|cacheGitData\\|cacheBF\" -n manuscript_croco4_5.Rmd | head -40"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "Z9Ec3JbwEZ8xhLGF2ASdVT",
+      "content": "Exit code: 0\nartifacts/step-005.stdout.txt\n1: 56:cacheBF <- TRUE\n2: 59:cacheGitData <- TRUE\n3: 228:if(cacheGitData){\n4: 231:VisibilityData4 <- read_gitdata(\"https://github.com/methexp/rawdata/tree/master/croco4\", \"DataTrials_Croco4\")\n5: 266:if(cacheGitData){\n6: 269:VisibilityData4B <- read_gitdata(\"https://github.com/methexp/rawdata/tree/master/croco4b\", \"DataTrials_Croco4b\")\n7: 365:[^open]: The data of the pretest and the main study were collected under a Born Open Data protocol [@rouder_what_2016] in which they were automatically logged, uploaded, and made freely available after every day of data collection (github.com/methexp/rawdata/tree/master/croco4, github.com/methexp/rawdata/tree/master/croco4b, github.com/methexp/rawdata/tree/master/croco5).\n8: 400:github_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\n9: 412:if(cacheGitData){\n10: 440:if(cacheGitData){\n11: 481:if(cacheGitData){\n12: 507:if(cacheGitData){\n13: 536:if(cacheBF){\nartifacts/step-005.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_6037918d8c7b4dfbba5919b3dd373551",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "9G8QqKzPfbBEeia7yXx7xi",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_YwEjYcBmbtCEkCv1RD3NFhWL",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && sed -n '390,430p' manuscript_croco4_5.Rmd"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "NRXHbTZtNvLemGkTUE4LDC",
+      "content": "Exit code: 0\nartifacts/step-006.stdout.txt\n1: \n2: As part of the sequential Bayesian analyses paradigm, we started the data analysis after initially collecting the data of 30 participants, with the same stopping rules used by Heycke and colleagues (2017) in Experiment 3.\n3: Specifically, we decided a priori to collect data until either the Bayes factors for both *t* tests of interest (i.e., for an EC effect in the 1000 ms condition and an EC effect in the 30 ms condition) were larger than 10 (for the null or alternative hypothesis) or until a maximum of 150 (paid) participants was reached.\n4: We ran the analyses after every day of data collection and decided that signed-up participants were allowed to participate, even if we had already stopped the data collection based on the above specified analyses.\n5: \n6: ### Participants\n7: \n8: ```{r getPPN}\n9: \n10: # This script automatically checks for the largest Participantnumber which is on github\n11: github_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\n12: file_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")\n13: file_names <- html_text(file_nodes)\n14: file_names <- gsub(\".txt\", \"\", file_names)\n15: \n16: #get only Croco5_log files (these files appear at top of list on github)\n17: tmp <- subset(file_names, substring(file_names, 1, 10) == \"Croco5_log\")\n18: N <- as.numeric(length(tmp))\n19: ```\n20: \n21: ```{r Demographics5, warning = FALSE}\n22: # Read in the Damographics data\n23: if(cacheGitData){\n24:   load(\"../data/DemoData5\")\n25: } else{\n26: #list of all data files\n27: file_url <- paste0(\"https://raw.githubusercontent.com/methexp/rawdata/master/croco5/Data_Demographics_Croco5_\", 1:N, \".txt\")\n28: #add data to a data frame\n29: DemoData5 <- lapply(file_url, read.delim)\n30: DemoData5 <- do.call(\"rbind\", DemoData5)\n31: }\n32: \n33: # number of humans who took part initially\n34: # pp nr 66 was accedentially given and experiment aborted (no participant was present)\n35: allPP  <- length(unique(DemoData5$ParticipantNumber))-1\n36: \n37: #exclude the following participants (see lab protocoll for details):\n38: # Nr 4, 5, 7, 13, 160 were excluded as they participated in previous study\n39: # Nr. 30 was excluded as he/she knew about this exact experiment but took part anyway\n40: ExclList5 <- c(4, 5, 7, 13, 30, 66, 160)\n41: \nartifacts/step-006.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_YwEjYcBmbtCEkCv1RD3NFhWL",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "DC5KEXjcm6h8Wpd7S4xDqe",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_ldJLNforhbWogP4qmkU7kvEl",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /data && find . -maxdepth 3 | head -100"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "nMb8Bcxa8uue5rRXW22KSn",
+      "content": "Exit code: 0\nartifacts/step-007.stdout.txt\n1: .\n2: ./visData5\n3: ./LICENSE\n4: ./DemoData5\n5: ./VisibilityData4\n6: ./VisibilityData4B\n7: ./aovBF5\n8: ./ratingData5\n9: ./TrialData5\nartifacts/step-007.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_ldJLNforhbWogP4qmkU7kvEl",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "JeCBUGGEDpLKZZfSwyYdrm",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_cRK6ikAZGjBL4Scgo7asgNaq",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /data && find TrialData5 -maxdepth 1 | head -20 && echo 'count:' && find TrialData5 -maxdepth 1 -type f | wc -l && find DemoData5 -maxdepth 1 -type f | wc -l"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "TZSsEAZcgJicrt4yYry5BM",
+      "content": "Exit code: 139\nartifacts/step-008.stdout.txt\n\nartifacts/step-008.stderr.txt\n1: /usr/bin/timeout: the monitored command dumped core",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_cRK6ikAZGjBL4Scgo7asgNaq",
+      "function": "shell",
+      "error": null
+    }
+  ],
+  "export_policy": "Encrypted provider reasoning payloads are omitted; visible messages, tool calls, outputs, and usage are retained. Raw Inspect logs remain local.",
+  "model_usage": {
+    "openai/gpt-5.4-mini-2026-03-17": {
+      "input_tokens": 9005,
+      "output_tokens": 840,
+      "total_tokens": 40949,
+      "input_tokens_cache_write": null,
+      "input_tokens_cache_read": 31104,
+      "reasoning_tokens": 340,
+      "total_cost": 0.01286655
+    }
+  },
+  "sample_error": "ValueError('Pilot context limit reached')"
+}

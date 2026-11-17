@@ -9,3 +9,8 @@
 A GitHub release bundles the source and report files for review. Scientific input
 archives, author container images, raw binary logs, reference answer keys, and API
 credentials are intentionally not bundled. Follow README.md to rerun the pilot.
+
+The v0.2.0 walkthrough and reports cover fifteen held-out tasks and sixty fresh
+formal A/B records. The portable app retains 74 records including development and
+historical results, with experiment labels to avoid combining them accidentally.
+The original v0.1.0 release remains available as a separate historical artifact.

@@ -1,0 +1,112 @@
+01_code.R:    ASCII text
+codebook.pdf: PDF document, version 1.5
+LICENSE:      ASCII text
+readme.pdf:   PDF document, version 1.5
+run:          Bourne-Again shell script, ASCII text executable
+---01_code.R---
+library(readxl)
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(xtable)
+library(ggplot2)
+
+# data used for Table A2
+data <- read_xlsx("../../data/raw/data_power_to_people.xlsx")
+
+
+# code for both tests -----------------------------------------------------
+
+sign_comp_test <-  function(e1, se1, e2, se2){
+  T1 = e1/se1
+  T2 = e2/se2
+  p1 = c(pnorm(T1, lower.tail = F),
+         pnorm(T2, lower.tail = F))
+  b1 <- min(p.adjust(p1, method = "bonferroni"))
+  p2 = c(pnorm(T1, lower.tail = T),
+         pnorm(T2, lower.tail = T))
+  b2 = min(p.adjust(p2, method = "bonferroni"))
+  return(max(b1, b2))
+}
+
+est_comp_test <- function(e1, se1, e2, se2){
+ p = 2 * pnorm(abs(e1-e2)/sum(c(se1^2, se2^2)), lower.tail = F)
+ return(p)
+}
+
+get_p_vals <- function(e1, se1, e2, se2){
+  p1 = est_comp_test(e1, se1, e2, se2)
+  p2 = sign_comp_test(e1, se1, e2, se2)
+  return(c(p1, p2))
+}
+
+
+
+# Figure 2 ----------------------------------------------------------------
+
+e <- seq(-4,4, by = .02)
+
+# estimate comparison test
+ec <- as.data.frame(expand.grid(e, e)) %>%
+  mutate(p = est_comp_test(Var1, Var2, se1 = 1, se2 = 1),
+         reg = cut(p, breaks = c(0, .01, .05, .1, 1), labels = 1:4),
+         alpha = plyr::mapvalues(reg, from = 1:4, to = c(0.01, 0.05, 0.1, NA)),
+         panel = "Estimate-comparison test")
+
+# sign comparison test
+sc <- as.data.frame(expand.grid(e, e)) 
+
+sc$p <- mapply(FUN = sign_comp_test, e1 = sc$Var1, e2 = sc$Var2, se1 = 1, se2 = 1)
+
+sc <- sc %>%
+  mutate(
+    reg = cut(p, breaks = c(0, .01, .05, .1, 1.1), labels = 1:4),
+    alpha = plyr::mapvalues(reg, from = 1:4, to = c(0.01, 0.05, 0.1, NA)),
+    panel = "Sign-comparison test")
+
+# make figure
+fig2 <- rbind(ec, sc) %>%
+  as.data.frame() %>%
+  filter(abs(Var1) <= 3 & abs(Var2) <= 3) %>%
+  ggplot(aes(x = Var1, y = Var2, z = p)) +
+  facet_grid(~panel) +
+  geom_contour_filled(breaks=c(0,.01, 0.05, 0.1)) +
+  scale_fill_manual(expression(alpha), values = c("#6baed6",
+                                                  "#3182bd",
+                                                  "#08519c"),
+                    labels = c(0.01, 0.05, 0.1)) +
+  theme_minimal() +
+  scale_x_continuous(expression(paste(e[1]," (Estimate 1)"))) +
+  scale_y_continuous(expression(paste(e[2]," (Estimate 2)"))) +
+  geom_abline(intercept = 0, slope =1, lty = 3)
+
+ggsave(fig2, file = "../../results/Figure_2.pdf", width = 8, height = 4)
+
+# Table A2 ---------------------------------------------------------------
+
+
+# reshape data
+
+wide_dat <- pivot_wider(select(data, 
+      Study, Outcome, Est = `ITT estimate`, SE = `ITT standard error`),
+            names_from = Study,
+            values_from = c(Est, SE))
+
+# calculate p-values from sign- and estimate-comparison tests
+
+p_vals <- round(t(mapply(get_p_vals, 
+         e1 = as.numeric(wide_dat$`Est_Bjorkman and Svensson`),
+         e2 = as.numeric(wide_dat$`Est_Raffler, Posner, and Parkerson`),
+         se1 = as.numeric(wide_dat$`SE_Bjorkman and Svensson`),
+         se2 = as.numeric(wide_dat$`SE_Raffler, Posner, and Parkerson`))), 3)
+
+# fix p-values that are rounded  to 0
+
+p_vals[which(p_vals[,1] == 0),1] <- "< 0.001"
+
+# generate table 
+
+out <- cbind(wide_dat$Outcome, p_vals)
+colnames(out) <- c("Outcome measure", "Estimate-comparison test", "Sign-comparison test")
+
+print(xtable(out), include.rownames=FALSE, file = "../../results/Table_A2.tex")

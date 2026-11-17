@@ -1,0 +1,86 @@
+```{r plotOutcomes_table4}
+# create forest plot for all meta-analyses in Table 4
+
+count <- 1
+
+# Increment by 2 because we have a denominator for each non-outcome discrepancy in the column after the numerator. This is also the reason this block of code needs to be separate from the outcome discrepancies, which all share a denominator.
+  for (i in seq(from = grep("discOtherElig", colnames(df))[1], to = grep("discOtherResults", colnames(df))[1], by = 2)) {
+    if (!is.null(metaListAll[[i]])){
+      png(paste0("forestI", count, ".png"), width = 800, height = 700)
+      meta::forest(metaListAll[[i]],
+                   leftlabs = c("Article", "n Discrepant", "n Studies"),
+                   pooled.events = TRUE,
+                   squaresize = 0,
+                   sortvar = TE,
+                   comb.fixed = FALSE,
+                   plotwidth = "11cm",
+                   xlim = c(0,1),
+                   fontsize = 12
+                   )
+      dev.off()
+      count <- count + 1
+    }
+}
+```
+
+<!--Note, for the figure captions to appears, there needs to be an empty line between each figure call-->
+
+![Supplementary Figure I1. Eligibility criteria.](forestI1.png)
+
+![Supplementary Figure I2. Sample size.](forestI2.png)
+
+![Supplementary Figure I3. Randomization.](forestI3.png)
+
+![Supplementary Figure I4. Blinding.](forestI4.png)
+
+![Supplementary Figure I5. Intervention.](forestI5.png)
+
+![Supplementary Figure I6. Study Duration.](forestI6.png)
+
+![Supplementary Figure I7. Analyses.](forestI7.png)
+
+![Supplementary Figure I8. Subgroup analyses.](forestI8.png)
+
+![Supplementary Figure I9. Funding.](forestI9.png)
+
+![Supplementary Figure I10. Results.](forestI10.png)
+
+\clearpage
+
+## J. Gaps in the literature
+
+In addition to the quantitative data presented thus far, our reviewers took qualitative notes. These included a conclusion from each article, details regarding the source used to identify studies and the sub-disciplines they surveyed, and other *ad hoc* observations. One reviewer (RTT) extracted themes related to discrepancies and identified gaps in the literature using narrative synthesis. This process revealed several issues parallel to discrepancies: many studies are never registered, registrations are often imprecise, they rarely include information on analysis plans, and additional initiatives or enforcement may be necessary to improve registration in practice (see Supplementary Table J1 for a list of themes and article quotes).
+
+We further identified at least four gaps in the literature: (1) discrepancy prevalence in fields other than clinical research, (2) discrepancy prevalence in a representative sample across clinical disciplines, (3) the level of detail in registrations, and (4) interventions that attempt to reduce undisclosed discrepancies.
+
+Only one preprint surveyed each of psychology and economics, and no other article assessed preclinical or animal research, or sourced registrations from the Open Science Framework, AsPredicted.org, the American Economic Association (AEA) and Evidence in Governance and Politics (EGAP) registration platform, or the Registry for International Development Impact Evaluations (RIDIE). Notably, registration standards differ across disciplines and this necessitates different methods for identifying discrepancies. For example, pre-analysis plans on EGAP often contain over 10 hypotheses [@ofosu2019] and clinicaltrials.gov does not contain a question regarding an analysis plan.
+
+Many articles we reviewed restricted their search to high-impact factor journals or a specific clinical discipline. Randomly sampling registrations and publications from the broader clinical literature could better estimate the prevalence of discrepancies at the level where some interventions could be applied (e.g., an ICMJE policy). With a sufficient sample size, random sampling could allow comparisons among clinical disciplines and the potential to identify best practices.
+
+Most articles did not identify the level of specificity with which an outcome was registered. For example, outcomes can be specified at the level of domain (e.g., anxiety), specific measurement (e.g., Hamilton Anxiety Rating Scale), specific metric (e.g. change from baseline), and method of aggregation (e.g., proportion of participants with decrease \>50%) (example taken from @zarin2011). Outcomes registered with low specificity allow for a greater range of researcher degrees of freedom. Future research efforts can also benefit from identifying whether the registrations were prospective, which version of the registration was being assessed, and if discrepancies were disclosed. This information would help reveal how problematic the discrepancies are.
+
+Finally, nearly all the articles focused on documenting discrepancies. Future efforts may be more fruitful if they attempt to understand the causes of discrepancies and seek to develop and evaluate solutions to the issue (e.g., following the framework for meta-research presented by @hardwicke2020b).
+
+```{r, gapsTable, include = TRUE, echo = FALSE, results = "asis"}
+  knitr::kable(gaps, caption = "Supplementary Table J1. Additional themes related to registration and discrepancies", booktabs = T, linesep = "\\addlinespace") %>%
+  kable_styling(latex_options = "striped") %>%
+      column_spec(1, width = "3cm") %>%
+        column_spec(2, width = "12cm")
+        
+```
+
+\clearpage
+
+# References
+
+[^1]: We had planned to report on this scoping review separately. However, the scoping review has been terminated (details provided at https://osf.io/ktmdg).
+
+[^2]: By definition, non-registered studies cannot be assessed for discrepancies between their registration and publication. Several articles identified non-registered studies in their sampling process, but did not include these studies in their final sample.
+
+[^3]: If readers want to find if a study on discrepancies exists within a particular sub-discipline, we invite them to explore the variable ‘disciplineDetail’ in our dataset. 
+---run file---
+#!/usr/bin/env bash
+set -ex
+
+# This is the master script for the capsule. When you click "Reproducible Run", the code in this file will execute.
+Rscript -e "rmarkdown::render(input = 'preregSR_manuscript.Rmd', output_dir = '../results', clean = TRUE)"

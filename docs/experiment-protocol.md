@@ -1,5 +1,8 @@
 # Experiment protocol: prepared-author-environment pilot
 
+This document describes the historical prepared-v1 fallback. For the expanded
+15-task study, see [expanded-experiment-protocol.md](expanded-experiment-protocol.md).
+
 ## Research question
 
 Does a frozen development-derived lessons file improve reproduction accuracy or

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && mkdir -p /results && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom traitlets.config import Config\nfrom pathlib import Path\n\ninfile = Path('PerformanveEval.ipynb')\noutfile = Path('/results/PerformanveEval.html')\nnb = nbformat.read(infile, as_version=4)\n\nc = Config()\n# disable timeout and allow errors\nc.ExecutePreprocessor.timeout = None\nc.ExecutePreprocessor.allow_errors = True\nc.ExecutePreprocessor.kernel_name = 'python3'\n\n\u10d4\u10de = ExecutePreprocessor(config=c)\nresources = {'metadata': {'path': '/code'}}\nnb, _ = \u10d4\u10de.preprocess(nb, resources)\n\n# write executed notebook to temp and export html\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(nb)\noutfile.write_text(body, encoding='utf-8')\nprint('wrote', outfile)\nPY",
+  "exit_code": 0,
+  "seconds": 45.69624933303567,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

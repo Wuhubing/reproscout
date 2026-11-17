@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, json\nnb=nbformat.read('../results/FS-Filters-executed.ipynb', as_version=4)\nfor i,cell in enumerate(nb.cells):\n    if cell.cell_type=='code' and cell.outputs:\n        print('\\nCELL',i)\n        for out in cell.outputs:\n            if out.output_type=='execute_result':\n                txt=out.get('data',{}).get('text/plain','')\n                if len(txt)>500: txt=txt[:500]+'...'\n                print('RESULT:',txt)\n            elif out.output_type=='stream':\n                print('STREAM:',out.text[:500])\n            elif out.output_type=='display_data':\n                txt=out.get('data',{}).get('text/plain','')\n                if txt: print('DISPLAY:',txt[:500])\nPY",
+  "exit_code": 0,
+  "seconds": 0.5525945000117645,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

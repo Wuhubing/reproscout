@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript -e 'library(readxl);library(tidyr);library(plyr);library(dplyr); e<-seq(-4,4,by=.02); est_comp_test <- function(e1,se1,e2,se2){ p = 2 * pnorm(abs(e1-e2)/sum(c(se1^2, se2^2)), lower.tail = F); return(p)}; sign_comp_test <-  function(e1, se1, e2, se2){ T1 = e1/se1; T2 = e2/se2; p1 = c(pnorm(T1, lower.tail = F), pnorm(T2, lower.tail = F)); b1 <- min(p.adjust(p1, method = \"bonferroni\")); p2 = c(pnorm(T1, lower.tail = T), pnorm(T2, lower.tail = T)); b2 = min(p.adjust(p2, method = \"bonferroni\")); return(max(b1, b2))}; ec <- as.data.frame(expand.grid(e, e)) %>% mutate(p = est_comp_test(Var1, Var2, se1 = 1, se2 = 1), reg = cut(p, breaks = c(0, .01, .05, .1, 1), labels = 1:4), alpha = plyr::mapvalues(reg, from = 1:4, to = c(0.01, 0.05, 0.1, NA))); sc <- as.data.frame(expand.grid(e, e)); sc$p <- mapply(FUN = sign_comp_test, e1 = sc$Var1, e2 = sc$Var2, se1 = 1, se2 = 1); sc <- sc %>% mutate(reg = cut(p, breaks = c(0, .01, .05, .1, 1.1), labels = 1:4), alpha = plyr::mapvalues(reg, from = 1:4, to = c(0.01, 0.05, 0.1, NA))); print(sort(unique(c(as.numeric(as.character(ec$alpha)), as.numeric(as.character(sc$alpha))))), quote=FALSE)'",
+  "exit_code": 0,
+  "seconds": 36.55008016701322,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

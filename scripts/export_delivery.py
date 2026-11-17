@@ -18,6 +18,27 @@ from reproscout.tasks import write_json
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def public_messages(value):
+    """Omit opaque provider reasoning payloads without changing visible evidence."""
+    if isinstance(value, list):
+        return [public_messages(item) for item in value]
+    if isinstance(value, dict):
+        result = {key: public_messages(item) for key, item in value.items()}
+        if result.get("type") == "reasoning" and result.get("redacted"):
+            result["reasoning"] = (
+                "[Encrypted provider payload omitted from public export; retained in local raw log.]"
+            )
+            result["signature"] = None
+        return result
+    return value
+
+
+def check_public_export(encoded):
+    """Keep the conservative standalone/embedded credential check on visible data."""
+    if re.search(r"sk-[A-Za-z0-9_-]{20,}", encoded):
+        raise ValueError("Potential secret in trajectory; export refused")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--experiment", type=Path)
@@ -49,7 +70,7 @@ def main():
                 {
                     "status": "not_recorded",
                     "unchanged": None,
-                    "note": "This early development attempt predates the source hash audit. No unchanged-source claim is made.",
+                    "note": "No source audit was recorded for this attempt. See summary.json for initialization failures or historical development limitations. No unchanged-source claim is made.",
                 },
             )
         # Export model/tool messages rather than provider headers, environment or raw answers.
@@ -57,13 +78,13 @@ def main():
         if logs:
             sample = read_eval_log(str(logs[0])).samples[0]
             trajectory = {
-                "messages": [m.model_dump(mode="json") for m in sample.messages],
+                "messages": public_messages([m.model_dump(mode="json") for m in sample.messages]),
+                "export_policy": "Encrypted provider reasoning payloads are omitted; visible messages, tool calls, outputs, and usage are retained. Raw Inspect logs remain local.",
                 "model_usage": {k: v.model_dump() for k, v in sample.model_usage.items()},
                 "sample_error": sample.error.message if sample.error else None,
             }
             encoded = json.dumps(trajectory, indent=2, ensure_ascii=True)
-            if re.search(r"sk-[A-Za-z0-9_-]{20,}", encoded):
-                raise ValueError("Potential secret in trajectory; export refused")
+            check_public_export(encoded)
             (target / "trajectory.json").write_text(encoded, encoding="utf-8")
         manifest = json.loads((run / "manifest.json").read_text())
         score = summary.get("evaluation", {})
@@ -103,6 +124,17 @@ def main():
             comparison += f"<tr><td>{label}</td><td>{value['solved']}/{value['planned']}</td><td>${value['cost_estimated_usd']:.5f}</td><td>{value['seconds']:.1f}s</td></tr>"
         comparison += f"</table><p>Average B minus A solved count: <strong>{results['average_solved_difference_B_minus_A']:+.1f}</strong>. Missing planned runs: {len(results['missing'])}.</p>"
         comparison += f'<p>Experiment: {html.escape(results["experiment_id"])}. A: baseline. B: frozen development lessons. <a href="experiment/freeze.json">Freeze manifest</a> | <a href="experiment/results.json">Full comparison data</a></p>'
+        context_stops = sum(
+            "Pilot context limit reached" in (r.get("sample_error") or "") for r in results["runs"]
+        )
+        startup_failures = sum(r.get("model_calls") == 0 for r in results["runs"])
+        comparison += f"<p>{len({r['task_id'] for r in results['runs']})} unique held-out tasks; {len(results['runs'])} recorded formal attempts. Application request-bound stops: {context_stops}. Zero-model-call initialization failures: {startup_failures}. All remain in the primary denominator.</p>"
+        exposure = json.loads((args.experiment / "freeze.json").read_text()).get(
+            "previously_evaluated_task_ids", []
+        )
+        task_ids = {r["task_id"] for r in results["runs"]}
+        prior_count = len(task_ids & set(exposure))
+        comparison += f'<p>Previously evaluated tasks: {prior_count}; newly evaluated tasks: {len(task_ids) - prior_count}. <a href="../docs/results.md">Detailed interpretation and exposure breakdown</a> | <a href="../docs/registry-recovery.md">Image recovery evidence</a></p>'
         formal = [r for r in run_records if r.get("experiment_id") == results["experiment_id"]]
         groups = "<h2>Language and modality</h2><table><tr><th>Group</th><th>A solved / runs</th><th>B solved / runs</th></tr>"
         for field, value in [
@@ -158,7 +190,7 @@ Results are empirical observations, not proof of general reproducibility or stat
 <h2>Frozen comparison</h2>{comparison}
 {groups}{lessons_panel}<h2>Recorded runs</h2><table><tr><th>Experiment / split</th><th>Task</th><th>Language</th><th>Condition</th><th>Questions correct</th><th>Model cost</th><th>Time</th><th>Details</th></tr>{"".join(rows)}</table>
 {failure_panel}<h2>Inspect the evidence</h2><p>Each task report links to controller-owned output snapshots.
-A trajectory.json file alongside each report preserves the actual model/tool conversation.
+A trajectory.json file alongside each report preserves visible model/tool messages, outputs, and usage. Opaque encrypted provider reasoning is omitted from the public export; raw logs remain local.
 Costs are usage-based estimates. Failure diagnoses are provisional, not independent human labels.</p>
 <p><a href="run-index.json">Run index</a> | <a href="environment-checks.json">Environment checks</a> |
 <a href="https://github.com/Wuhubing/reproscout">Source and reproduction instructions</a></p></html>"""

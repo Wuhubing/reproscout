@@ -1,0 +1,41 @@
+
+As part of the sequential Bayesian analyses paradigm, we started the data analysis after initially collecting the data of 30 participants, with the same stopping rules used by Heycke and colleagues (2017) in Experiment 3.
+Specifically, we decided a priori to collect data until either the Bayes factors for both *t* tests of interest (i.e., for an EC effect in the 1000 ms condition and an EC effect in the 30 ms condition) were larger than 10 (for the null or alternative hypothesis) or until a maximum of 150 (paid) participants was reached.
+We ran the analyses after every day of data collection and decided that signed-up participants were allowed to participate, even if we had already stopped the data collection based on the above specified analyses.
+
+### Participants
+
+```{r getPPN}
+
+# This script automatically checks for the largest Participantnumber which is on github
+github_page <- read_html("https://github.com/methexp/rawdata/tree/master/croco5")
+file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+file_names <- html_text(file_nodes)
+file_names <- gsub(".txt", "", file_names)
+
+#get only Croco5_log files (these files appear at top of list on github)
+tmp <- subset(file_names, substring(file_names, 1, 10) == "Croco5_log")
+N <- as.numeric(length(tmp))
+```
+
+```{r Demographics5, warning = FALSE}
+# Read in the Damographics data
+if(cacheGitData){
+  load("../data/DemoData5")
+} else{
+#list of all data files
+file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/Data_Demographics_Croco5_", 1:N, ".txt")
+#add data to a data frame
+DemoData5 <- lapply(file_url, read.delim)
+DemoData5 <- do.call("rbind", DemoData5)
+}
+
+# number of humans who took part initially
+# pp nr 66 was accedentially given and experiment aborted (no participant was present)
+allPP  <- length(unique(DemoData5$ParticipantNumber))-1
+
+#exclude the following participants (see lab protocoll for details):
+# Nr 4, 5, 7, 13, 160 were excluded as they participated in previous study
+# Nr. 30 was excluded as he/she knew about this exact experiment but took part anyway
+ExclList5 <- c(4, 5, 7, 13, 30, 66, 160)
+

@@ -1,0 +1,166 @@
+6:# 3. expected lives saved (LSs)
+47:    # expected lives saved
+165:hypothetical_euc_plot <- function(type, ext='png', saveit=FALSE){
+226:    if(saveit){
+229:        ggsave(file.path(resupath, filename),
+239:hypothetical_cd_plot <- function(ext='png', saveit=FALSE){
+265:    if(saveit){
+268:        ggsave(file.path(resupath, filename),
+278:empirical_age_plot <- function(dset, figureno, ext='png', sensitivity=FALSE, saveit=FALSE){
+305:                                                    'Exposed to\nunnecessary\nconfirmation tests\nper life saved')),
+308:        dset <- dset %>% filter(outcome == 'Exposed to\nunnecessary\nconfirmation tests\nper life saved')
+326:    gg <- gg+geom_blank(data=dset %>% filter(outcome == 'Exposed to\nunnecessary\nconfirmation tests\nper life saved'), aes(y=ymax))
+337:    if(saveit){
+340:        ggsave(file.path(resupath, filename),
+350:format_hypothetical <- function(dset, saveit=FALSE){
+369:    if(saveit){
+378:format_seer <- function(dset, fmt='%5.2f', saveit=FALSE){
+392:                            '5-year probability of diagnosis, %'=prevalence,
+393:                            '15-year probability of death, %'=mortality)
+394:    if(saveit){
+403:format_inputs <- function(dset, saveit=FALSE){
+406:                            'Localization probability, %'='localization',
+409:    if(saveit){
+418:format_empirical <- function(dset, saveit=FALSE){
+431:                            'Lives saved, n'='LS',
+434:    if(saveit){
+443:format_supplemental <- function(dset, tableno, saveit=FALSE){
+461:                            'Lives saved (5%), n'='LS_low',
+462:                            'Lives saved (10%), n'='LS_mid',
+463:                            'Lives saved (20%), n'='LS_high')
+464:    if(saveit){
+478:format_seer(sset, saveit=TRUE)
+492:format_inputs(pset, saveit=TRUE)
+508:format_empirical(cset, saveit=TRUE)
+513:hypothetical_euc_plot(type='sensitivity', saveit=TRUE)
+514:hypothetical_cd_plot(saveit=TRUE)
+527:empirical_age_plot(fig2, figureno=2, ext='pdf', saveit=TRUE)
+538:empirical_age_plot(fig3, figureno=3, ext='pdf', saveit=TRUE)
+545:format_hypothetical(hset, saveit=TRUE)
+550:format_supplemental(fig2, tableno=2, saveit=TRUE)
+555:format_supplemental(fig3, tableno=3, saveit=TRUE)
+560:hypothetical_euc_plot(type='prevalence', saveit=TRUE)
+561:hypothetical_euc_plot(type='localization', saveit=TRUE)
+567:empirical_age_plot(figs2, figureno='S2', sensitivity=TRUE, saveit=TRUE)
+576:empirical_age_plot(figs3, figureno='S3', sensitivity=TRUE, saveit=TRUE)
+584:empirical_age_plot(figs4, figureno='S4', sensitivity=TRUE, saveit=TRUE)
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Read merged SEER incidence and mortality rates
+##################################################
+sset <- read_data('seer_merged_2000-2002_followup=15_2021-05-13.csv')
+
+##################################################
+# Table 1
+##################################################
+format_seer(sset, saveit=TRUE)
+
+##################################################
+# Table 2
+##################################################
+pset <- tribble(~site, ~sensitivity, ~localization,
+                'Breast',     0.64, 0.96,
+                'Colorectal', 0.74, 0.97,
+                'Lung',       0.59, 0.92,
+                'Ovary',      0.67, 0.96,
+                'Pancreas',   0.78, 0.79,
+                'Liver',      0.68, 0.72)
+pset <- pset %>% mutate(marginal=sensitivity*localization,
+                        effect=0.1/marginal)
+format_inputs(pset, saveit=TRUE)
+sset <- full_join(sset, pset, by='site')
+
+##################################################
+# Table 3
+##################################################
+iset6 <- age_analysis_incremental(sset, setdiff(pset$site, 'Breast'))
+iset6 <- iset6 %>% mutate(Test='Pan-cancer')
+bset <- sset %>% filter(site == 'Breast')
+bset <- age_analysis(bset, bset[FALSE, ])
+bset <- bset %>% mutate(Test='Breast only')
+mset <- sset %>% filter(site == 'Breast')
+mset <- mset %>% mutate(sensitivity=0.869, localization=1)
+mset <- age_analysis(mset, mset[FALSE, ], specificity=0.889)
+mset <- mset %>% mutate(Test='Mammography')
+cset <- bind_rows(iset6, bset, mset)
+format_empirical(cset, saveit=TRUE)
+
+##################################################
+# Figure 1
+##################################################
+hypothetical_euc_plot(type='sensitivity', saveit=TRUE)
+hypothetical_cd_plot(saveit=TRUE)
+
+##################################################
+# Figure 2
+##################################################
+lset <- sset %>% mutate(effect=0.05/marginal)
+hset <- sset %>% mutate(effect=0.2/marginal)
+fig2l <- age_analysis_incremental(lset, 'Breast')
+fig2m <- age_analysis_incremental(sset, 'Breast')
+fig2h <- age_analysis_incremental(hset, 'Breast')
+fig2 <- full_join(fig2l, fig2m, by=c('site', 'age', 'EUC', 'CD'), suffix=c('_low', '_mid'))
+fig2 <- full_join(fig2, fig2h, by=c('site', 'age', 'EUC', 'CD'))
+fig2 <- fig2 %>% rename(LS_high=LS)
+empirical_age_plot(fig2, figureno=2, ext='pdf', saveit=TRUE)
+
+##################################################
+# Figure 3
+##################################################
+fig3l <- age_analysis_incremental(lset, c('Breast', 'Lung'))
+fig3m <- age_analysis_incremental(sset, c('Breast', 'Lung'))
+fig3h <- age_analysis_incremental(hset, c('Breast', 'Lung'))
+fig3 <- full_join(fig3l, fig3m, by=c('site', 'age', 'EUC', 'CD'), suffix=c('_low', '_mid'))
+fig3 <- full_join(fig3, fig3h, by=c('site', 'age', 'EUC', 'CD'))
+fig3 <- fig3 %>% rename(LS_high=LS)
+empirical_age_plot(fig3, figureno=3, ext='pdf', saveit=TRUE)
+
+##################################################
+# Supplemental Table 1
+##################################################
+hset <- bind_rows(hypothetical_test(specificity=0.95),
+                  hypothetical_test(specificity=0.99))
+format_hypothetical(hset, saveit=TRUE)
+
+##################################################
+# Supplemental Table 2
+##################################################
+format_supplemental(fig2, tableno=2, saveit=TRUE)
+
+##################################################
+# Supplemental Table 3
+##################################################
+format_supplemental(fig3, tableno=3, saveit=TRUE)
+
+##################################################
+# Supplemental Figure 1
+##################################################
+hypothetical_euc_plot(type='prevalence', saveit=TRUE)
+hypothetical_euc_plot(type='localization', saveit=TRUE)
+
+##################################################
+# Supplemental Figure 2
+##################################################
+figs2 <- age_analysis_incremental(sset, 'Breast', specificity=0.97)
+empirical_age_plot(figs2, figureno='S2', sensitivity=TRUE, saveit=TRUE)
+
+##################################################
+# Supplemental Figure 3
+##################################################
+ssets3 <- sset %>% mutate(effect=ifelse(site %in% c('Breast', 'Colorectal', 'Lung'),
+                                        0.1/marginal,
+                                        0.5/marginal))
+figs3 <- age_analysis_incremental(ssets3, 'Breast')
+empirical_age_plot(figs3, figureno='S3', sensitivity=TRUE, saveit=TRUE)
+
+##################################################
+# Supplemental Figure 4
+##################################################
+ssets4 <- read_data('seer_merged_2000-2002_followup=10_2021-05-13.csv')
+ssets4 <- full_join(ssets4, pset, by='site')
+figs4 <- age_analysis_incremental(ssets4, 'Breast')
+empirical_age_plot(figs4, figureno='S4', sensitivity=TRUE, saveit=TRUE)
+
