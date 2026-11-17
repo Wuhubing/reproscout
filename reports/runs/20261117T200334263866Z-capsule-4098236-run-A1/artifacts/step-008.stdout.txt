@@ -1,0 +1,129 @@
+import arff
+import bz2
+import pickle
+from scipy import sparse
+import hashlib
+
+import os
+import requests
+import shutil
+from collections import defaultdict
+
+
+def get_data_home(data_home=None, subdirectory=''):
+    """Return the path of the scikit-multilearn data dir.
+
+    This folder is used by some large dataset loaders to avoid
+    downloading the data several times.
+
+    By default the :code:`data_home` is set to a folder named
+    :code:`'scikit_ml_learn_data'` in the user home folder.
+
+    Alternatively, it can be set by the :code:`'SCIKIT_ML_LEARN_DATA'`
+    environment variable or programmatically by giving an explicit
+    folder path. The :code:`'~'` symbol is expanded to the user home
+    folder.
+
+    If the folder does not already exist, it is automatically created.
+
+    Parameters
+    ----------
+    data_home : str (default is None)
+        the path to the directory in which scikit-multilearn data sets
+        should be stored, if None the path is generated as stated above
+
+    subdirectory : str, default ''
+        return path subdirectory under data_home if data_home passed or under default if not passed
+
+    Returns
+    --------
+    str
+        the path to the data home
+    """
+    if data_home is None:
+        if len(subdirectory) > 0:
+            data_home = os.environ.get('SCIKIT_ML_LEARN_DATA', os.path.join('~', 'scikit_ml_learn_data', subdirectory))
+        else:
+            data_home = os.environ.get('SCIKIT_ML_LEARN_DATA', os.path.join('~', 'scikit_ml_learn_data'))
+    data_home = os.path.expanduser(data_home)
+    if not os.path.exists(data_home):
+        os.makedirs(data_home)
+    return data_home
+
+
+def clear_data_home(data_home=None):
+    """Delete all the content of the data home cache.
+
+    Parameters
+    ----------
+    data_home : str (default is None)
+        the path to the directory in which scikit-multilearn data sets
+        should be stored.
+    """
+    data_home = get_data_home(data_home)
+    shutil.rmtree(data_home)
+
+
+def _get_download_base_url():
+    """Returns base URL for data sets."""
+
+    return 'http://scikit.ml/datasets/'
+
+
+def available_data_sets():
+    """Lists available data sets and their variants
+
+    Returns
+    -------
+    dict[(set_name, variant_name)] -> [md5, file_name]
+        available datasets and their variants with the key pertaining
+        to the :code:`(set_name, variant_name)` and values include md5 and file name on server
+    """
+    r = requests.get(_get_download_base_url() + 'data.list')
+    if r.status_code != 200:
+        r.raise_for_status()
+    else:
+        raw_data_list = r.text
+
+        variant_information = defaultdict(list)
+        for row in raw_data_list.split('\n'):
+            md5, file_name = row.split(';')
+            set_name, variant = file_name.split('.')[0].split('-')
+            if (set_name, variant) in variant_information:
+                raise Exception('Data file broken, files doubled, please file bug report.')
+            variant_information[(set_name, variant)] = [md5, file_name]
+        return variant_information
+
+
+def download_dataset(set_name, variant, data_home=None):
+    """Downloads a data set
+
+    Parameters
+    ----------
+    set_name : str
+        name of set from :func:`available_data_sets`
+    variant : str
+        variant of the data set from :func:`available_data_sets`
+    data_home : default None, str
+        custom base folder for data, if None, default is used
+
+    Returns
+    -------
+    str
+        path to the downloaded data set file on disk
+    """
+
+    data_sets = available_data_sets()
+    if (set_name, variant) not in data_sets:
+        raise ValueError('The set {} in variant {} does not exist on server.'.format(set_name, variant))
+
+    md5, name = data_sets[set_name, variant]
+
+    if data_home is None:
+        target_name = os.path.join(get_data_home(), name)
+    else:
+        target_name = os.path.join(data_home, name)
+
+    if os.path.exists(target_name):
+        if md5 == _get_md5(target_name):
+            print ("{}

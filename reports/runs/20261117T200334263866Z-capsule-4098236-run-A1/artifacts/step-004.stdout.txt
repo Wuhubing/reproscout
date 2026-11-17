@@ -1,0 +1,284 @@
+import numpy as np
+from sklearn.model_selection import cross_validate
+from sklearn.metrics import make_scorer
+import sklearn.metrics as metrics
+from skmultilearn.dataset import load_dataset
+from skmultilearn.dataset import available_data_sets
+
+from mlca import MLCA
+
+print('Start...')
+
+# load dataset
+# available_data_sets()  # list of dataset
+data_name = 'emotions'
+data, target, feature_names, label_names = load_dataset(data_name, 'undivided')
+data = data.toarray()
+target = target.toarray()
+
+# Number of folds for cross validation
+splits = 10
+
+# Algorithm
+mlca = MLCA(plambda=50, v_thres=0.55)
+
+
+# Evaluation Metrics
+def exact_match(y_true, y_pred):
+    return metrics.accuracy_score(y_true, y_pred)
+def f1_score(y_true, y_pred):
+    return metrics.f1_score(y_true, y_pred, average='macro')
+def ave_precision(y_true, y_pred):
+    return metrics.label_ranking_average_precision_score(y_true, y_pred)
+def hamming_loss(y_true, y_pred):
+    return metrics.hamming_loss(y_true, y_pred)
+def coverage_error(y_true, y_pred):
+    return metrics.coverage_error(y_true, y_pred)
+def ranking_loss(y_true, y_pred):
+    return metrics.label_ranking_loss(y_true, y_pred)
+
+score_funcs = {
+    'exact_match': make_scorer(exact_match),
+    'macro_f1_score': make_scorer(f1_score),
+    'ave_precision': make_scorer(ave_precision),
+    'hamming_loss': make_scorer(hamming_loss),
+    'coverage_error': make_scorer(coverage_error),
+    'ranking_loss': make_scorer(ranking_loss),
+    }
+
+
+# Cross Validation
+cv_results = cross_validate(estimator=mlca, X=data, y=target, scoring=score_funcs, return_estimator=True, cv=splits, n_jobs=-1)
+
+
+# Averaged results
+n_nodes = [cv_results['estimator'][k].G_.number_of_nodes() for k in range(splits)]
+print('# of Nodes: ', np.mean(n_nodes))
+print('Exact Match: ', np.mean(cv_results['test_exact_match']))
+print('Hamming Loss: ', np.mean(cv_results['test_hamming_loss']))
+print('Finished')
+
+
+---mlca head---
+#
+# (c) 2022 Naoki Masuyama
+#
+# MLCA is proposed in:
+# N. Masuyama, Y. Nojima, C. K. Loo, and H. Ishibuchi,
+# "Multi-label classification via adaptive resonance theory-based clustering,"
+# IEEE Transactions on Pattern Analysis and Machine Intelligence, 2022."
+#
+# Please contact "masuyama@omu.ac.jp" if you have any problems.
+#
+
+import networkx as nx
+import numpy as np
+import scipy.sparse as sparse
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.utils.estimator_checks import check_estimator
+from collections.abc import Iterable, Iterator
+
+
+class MLCA(BaseEstimator, ClassifierMixin):
+    """ Multi-Label CIM-based Adaptive Resonance Theory (MLCA)"""
+
+    def __init__(self, plambda=50, v_thres=0.25, ref_node=10, s=1.0, G_=nx.Graph(), dim_=None, init_label_list_=None, num_signal_=0, init_count_label_=0, sigma_=None, labels_=None, likelihood_false_=None, likelihood_true_=None, ci_false_=None, ci_true_=None, prior_prob_false_=None, prior_prob_true_=None):
+        """
+        :param plambda:
+            A period deleting nodes. The nodes that doesn't satisfy some condition are deleted every this period.
+        :param v_thres:
+            A similarity threshold for node learning
+        """
+
+        self.plambda = plambda  # An interval for adapting \sigma
+        self.v_thres = v_thres  # A similarity threshold
+        self.ref_node = ref_node  # Number of neighbours
+        self.s = s  # A smoothing parameter
+
+        self.G_ = G_  # network
+        self.dim_ = dim_  # Number of variables in an instance
+        self.init_label_list_ = init_label_list_  # A list for initial label counts
+        self.num_signal_ = num_signal_  # Counter for training instances
+        self.init_count_label_ = init_count_label_  # Number of labels of signal
+        self.sigma_ = sigma_  # An estimated sigma for CIM
+        self.labels_ = labels_  # Label information for a testing instance
+
+        self.prior_prob_false_ = prior_prob_false_  # Prior probability
+        self.prior_prob_true_ = prior_prob_true_
+        self.ci_false_ = ci_false_  # Label count for prior probability
+        self.ci_true_ = ci_true_
+        self.likelihood_false_ = likelihood_false_  # Likelihood
+        self.likelihood_true_ = likelihood_true_
+
+    def fit(self, x: np.ndarray, y: np.ndarray):
+        """
+        train data in batch manner
+        :param y: array-like or ndarray
+        :param x: array-like or ndarray
+        """
+
+        # avoiding IndexError caused by a complex-valued label
+        # Comment-in when check_estimator() is used
+        # y = y.real.astype(int)
+
+        self.initialization(x, y)
+
+        for signal in x:
+            self.input_signal(signal, x, y)  # training network
+
+        return self
+
+    def predict(self, x: np.ndarray):
+        """
+        predict label for each sample.
+        :param x: array-like or ndarray
+        :rtype list:
+            label for each sample.
+        """
+        y_pred, _ = self.__labeling_sample_for_multi_label_classification(x)
+
+        return y_pred
+
+    def predict_proba(self, x: np.ndarray):
+        """
+        predict label probability for each sample.
+        :param x: array-like or ndarray
+        :rtype list:
+            label probability for each sample.
+        """
+        _, y_prob = self.__labeling_sample_for_multi_label_classification(x)
+
+        return y_prob
+
+    def initialization(self, x: np.ndarray, y: np.ndarray):
+        """Initialize parameters
+        :param y: array-like or ndarray
+        :param x: array-like or ndarray
+        """
+        # set graph
+        if len(list(self.G_.nodes)) == 0:
+            self.G_ = nx.Graph()
+
+        # set dimension of x
+        if self.dim_ is None:
+            self.dim_ = x.shape[1]
+
+        # set an initial label count for a node
+        if self.init_count_label_ is None:
+            self.init_count_label_ = sparse.lil_array(np.zeros(y.shape[1]))
+
+        # set a label count for a prior probability
+        if self.ci_false_ is None:
+            self.ci_false_ = sparse.lil_matrix((y.shape[1], self.ref_node + 1), dtype='i8')
+            self.ci_true_ = sparse.lil_matrix((y.shape[1], self.ref_node + 1), dtype='i8')
+
+        # set likelihood
+        if self.likelihood_false_ is None:
+            self.likelihood_false_ = sparse.lil_matrix((y.shape[1], self.ref_node + 1), dtype='float')
+            self.likelihood_true_ = sparse.lil_matrix((y.shape[1], self.ref_node + 1), dtype='float')
+
+    def input_signal(self, signal: np.ndarray, x: np.ndarray, y: sparse):
+        """
+        Input a new signal one by one, which means training in online manner.
+        fit() calls __init__() before training, which means resetting the state. So the function does batch training.
+        :param signal: A new input signal
+        :param y: array-like or ndarray
+            label
+        :param x: array-like or ndarray
+            data
+        """
+        if self.num_signal_ == x.shape[0]:
+            self.num_signal_ = 1
+        else:
+            self.num_signal_ += 1
+
+        label = y[self.num_signal_ - 1, :]  # extract a label of signal
+
+        if self.G_.number_of_nodes() < 1:
+            self.__estimate_sigma(x)
+            self.__add_node(signal, label)
+        else:
+
+            node_list, cim = self.__calculate_cim(signal)
+            s1_idx, s1_cim, s2_idx, s2_cim = self.__find_nearest_node(node_list, cim)
+
+            if self.v_thres < s1_cim:
+                self.__estimate_sigma(x)
+                self.__add_node(signal, label)
+
+                new_node_list = node_list + [list(self.G_.nodes())[-1]]  # add a new node
+                new_cim = np.append(cim, 0)  # add a cim value of a new node
+                self.__update_likelihood(label, new_node_list, new_cim)
+            else:
+                self.__update_s1_node(s1_idx, signal, label)
+                if self.v_thres >= s2_cim:
+                    self.__update_s2_node(s2_idx, signal)
+
+                self.__update_likelihood(label, node_list, cim)
+
+        self.__compute_prior()
+
+    def __estimate_sigma(self, X: np.ndarray) -> None:
+        """Estimate a sigma for CIM
+
+        Setup
+        >>> MLCAnet = MLCA()
+        >>> MLCAnet.G_ = nx.Graph()
+        >>> MLCAnet.dim_ = 2
+        >>> x = np.array([[1,2],[3,4],[5,6],[7,8],[9,10]])
+
+        Depending on num_signal, pLamba, and the number of datapoints x,
+        a value of an estimated sigma will be changed.
+
+        if x.shape[0] < self.pLambda:
+        >>> MLCAnet.num_signal_ = 4
+        >>> MLCAnet.plambda = 10
+        >>> MLCAnet._MLCA__estimate_sigma(x)
+        >>> MLCAnet.sigma_
+        2.4182711751219577
+
+        elif (self.num_signal - self.pLambda) <= 0:
+        >>> MLCAnet.num_signal_ = 2
+        >>> MLCAnet.plambda = 4
+        >>> MLCAnet._MLCA__estimate_sigma(x)
+        >>> MLCAnet.sigma_
+        2.0493259460083237
+
+        elif (self.num_signal - self.pLambda) > 0:
+        >>> MLCAnet.num_signal_ = 4
+        >>> MLCAnet.plambda = 2
+        >>> MLCAnet._MLCA__estimate_sigma(x)
+        >>> MLCAnet.sigma_
+        1.2599210498948732
+        """
+        # if self.num_signal == 1:
+        #     selected_signals = X[0:2]
+        # elif X.shape[0] < self.pLambda:
+        if X.shape[0] < self.plambda:
+            selected_signals = X
+        elif (self.num_signal_ - self.plambda) <= 0:
+            selected_signals = X[0:self.plambda]
+        elif (self.num_signal_ - self.plambda) > 0:
+            selected_signals = X[(self.num_signal_ - self.plambda):self.num_signal_]
+
+        std_signals = np.std(selected_signals, axis=0, ddof=1)
+        np.putmask(std_signals, std_signals == 0.0, 1.0e-6)  # If value=0, add a small value for avoiding an error.
+
+        # Silverman's Rule
+        s = np.power(4 / (2 + self.dim_), 1 / (4 + self.dim_)) * std_signals * np.power(selected_signals.shape[0], -1 / (4 + self.dim_))
+        self.sigma_ = np.median(s)
+
+    def __calculate_cim(self, signal: np.ndarray):
+        """Calculate CIM between signal and nodes
+
+        Setup
+        >>> MLCAnet = MLCA()
+        >>> MLCAnet.G_ = nx.Graph()
+        >>> MLCAnet.G_.add_node(0, weight=[0.1, 0.5], winning_counts=1, sigma=1.0)
+        >>> signal = np.array([0, 0])
+
+        Return an index and a value of the cim between a node and a signal
+        >>> MLCAnet._MLCA__calculate_cim(signal)
+        ([0], array([0.2474779]))
+
+---data---

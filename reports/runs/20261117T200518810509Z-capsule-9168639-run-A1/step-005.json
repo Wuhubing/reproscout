@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nrec <- read.csv('../data/rec_data_raw.csv', header=TRUE)\nus <- subset(rec, country=='us' & !is.na(expenditure_rank))\nuk <- subset(rec, country=='uk' & !is.na(expenditure_rank))\nrec_flowchart <- function(df){\n  data.frame(item=c('Institutions sampled','Public forms identified','Institutions contacted','Public forms identified after contact','Private forms provided','Forms indicated as not available to share','No response'),\n             count=c(nrow(df), sum(df$included==1 & df$contacted==0), sum(df$contacted==T), sum(df$contacted==1 & df$form_available=='public', na.rm=TRUE), sum(sum(df$contacted==1 & df$form_available=='private', na.rm=TRUE)), sum(grepl('declined', df$form_available)), sum(df$form_available=='noreply' | is.na(df$form_available))))\n}\nprint(rec_flowchart(us))\nprint(rec_flowchart(uk))\nwriteLines(capture.output(rec_flowchart(us)), '/results/us_flowchart.txt')\nwriteLines(capture.output(rec_flowchart(uk)), '/results/uk_flowchart.txt')\nRS",
+  "exit_code": 0,
+  "seconds": 0.9120092079974711,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}
