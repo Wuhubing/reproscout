@@ -75,12 +75,25 @@ def sanitized_archive(data: bytes) -> tuple[bytes, list[dict]]:
                 stream = source.extractfile(member)
                 assert stream is not None
                 body = stream.read()
+                original_sha = digest(body)
+                if relative.suffix == ".ipynb":
+                    notebook = json.loads(body)
+                    for cell in notebook.get("cells", []):
+                        if cell.get("cell_type") == "code":
+                            cell["outputs"] = []
+                            cell["execution_count"] = None
+                    body = json.dumps(notebook, ensure_ascii=True).encode()
                 entry = tarfile.TarInfo(str(relative))
                 entry.size = len(body)
                 entry.mode = 0o755 if member.mode & 0o111 else 0o644
                 target.addfile(entry, io.BytesIO(body))
                 inventory.append(
-                    {"path": str(relative), "sha256": digest(body), "bytes": len(body)}
+                    {
+                        "path": str(relative),
+                        "sha256": digest(body),
+                        "upstream_sha256": original_sha,
+                        "bytes": len(body),
+                    }
                 )
     return output.getvalue(), inventory
 

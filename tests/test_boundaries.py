@@ -131,3 +131,25 @@ def test_frozen_inputs_reject_edits_and_test_sources(tmp_path):
     write_json(tmp_path / "runs/dev/summary.json", {"split": "official_test"})
     with pytest.raises(ValueError, match="training"):
         freeze(tmp_path, lessons, ["dev"], "invalid-freeze")
+
+
+def test_notebook_outputs_are_removed_without_changing_source():
+    notebook = {
+        "cells": [
+            {
+                "cell_type": "code",
+                "source": "print(2)",
+                "outputs": [{"text": "old answer"}],
+                "execution_count": 1,
+            }
+        ]
+    }
+    safe, inventory = sanitized_archive(
+        archive([("capsule/code/main.ipynb", json.dumps(notebook), tarfile.REGTYPE)])
+    )
+    with tarfile.open(fileobj=io.BytesIO(safe)) as tf:
+        restored = json.loads(tf.extractfile("code/main.ipynb").read())
+    assert restored["cells"][0]["source"] == "print(2)"
+    assert restored["cells"][0]["outputs"] == []
+    assert restored["cells"][0]["execution_count"] is None
+    assert inventory[0]["sha256"] != inventory[0]["upstream_sha256"]

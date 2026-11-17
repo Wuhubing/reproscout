@@ -28,13 +28,13 @@ def report(run: Path) -> Path:
         rows.append(
             f"<tr><td>{html.escape(question)}</td><td>{html.escape(str(answer.get('value', 'not submitted')))}</td><td>{correct}</td><td>{'<br>'.join(citations)}</td></tr>"
         )
-    body = f"""<!doctype html><html lang="en"><meta charset="utf-8"><title>ReproScout pilot report</title>
+    body = f"""<!doctype html><html lang="en"><meta charset="utf-8"><title>ReproScout evidence report</title>
 <style>body{{font:16px system-ui;max-width:1150px;margin:40px auto;padding:0 24px;color:#172633}}table{{border-collapse:collapse;width:100%}}td,th{{padding:12px;border:1px solid #ccd6dc;text-align:left}}pre{{white-space:pre-wrap;background:#f2f5f7;padding:18px}}a{{color:#1659a5}}</style>
-<h1>ReproScout: development pilot</h1><p>{html.escape(manifest["title"])}</p>
+<h1>ReproScout: evidence report</h1><p>{html.escape(manifest["title"])}</p>
 <p><strong>Prepared author environment. Not an unchanged CORE-Bench Medium result.</strong></p>
-<p>Evidence links prove artifact availability, not semantic support. See the independent audit.</p>
+<p>Evidence links prove artifact availability, not semantic support. Semantic support requires a separate review.</p>
 <table><tr><th>Question</th><th>Submitted answer</th><th>Correct</th><th>Evidence</th></tr>{"".join(rows)}</table>
-<h2>Run summary</h2><pre>{html.escape(json.dumps(summary, indent=2))}</pre>
+<p><a href="diagnosis.json">Provisional failure diagnosis</a> | <a href="source-audit.json">Source integrity audit</a> | <a href="trajectory.json">Exported trajectory (delivery reports)</a></p><h2>Run summary</h2><pre>{html.escape(json.dumps(summary, indent=2))}</pre>
 <p><a href="manifest.json">Task manifest</a> | <a href="budget.json">Model usage</a> | <a href="artifact-index.json">Artifact index</a></p></html>"""
     destination = run / "report.html"
     destination.write_text(body, encoding="utf-8")

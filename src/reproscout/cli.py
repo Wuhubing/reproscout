@@ -141,7 +141,7 @@ def execute(
         "framework": importlib.metadata.version("inspect-ai"),
         "limitations": [
             "Pre-provisioned environment, not unchanged Medium",
-            "No held-out comparison yet",
+            "Single-run report; see the frozen experiment for cohort comparisons",
             "Artifact validity is not semantic evidence verification",
         ],
     }

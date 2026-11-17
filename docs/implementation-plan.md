@@ -11,7 +11,7 @@ existing benchmark task. All project-authored content is in English.
 1. Establish the independent repository and pinned dependencies.
 2. Validate Docker, model access, sandbox boundaries, and termination behavior.
 3. Execute one official training capsule with original author code and evidence.
-4. Extend the same application to a fixed small text-only cohort, if archived
+4. Extend the same application to a fixed small Python/R cohort, if archived
    images and local resources permit. Preserve all selection exclusions.
 5. Derive development lessons, freeze code/configuration/data membership, and
    run both conditions twice without updating lessons on held-out outcomes.
@@ -23,8 +23,9 @@ The first execution uses a controller-provisioned author image instead of giving
 the agent privileged Docker-in-Docker. This is a prepared-environment variant;
 it must not be called an unchanged CORE-Bench Medium reproduction. Images are
 pulled before the 30-minute sample clock; provisioning is recorded separately.
-The initial executable tool surface supports text only. Vision and full Medium
-environment construction require separate validation before any claims.
+The tool surface includes text, image, and PDF inspection. Full Medium environment
+construction remains outside this prepared-environment experiment. Task modality
+labels and actual image-tool use are reported separately.
 
 ## Acceptance
 

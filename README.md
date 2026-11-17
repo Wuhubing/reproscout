@@ -10,7 +10,7 @@ See [implementation references](docs/research-references.md).
 
 ## What works
 
-- Independent loading of an official CORE-Bench training capsule.
+- Independent loading and preparation of official CORE-Bench train/test capsules.
 - Archived author images pinned by digest; unchanged author code.
 - No runtime network, privileged mode, host directory mounts, or Docker socket.
 - Inspect ReAct with project-owned shell, file, image/PDF, and evidence submission tools.
@@ -22,6 +22,13 @@ See [implementation references](docs/research-references.md).
 **Important scope:** the controller pre-provisions the author environment. This is
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
+
+## Review the delivered results
+
+Open [the portable results app](reports/index.html) locally. Read the
+[project overview](docs/project-overview.md), [measured results](docs/results.md),
+and [delivery/reproduction guide](docs/delivery-guide.md). The report contains real
+execution evidence and both successful and failed attempts.
 
 ## Install
 
