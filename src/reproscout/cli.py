@@ -59,6 +59,11 @@ def execute(
     write_json(run / "manifest.json", manifest)
     write_json(run / "config.json", config)
     config.update(condition=condition, repeat=repeat, experiment_id=experiment_id)
+    if experiment_id and experiment_id.endswith("v6"):
+        config["controlled_execution"] = condition == "B"
+        config["answer_types"] = json.loads((root / "configs/answer-types-v6.json").read_text())[
+            "tasks"
+        ][manifest["task_id"]]
     write_json(run / "config.json", config)
     budget = Budget(
         limit=config["model_budget_usd"],
@@ -79,7 +84,7 @@ def execute(
     )
     # Retries share the original cell budgets; failed attempts are never erased.
     prior = []
-    if mode == "run" and experiment_id and experiment_id.endswith(("v4", "v5")):
+    if mode == "run" and experiment_id and experiment_id.endswith(("v4", "v5", "v6")):
         for previous in sorted((root / "runs").glob("*/summary.json")):
             old = json.loads(previous.read_text())
             if (old.get("experiment_id"), old.get("condition"), old.get("repeat")) != (
@@ -213,6 +218,17 @@ def execute(
             (root / manifest.get("answers_path", "private/pilot_answers.json")).read_text()
         )
         summary["evaluation"] = score_answers(answers, references, manifest["questions"])
+    if experiment_id and experiment_id.endswith("v6"):
+        from .controlled import evaluate_run
+
+        assessment = evaluate_run(run, config["answer_types"], config["controlled_execution"])
+        assessment["answer_solved"] = bool(summary["evaluation"].get("solved"))
+        assessment["answer_solved_with_verified_execution"] = (
+            assessment["answer_solved"]
+            and assessment["execution_fidelity"] == "verified_original_execution"
+        )
+        write_json(run / "fidelity-assessment.json", assessment)
+        summary["fidelity"] = assessment
     write_json(run / "budget.json", budget.__dict__)
     write_json(run / "summary.json", summary)
     diagnose(run)

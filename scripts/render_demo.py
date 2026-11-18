@@ -53,24 +53,35 @@ notes = [
     ],
     [
         "5 training tasks → validated lesson revision"
-        if freeze.get("lessons_revision") == 2
+        if freeze.get("lessons_revision", 0) >= 2
         else "5 official training tasks → 3 workflow lessons",
         f"{heldout} held-out tasks × A/B × 2 repeats",
         "A: no lessons • B: frozen lessons",
         "Code, configuration, inputs and rules hashed",
         "Test-informed revision; exposed-cohort rerun"
-        if freeze.get("lessons_revision") == 2
+        if freeze.get("lessons_revision", 0) >= 2
         else "No lessons derived from held-out traces",
     ],
     [],
     [
         "Runnable repo + pinned dependencies + reports",
-        "33 software tests • 13 environment checks",
+        f"{freeze.get('software_test_count', 33)} software tests • 13 environment checks",
         "Small cohort; no significance claim",
         "Prepared environments, not unchanged Medium",
         "Codex-assisted implementation; synthetic narration",
     ],
 ]
+
+if freeze.get("lessons_revision") == 3:
+    titles[3] = "Controlled execution, separate fidelity"
+    notes[1][-1] = "B: original-file execution → typed evidence submission"
+    notes[3] = [
+        "A: original unrestricted baseline",
+        "B: no model-written scientific code",
+        "Public numeric types enforced without coercion",
+        "Correctness, provenance and semantics separate",
+        "Previously exposed cohort; no generalization claim",
+    ]
 
 for label, v in results["totals"].items():
     notes[4].append(

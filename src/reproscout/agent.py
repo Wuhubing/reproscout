@@ -40,6 +40,8 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
     artifacts: dict = {}
     step = 0
     max_calls = config["max_model_calls"]
+    constrained = config.get("controlled_execution", False)
+    controller = None
 
     def retain(name: str, content: str, metadata: dict) -> str:
         relative = "artifacts/" + name
@@ -202,6 +204,8 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
                 "page": page,
                 "dimensions": list(image.size),
             }
+            if controller is not None:
+                artifacts[artifact].update(controller.lineage(real, digest(data)))
             write_json(run / "artifact-index.json", artifacts)
             return [
                 ContentText(
@@ -224,6 +228,21 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
                 answers = validate_submission(answers_json, manifest["questions"], artifacts, run)
             except (ValueError, TypeError, KeyError) as exc:
                 raise ToolError(str(exc)) from None
+            if constrained:
+                from .controlled import validate_provenance, validate_types
+
+                try:
+                    validate_types(answers, config["answer_types"])
+                    validate_provenance(answers, artifacts)
+                except ValueError as exc:
+                    controller.record(
+                        operation="submit_report",
+                        status="refused",
+                        reason=str(exc),
+                        answers=answers,
+                    )
+                    raise ToolError(str(exc)) from None
+                controller.record(operation="submit_report", status="accepted")
             write_json(run / "submission.json", answers)
             return json.dumps(answers)
 
@@ -272,13 +291,98 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
         state.messages.append(output.message)
         return state
 
+    selected_tools = [shell(), read_file(), view_image()]
+    if constrained:
+        from .controlled import ControlledExecution
+
+        controller = ControlledExecution(run, manifest, artifacts, shell())
+
+        @tool
+        def inspect_file() -> Tool:
+            async def execute(path: str, start_line: int = 1, line_count: int = 150) -> str:
+                """Read a bounded text snapshot without executing any supplied code.
+
+                Args:
+                    path: Task file under /code, /data, /results or /REPRODUCING.md.
+                    start_line: One-based first line.
+                    line_count: Number of lines, at most 300.
+                """
+                nonlocal step
+                try:
+                    real = await controller.resolve(path)
+                    if start_line < 1 or not 1 <= line_count <= 300:
+                        raise ValueError("Invalid line range")
+                    size = await sandbox().exec(["stat", "-c", "%s", real], timeout=10)
+                    if size.returncode or int(size.stdout) > 10_000_000:
+                        raise ValueError("Text unavailable or above 10 MB")
+                    content = await sandbox().read_file(real)
+                except (ValueError, UnicodeError) as exc:
+                    raise ToolError(str(exc)) from None
+                selected = "\n".join(
+                    content.splitlines()[start_line - 1 : start_line - 1 + line_count]
+                )[:20000]
+                if not selected:
+                    selected = "[No text in requested range]"
+                step += 1
+                artifact = retain(
+                    f"step-{step:03d}.file.txt",
+                    selected,
+                    {
+                        "kind": "file_snapshot",
+                        "source": real,
+                        "source_line_start": start_line,
+                        **controller.lineage(real, digest(content.encode())),
+                    },
+                )
+                return (
+                    artifact
+                    + "\n"
+                    + "\n".join(f"{i}: {line}" for i, line in enumerate(selected.splitlines(), 1))
+                )
+
+            return execute
+
+        @tool
+        def inspect_output() -> Tool:
+            async def execute(artifact: str, start_line: int = 1, line_count: int = 150) -> str:
+                """Read more lines of an already captured text output; cite its original line numbers.
+
+                Args:
+                    artifact: Exact artifact ID from a previous tool.
+                    start_line: One-based first line.
+                    line_count: Number of lines, at most 300.
+                """
+                if artifact not in artifacts or artifacts[artifact].get("kind") == "image":
+                    raise ToolError("Unknown text artifact")
+                if start_line < 1 or not 1 <= line_count <= 300:
+                    raise ToolError("Invalid line range")
+                lines = (run / artifact).read_text().splitlines()
+                return (
+                    artifact
+                    + "\n"
+                    + "\n".join(
+                        f"{i}: {line}"
+                        for i, line in enumerate(
+                            lines[start_line - 1 : start_line - 1 + line_count], start_line
+                        )
+                    )[:20000]
+                )
+
+            return execute
+
+        selected_tools = controller.tools() + [inspect_file(), inspect_output(), view_image()]
+        lessons += (
+            "\nPublic answer type contracts (null allowed with blocker evidence):\n"
+            + json.dumps(config["answer_types"])
+        )
+
     return react(
         name="reproscout",
         prompt=AgentPrompt(
             instructions=INSTRUCTIONS + lessons, handoff_prompt=None, assistant_prompt=None
         ),
         model=bounded_generate,
-        tools=[shell(), read_file(), view_image()],
+        tools=selected_tools,
         submit=AgentSubmit(tool=submit_report(), keep_in_messages=True),
         retry_refusals=0,
         attempts=1,

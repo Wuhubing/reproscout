@@ -89,6 +89,13 @@ def main():
             encoded = json.dumps(trajectory, indent=2, ensure_ascii=True)
             check_public_export(encoded)
             (target / "trajectory.json").write_text(encoded, encoding="utf-8")
+        if "fidelity" in summary:
+            page_path = target / "report.html"
+            page_text = page_path.read_text().replace(
+                "<h2>Run summary</h2>",
+                '<h2>Separate execution assessment</h2><p>Answer scoring is separate from execution fidelity, type compliance and evidence meaning. Unknown is not a verified failure rate.</p><p><a href="fidelity-assessment.json">Execution/type/provenance assessment</a></p><h2>Run summary</h2>',
+            )
+            page_path.write_text(page_text)
         manifest = json.loads((run / "manifest.json").read_text())
         score = summary.get("evaluation", {})
         group = summary.get("experiment_id") or "development"
@@ -151,6 +158,35 @@ def main():
             comparison += f'<p class="note">Scientific matrix complete: {results["scientific_matrix_complete"]}. Retained infrastructure attempts: {len(results["infrastructure_attempts"])}. Infrastructure attempts do not fill scientific cells. <a href="../docs/controller-comparison.md">Cross-version comparison and limitations</a> | <a href="../docs/network-recovery-protocol.md">Frozen retry policy</a></p>'
         selected_ids = {r["run_id"] for r in results["runs"]}
         formal = [r for r in run_records if r["run_id"] in selected_ids]
+        if results["experiment_id"] == "prepared-v6":
+            comparison = comparison.replace(
+                "B: frozen development lessons",
+                "B: constrained author execution and typed submission",
+            )
+            comparison += '<p class="note">V6 changes B capabilities, not just lesson text. A remains unrestricted. This exposed-cohort study does not establish unseen generalization. <a href="../docs/fidelity-protocol-v6.md">Protocol</a> | <a href="../docs/baseline-decline-v5.md">Why A declined previously</a></p>'
+            comparison += "<h2>Correctness and execution fidelity are separate</h2><table><tr><th>Arm</th><th>Answer solved</th><th>Strict types</th><th>Verified original execution</th><th>Unverified</th><th>Observed input violation</th><th>Solved + verified execution</th></tr>"
+            for c in ["A", "B"]:
+                subset = [x for x in formal if x["condition"] == c]
+                assessments = [x["fidelity"] for x in subset]
+                cells = [
+                    sum(bool(x.get("evaluation", {}).get("solved")) for x in subset),
+                    sum(x["answer_types_compliant"] is True for x in assessments),
+                    sum(
+                        x["execution_fidelity"] == "verified_original_execution"
+                        for x in assessments
+                    ),
+                    sum(x["execution_fidelity"] == "unverified" for x in assessments),
+                    sum(x["execution_fidelity"] == "violated" for x in assessments),
+                    sum(x["answer_solved_with_verified_execution"] for x in assessments),
+                ]
+                comparison += (
+                    "<tr><td>"
+                    + c
+                    + "</td>"
+                    + "".join("<td>" + str(x) + "/30</td>" for x in cells)
+                    + "</tr>"
+                )
+            comparison += "</table><p>A lacks the controlled execution ledger and remains unverified unless separately reviewed. These are conservative instrumented counts, not a fair estimate of an intrinsic fidelity gap. Verified execution is not proof that the evidence supports the interpretation; see the separate semantic review in the report.</p>"
         groups = "<h2>Language and modality</h2><table><tr><th>Group</th><th>A solved / runs</th><th>B solved / runs</th></tr>"
         for field, value in [
             ("language", "Python"),
