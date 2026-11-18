@@ -79,7 +79,7 @@ def execute(
     )
     # Retries share the original cell budgets; failed attempts are never erased.
     prior = []
-    if mode == "run" and experiment_id and experiment_id.endswith("v4"):
+    if mode == "run" and experiment_id and experiment_id.endswith(("v4", "v5")):
         for previous in sorted((root / "runs").glob("*/summary.json")):
             old = json.loads(previous.read_text())
             if (old.get("experiment_id"), old.get("condition"), old.get("repeat")) != (

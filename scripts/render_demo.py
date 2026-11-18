@@ -52,16 +52,20 @@ notes = [
         "Failed development attempts are also retained",
     ],
     [
-        "5 official training tasks → 3 workflow lessons",
+        "5 training tasks → validated lesson revision"
+        if freeze.get("lessons_revision") == 2
+        else "5 official training tasks → 3 workflow lessons",
         f"{heldout} held-out tasks × A/B × 2 repeats",
         "A: no lessons • B: frozen lessons",
         "Code, configuration, inputs and rules hashed",
-        "No lessons derived from held-out traces",
+        "Test-informed revision; exposed-cohort rerun"
+        if freeze.get("lessons_revision") == 2
+        else "No lessons derived from held-out traces",
     ],
     [],
     [
         "Runnable repo + pinned dependencies + reports",
-        "31 software tests • 13 environment checks",
+        "33 software tests • 13 environment checks",
         "Small cohort; no significance claim",
         "Prepared environments, not unchanged Medium",
         "Codex-assisted implementation; synthetic narration",

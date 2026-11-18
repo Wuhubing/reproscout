@@ -145,6 +145,8 @@ def main():
         task_ids = {r["task_id"] for r in results["runs"]}
         prior_count = len(task_ids & set(exposure))
         comparison += f'<p>Previously evaluated tasks: {prior_count}; newly evaluated tasks: {len(task_ids) - prior_count}. <a href="../docs/results.md">Detailed interpretation and exposure breakdown</a> | <a href="../docs/registry-recovery.md">Image recovery evidence</a></p>'
+        if json.loads((args.experiment / "freeze.json").read_text()).get("lessons_revision") == 2:
+            comparison += '<p class="note">Revision 2 was informed by earlier test trajectories, then validated on training tasks. This rerun evaluates an exposed cohort, not new held-out generalization. <a href="../docs/lesson-revision-protocol.md">Revision protocol</a> | <a href="../docs/lesson-pair-analysis-v4.md">Four adverse pairs</a></p>'
         if "scientific_matrix_complete" in results:
             comparison += f'<p class="note">Scientific matrix complete: {results["scientific_matrix_complete"]}. Retained infrastructure attempts: {len(results["infrastructure_attempts"])}. Infrastructure attempts do not fill scientific cells. <a href="../docs/controller-comparison.md">Cross-version comparison and limitations</a> | <a href="../docs/network-recovery-protocol.md">Frozen retry policy</a></p>'
         selected_ids = {r["run_id"] for r in results["runs"]}

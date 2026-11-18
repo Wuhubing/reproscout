@@ -92,7 +92,7 @@ an unchanged CORE-Bench Medium score. Model and limits are recorded in the freez
 Average B-minus-A solved count: **{result["average_solved_difference_B_minus_A"]:+.1f}**.
 All **{len(runs)}** planned scientific outcomes are present; no missing cells.
 Retained infrastructure attempts: **{len(result.get("infrastructure_attempts", []))}**; these do not fill scientific cells.
-Total selected-outcome model cost: **${cost:.5f}**. A receives no lessons; B receives the original frozen rules.
+Total selected-outcome model cost: **${cost:.5f}**. A receives no lessons; B receives the rules saved in this experiment's freeze.
 All-attempt cost, including infrastructure retries: **${result.get("all_attempt_cost_estimated_usd", cost):.5f}**.
 No earlier experiment run is counted in these totals. Costs exclude image
 preparation, host compute, and development assistance.
@@ -105,7 +105,7 @@ preparation, host compute, and development assistance.
 
 Counts combine two repetitions; repeats are not independent scientific tasks.
 Previously evaluated capsules: {len(prior)}; newly evaluated capsules: {len(cohort["heldout"]) - len(prior)}.
-Prior exposure is disclosed rather than treating repeated evaluation as new data. The original lessons remain unchanged; controller changes were validated on development tasks before the new freeze. Task modality labels do not establish image-tool use.
+Prior exposure is disclosed rather than treating repeated evaluation as new data. Any method revision and its development validation are documented in this experiment's protocol. Task modality labels do not establish image-tool use.
 
 ## Per-task records
 
@@ -126,8 +126,8 @@ recheck after the first recovery. The exact upstream rate-limit policy remains
 unknown; do not attribute recovery conclusively to digest addressing alone.
 
 The original size-ranked selection was extended to the proposal target of fifteen
-held-out tasks before formal execution. The same five development tasks and three
-lessons were retained. See selection-v2.json, recovery-v2.json, and the expanded
+held-out tasks before v2 execution. The five development tasks remain fixed;
+the version-specific frozen lesson text records any subsequent revision. See selection-v2.json, recovery-v2.json, and the expanded
 experiment protocol. No held-out score determined task replacement.
 
 ## Evidence and limitations
