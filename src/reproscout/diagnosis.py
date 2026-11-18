@@ -1,71 +1,87 @@
-"""Conservative operational failure labels with explicit uncertainty."""
+"""Evidence-backed operational hypotheses, independent of answer scores."""
 
-import json
-from pathlib import Path
-
+from .review import read
 from .tasks import write_json
 
 
-def diagnose(run: Path) -> dict:
-    summary = json.loads((run / "summary.json").read_text())
-    if summary.get("evaluation", {}).get("solved"):
-        result = {
-            "label": None,
-            "status": "solved",
-            "evidence": ["summary.json"],
-            "human_confirmed": False,
-            "note": "No failed reproduction to classify.",
-        }
-    else:
-        files = sorted((run / "artifacts").glob("*.txt"))
-        labels = [
-            (
-                "environment",
-                [
-                    "Temporary failure in name resolution",
-                    "Network is unreachable",
-                    "ModuleNotFoundError",
-                    "ImportError",
-                    "there is no package called",
-                    "command not found",
-                    "cannot open shared object",
-                ],
-            ),
-            ("code_error", ["Traceback (most recent call last)", "Error in ", "Execution halted"]),
-        ]
-        result = {
-            "label": "output_error",
-            "status": "provisional",
-            "evidence": ["summary.json"],
-            "human_confirmed": False,
-            "note": "No fully correct submitted output. This is a symptom, not proof of root cause.",
-        }
-        for label, markers in labels:
-            matched = [
-                str(p.relative_to(run))
-                for p in files
-                if any(m in p.read_text(errors="replace") for m in markers)
-            ]
-            if matched:
-                result.update(
-                    label=label,
-                    evidence=matched,
-                    note="Trace signature suggests this category; independent review is required.",
-                )
-                break
-        timed_out = []
-        for p in run.glob("step-*.json"):
-            if json.loads(p.read_text()).get("status") == "timeout":
-                timed_out.append(p.name)
-        if (
-            summary.get("limit")
-            or timed_out
-            or "limit" in str(summary.get("sample_error", "")).lower()
-        ):
-            result.update(
-                label="budget_exhausted",
-                evidence=timed_out or ["summary.json"],
-                note="A configured execution limit was reached; earlier contributing failures may exist.",
-            )
+def diagnose(run):
+    summary = read(run, "summary.json", {})
+    facts = []
+    contributors = []
+    signatures = [
+        (
+            "environment",
+            "dependency_or_network",
+            [
+                "Temporary failure in name resolution",
+                "Network is unreachable",
+                "ModuleNotFoundError",
+                "ImportError",
+                "there is no package called",
+                "command not found",
+                "cannot open shared object",
+                "Could not resolve",
+                "URLError",
+            ],
+        ),
+        (
+            "code_error",
+            "execution",
+            ["Traceback (most recent call last)", "Error in ", "Execution halted"],
+        ),
+    ]
+    for label, stage, markers in signatures:
+        evidence = []
+        for path in sorted((run / "artifacts").glob("*.txt")):
+            for line, text in enumerate(path.read_text(errors="replace").splitlines(), 1):
+                if any(marker in text for marker in markers):
+                    evidence.append(
+                        {
+                            "artifact": str(path.relative_to(run)),
+                            "line_start": line,
+                            "line_end": line,
+                        }
+                    )
+        if evidence:
+            contributors.append({"label": label, "stage": stage, "evidence": evidence})
+    timed_out = [
+        p.name for p in run.glob("step-*.json") if read(run, p.name, {}).get("status") == "timeout"
+    ]
+    if (
+        summary.get("limit")
+        or timed_out
+        or any(
+            marker in str(summary.get("sample_error", "")).lower()
+            for marker in ("limit", "maximum model calls", "budget exhausted")
+        )
+    ):
+        contributors.append(
+            {
+                "label": "budget_exhausted",
+                "stage": "controller",
+                "evidence": timed_out or ["summary.json"],
+            }
+        )
+    ledger = read(run, "execution-ledger.json", [])
+    for item in ledger:
+        if item.get("status") in ("succeeded", "failed", "failed_or_timeout", "refused"):
+            facts.append(item)
+    result = {
+        "schema_version": "1.0",
+        "label": contributors[0]["label"] if contributors else None,
+        "stage": contributors[0]["stage"] if contributors else "unknown",
+        "status": "provisional",
+        "primary_cause": "Unconfirmed; inspect the cited trace and execution order.",
+        "contributors": contributors,
+        "known_facts": facts,
+        "evidence": ["summary.json", *(["execution-ledger.json"] if ledger else [])],
+        "human_confirmed": False,
+        "note": "A matching reference answer does not establish faithful or complete execution. Trace signatures are hypotheses, not confirmed root causes.",
+        "next_actions": [
+            "Inspect the first failing author step and cited output.",
+            "Separate computation output from rendering failure.",
+            "Review file changes and the requested metric, object, and units before accepting a candidate.",
+        ],
+    }
     write_json(run / "diagnosis.json", result)
     return result

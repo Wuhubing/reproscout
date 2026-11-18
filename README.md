@@ -1,5 +1,7 @@
 # ReproScout
 
+**v0.7 product workflow:** [User guide](docs/product-guide.md) · [Offline review dashboard](reports/index.html) · [Release validation](docs/product-release-v7.md). Historical experiments remain available from the dashboard.
+
 ReproScout runs authors' scientific code in isolated containers, submits answers
 with execution evidence, and evaluates whether frozen lessons help subsequent attempts. This is an independently authored MIT 1.125 project by Weibing Wang.
 

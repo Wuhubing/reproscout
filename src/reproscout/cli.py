@@ -35,6 +35,8 @@ def execute(
     lessons_path: Path | None = None,
     repeat: int = 1,
     experiment_id: str | None = None,
+    config_path: Path | None = None,
+    lesson_ids: list[str] | None = None,
 ) -> Path:
     from inspect_ai import Task, eval
     from inspect_ai.dataset import Sample
@@ -50,6 +52,23 @@ def execute(
 
     manifest = json.loads((manifest_path or root / "manifests/pilot.json").read_text())
     config = json.loads((root / "configs/pilot.json").read_text())
+    if config_path:
+        config.update(json.loads(config_path.read_text()))
+    product = not experiment_id and mode == "run"
+    if product:
+        policy = config.get("execution_policy", "author_only")
+        if policy not in ("author_only", "unrestricted"):
+            raise ValueError("Unknown execution_policy")
+        config["controlled_execution"] = policy == "author_only"
+        config["answer_types"] = manifest.get("answer_types", config.get("answer_types", {}))
+        if config["controlled_execution"] and set(config["answer_types"]) != set(
+            manifest["questions"]
+        ):
+            raise ValueError(
+                "Controlled execution requires explicit answer_types for every question"
+            )
+    reference_path = manifest.get("answers_path")
+    references = json.loads((root / reference_path).read_text()) if reference_path else None
     prepared = root / manifest.get("prepared_path", "data/prepared.tar")
     if digest(prepared.read_bytes()) != manifest["prepared_sha256"]:
         raise ValueError("Prepared input checksum changed; refusing to run")
@@ -120,7 +139,11 @@ def execute(
     if mode == "run":
         load_key(key_file)
         lessons = ""
-        if condition == "B":
+        if product:
+            from .lessons import snapshot
+
+            lessons = snapshot(root / "lessons/registry", lesson_ids or [], run)
+        elif condition == "B":
             if lessons_path is None:
                 raise ValueError("Condition B requires a frozen lessons file")
             lessons = "\nFrozen development lessons:\n" + lessons_path.read_text()
@@ -149,15 +172,44 @@ def execute(
             reasoning_effort=config["reasoning_effort"],
         ),
     )
-    logs = eval(
-        task,
-        model=model,
-        log_dir=str(run / "logs"),
-        display="plain",
-        max_samples=1,
-        max_tasks=1,
-        fail_on_error=False,
-    )
+    try:
+        logs = eval(
+            task,
+            model=model,
+            log_dir=str(run / "logs"),
+            display="plain",
+            max_samples=1,
+            max_tasks=1,
+            fail_on_error=False,
+        )
+    except Exception as exc:
+        # Fail closed while still producing an inspectable operational report.
+        # Avoid exporting arbitrary exception text that might contain provider headers.
+        write_json(run / "budget.json", budget.__dict__)
+        write_json(
+            run / "summary.json",
+            {
+                "run_id": run.name,
+                "mode": mode,
+                "split": manifest["split"],
+                "condition": condition,
+                "repeat": repeat,
+                "experiment_id": experiment_id,
+                "status": "error",
+                "sample_error": type(exc).__name__,
+                "seconds": time.monotonic() - started,
+                "model_calls": len(budget.calls),
+                "cost_estimated_usd": budget.estimated_billed,
+                "cost_uncached_upper_usd": budget.spent_upper,
+                "infrastructure_failure": True,
+                "evaluation": {},
+                "infrastructure_reason": "runner_exception; inspect local framework logs",
+            },
+        )
+        diagnose(run)
+        report(run)
+        print(f"Execution failed ({type(exc).__name__}); retained report: {run / 'report.html'}")
+        return run
     summary = {
         "run_id": run.name,
         "mode": mode,
@@ -212,17 +264,14 @@ def execute(
     )
     summary["attempt_number"] = len(prior) + 1
     summary["network_attempt_failures"] = sum(e["status"] == "failed" for e in events)
-    if (run / "submission.json").exists():
+    if (run / "submission.json").exists() and references is not None:
         answers = json.loads((run / "submission.json").read_text())
-        references = json.loads(
-            (root / manifest.get("answers_path", "private/pilot_answers.json")).read_text()
-        )
         summary["evaluation"] = score_answers(answers, references, manifest["questions"])
-    if experiment_id and experiment_id.endswith("v6"):
+    if product or (experiment_id and experiment_id.endswith("v6")):
         from .controlled import evaluate_run
 
         assessment = evaluate_run(run, config["answer_types"], config["controlled_execution"])
-        assessment["answer_solved"] = bool(summary["evaluation"].get("solved"))
+        assessment["answer_solved"] = summary["evaluation"].get("solved")
         assessment["answer_solved_with_verified_execution"] = (
             assessment["answer_solved"]
             and assessment["execution_fidelity"] == "verified_original_execution"
@@ -252,9 +301,75 @@ def main() -> None:
     run.add_argument("--lessons", type=Path)
     run.add_argument("--repeat", type=int, default=1)
     run.add_argument("--experiment-id")
+    run.add_argument("--config", type=Path)
+    run.add_argument("--lesson-id", action="append", default=[])
+    review = sub.add_parser("review")
+    review.add_argument("run", type=Path)
+    review.add_argument("--import-file", type=Path)
+    lessons = sub.add_parser("lessons")
+    lessons.add_argument("action", choices=["list", "propose", "approve", "disable"])
+    lessons.add_argument("--id")
+    lessons.add_argument("--source-run", type=Path)
+    lessons.add_argument("--action-text")
+    lessons.add_argument("--applicability")
+    lessons.add_argument("--evidence")
+    lessons.add_argument("--reviewer")
     args = parser.parse_args()
     root = args.root.resolve()
-    if args.command == "doctor":
+    if args.command == "lessons":
+        from .lessons import change, propose
+
+        directory = root / "lessons/registry"
+        if args.action == "list":
+            print(
+                json.dumps(
+                    [json.loads(p.read_text()) for p in sorted(directory.glob("*.json"))], indent=2
+                )
+            )
+        elif args.action == "propose":
+            if not all(
+                (args.id, args.source_run, args.action_text, args.applicability, args.evidence)
+            ):
+                parser.error(
+                    "propose requires id, source-run, action-text, applicability, evidence"
+                )
+            print(
+                json.dumps(
+                    propose(
+                        directory,
+                        args.source_run,
+                        args.id,
+                        args.action_text,
+                        args.applicability,
+                        args.evidence,
+                    ),
+                    indent=2,
+                )
+            )
+        else:
+            if not args.id or not args.reviewer:
+                parser.error("approve/disable require id and reviewer")
+            print(
+                json.dumps(
+                    change(
+                        directory,
+                        args.id,
+                        "approved" if args.action == "approve" else "disabled",
+                        args.reviewer,
+                    ),
+                    indent=2,
+                )
+            )
+    elif args.command == "review":
+        from .diagnosis import diagnose
+        from .reporting import report
+        from .review import import_review
+
+        if args.import_file:
+            import_review(args.run, args.import_file)
+        diagnose(args.run)
+        print(report(args.run))
+    elif args.command == "doctor":
         data = {
             "python": platform.python_version(),
             "host_arch": platform.machine(),
@@ -279,4 +394,6 @@ def main() -> None:
             getattr(args, "lessons", None),
             getattr(args, "repeat", 1),
             getattr(args, "experiment_id", None),
+            getattr(args, "config", None),
+            getattr(args, "lesson_id", None),
         )
