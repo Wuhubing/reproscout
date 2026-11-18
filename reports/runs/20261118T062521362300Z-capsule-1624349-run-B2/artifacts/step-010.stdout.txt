@@ -1,0 +1,44 @@
+
+CELL 22 code
+cv_acc_scores = []
+tst_acc_scores = []
+best_acc = 0
+best_k = 0
+for kk in range(1, X_train.shape[1]+1):
+    FS_trans = SelectKBest(mutual_info_classif, 
+                           k=kk).fit(X_train, y_train)
+    X_tR_new = FS_trans.transform(X_train)
+    X_tS_new = FS_trans.transform(X_test)
+    cv_acc = cross_val_score(model, X_tR_new, y_train, cv=8)
+    cv_acc_scores.append(cv_acc.mean())
+    y_pred_temp = model.fit(X_tR_new, y_train).predict(X_tS_new)
+    tst_acc_scores.append(accuracy_score(y_pred_temp, y_test))
+    if cv_acc.mean() > best_acc:
+        best_acc = cv_acc.mean()
+        best_k = kk
+df['Training Acc.'] = cv_acc_scores
+df['Test Acc.'] = tst_acc_scores
+
+print(best_k, best_acc)
+df.head(15)
+
+CELL 23 code
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+n = len(df.index)
+rr = range(0,n)
+fig, ax = plt.subplots()
+ax2 = ax.twinx()
+ax.bar(df.index, df["Mutual Info."], label='I-Gain',width=.35)
+
+ax2.plot(df.index, df["Training Acc."], color='green', label='Training Acc.')
+ax2.plot(df.index, df["Test Acc."], color='lightgreen', label='Test Acc')
+ax.set_xticks(rr)
+ax2.plot(best_k-1,best_acc,'gx') 
+ax.set_xticklabels(list(df.index), rotation = 90)
+ax.set_xlabel('Features')
+ax.set_ylabel('I-Gain')
+ax2.set_ylabel('Accuracy')
+fig.legend(loc="upper right", bbox_to_anchor=(1,0.8), bbox_transform=ax.transAxes)
+plt.show()

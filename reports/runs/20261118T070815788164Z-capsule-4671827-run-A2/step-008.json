@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = 'PerformanveEval.ipynb'\nout_nb = Path('/results/PerformanveEval-executed.ipynb')\nout_html = Path('/results/PerformanveEval.html')\n\nnb = nbformat.read(infile, as_version=4)\nep = ExecutePreprocessor(timeout=None, kernel_name='python3', allow_errors=True)\ntry:\n    ep.preprocess(nb, {'metadata': {'path': '/code'}})\nexcept Exception as e:\n    print('EXEC_EXCEPTION', type(e).__name__, e)\n\nnbformat.write(nb, out_nb)\nhtml_exporter = HTMLExporter()\nbody, _ = html_exporter.from_notebook_node(nb)\nout_html.write_text(body, encoding='utf-8')\nprint('wrote', out_nb, out_html)\nPY",
+  "exit_code": 0,
+  "seconds": 47.97664729098324,
+  "stdout": "artifacts/step-008.stdout.txt",
+  "stderr": "artifacts/step-008.stderr.txt"
+}

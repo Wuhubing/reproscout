@@ -1,0 +1,120 @@
+##################################################
+# Project expected outcomes of pan-cancer testing
+# at age-specific screening occasions:
+# 1. expected exposed to unnecessary confirmation (EUCs)
+# 2. expected cancers detected (CDs)
+# 3. expected lives saved (LSs)
+##################################################
+library(tidyverse)
+library(scales)
+library(viridis)
+
+datestamp <- '2021-05-15'
+
+##################################################
+# Control paths
+##################################################
+basepath <- '..'
+datapath <- file.path(basepath, 'data')
+resupath <- file.path(basepath, 'results')
+
+##################################################
+# Project outcomes for k-cancer test
+#
+# Notation in paper         Variable name
+# ---------------------------------------
+# P_A                       prevalence (of A)
+# P_A(T+)                   sensitivity (of A)
+# L_A(T+)                   localization (of A)
+# Sp                        specificity
+# m_A                       mortality (of A)
+# R_A                       mortality reduction (of A)
+##################################################
+k_cancer_test <- function(dset, specificity=0.99, size=1000){
+    # group results by cancer site
+    gset <- dset %>% group_by(site)
+    # expected exposed to unnecessary confirmation
+    tset <- gset %>% summarize(prevs=value[feature == 'prevalence'],
+                               tests=value[feature == 'prevalence']*
+                                     value[feature == 'sensitivity'] *
+                                     (1-value[feature == 'localization']))
+    tests <- with(tset, size*(sum(tests)+(1-specificity)*(1-sum(prevs))))
+    # expected cancers detected
+    iset <- gset %>% summarize(cancers=value[feature == 'prevalence']*
+                                       value[feature == 'sensitivity']*
+                                       value[feature == 'localization'])
+    cancers <- with(iset, size*sum(cancers))
+    # expected lives saved
+    lset <- gset %>% summarize(lives=value[feature == 'effect']*
+                                     value[feature == 'sensitivity']*
+                                     value[feature == 'localization']*
+                                     value[feature == 'mortality'])
+    lives <- with(lset, size*sum(lives))
+    tibble(EUC=tests, CD=cancers, LS=lives)
+}
+
+##################################################
+# Pan-cancer test for two hypothetical cancers
+# across selected scenarios:
+# 1. varying sensitivity of both cancers=0.5 to 0.9
+# 2. fixed prevalence of cancer A=0.001
+# 3. varying prevalence of cancer B=0 to 0.01
+# 4. varying localization of both cancers=0.5 to 0.8
+# 5. varying specificity=0.95 to 0.99
+##################################################
+hypothetical_test <- function(specificity, localization.a=c(0.5, 0.8)){
+    dset <- expand_grid(prevalence.a=0.005,
+                        prevalence.b=c(0, 0.001, 0.005, 0.01, 0.02),
+                        sensitivity.a=seq(0.5, 0.9, by=0.1),
+                        localization.a=localization.a,
+                        mortality.a=0)
+    dset <- dset %>% mutate(scenario=seq(nrow(dset)),
+                            sensitivity=sensitivity.a,
+                            localization=localization.a,
+                            prevalence=prevalence.b,
+                            sensitivity.b=sensitivity.a,
+                            localization.b=localization.a,
+                            mortality.b=mortality.a)
+    dset <- dset %>% pivot_longer(-c(scenario,
+                                     sensitivity,
+                                     localization,
+                                     prevalence),
+                                  names_to=c('feature', 'site'),
+                                  names_pattern='(.*)[.]([ab])',
+                                  values_to='value')
+    dset <- dset %>% mutate(specificity=specificity)
+    dset <- dset %>% group_by(scenario,
+                              sensitivity,
+                              localization,
+                              specificity,
+                              prevalence)
+    dset <- dset %>% do(k_cancer_test(., specificity=specificity))
+    dset <- dset %>% ungroup()
+}
+
+##################################################
+# Read merged SEER incidence and IBM data
+##################################################
+read_data <- function(filename){
+    dset <- read_csv(file.path(datapath, filename), col_types='ccddddddddd')
+    dset <- dset %>% rename(age='Age', site='Site')
+    dset <- dset %>% select(-Population,
+                            -Diagnosis.Count,
+                            -Death.Count,
+                            -ends_with('Lower'),
+                            -ends_with('Upper'))
+    dset <- dset %>% rename(prevalence='Diagnosis.Rate',
+                            mortality='Death.Rate')
+    dset <- dset %>% mutate(site=factor(site,
+                                        levels=c('Breast',
+                                                 'Colon and Rectum',
+                                                 'Liver and Intrahepatic Bile Duct',
+                                                 'Lung and Bronchus',
+                                                 'Ovary',
+                                                 'Pancreas'),
+                                        labels=c('Breast',
+                                                 'Colorectal',
+                                                 'Liver',
+                                                 'Lung',
+                                                 'Ovary',
+                                                 'Pancreas')))

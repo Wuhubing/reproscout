@@ -1,0 +1,33 @@
+cells 24
+
+CODE 1 import pandas as pd import numpy as np from sklearn.feature_selection import chi2, mutual_info_classif
+
+CODE 2 seg_data = pd.read_csv('../data/segmentation-all.csv') print(seg_data.shape) seg_data.head()
+
+CODE 3 seg_data['Class'].value_counts()
+
+CODE 5 y = seg_data.pop('Class').values X_raw = seg_data.values 
+
+CODE 7 chi2_score, pval = chi2(X_train, y_train) chi2_score = np.nan_to_num(chi2_score) chi2_score
+
+CODE 8 i_scores = mutual_info_classif(X_train,y_train) i_scores # The i-gain scores for the features
+
+CODE 10 df=pd.DataFrame({'Mutual Info.':i_scores,'Chi Square':chi2_score,'Feature':feature_names}) df.set_index('Feature', inplace = True) df.sort_values('Mutual Info.', inplace = True, ascending = False)
+
+CODE 12 fig, ax = plt.subplots() rr = range(0,len(feature_names)) ax2 = ax.twinx()
+
+CODE 13 from scipy import stats stats.spearmanr(chi2_score, i_scores)
+
+CODE 15 from sklearn.model_selection import train_test_split from sklearn.feature_selection import SelectKBest, mutual_info_classif from sklearn.metrics import accuracy_score
+
+CODE 17 model = KNeighborsClassifier(n_neighbors=3) model = model.fit(X_train,y_train) y_pred = model.predict(X_test)
+
+CODE 18 n_features = X_train.shape[1] n_features
+
+CODE 19 filters = [mutual_info_classif, chi2] k_options = [n_features, 3, 6, 10, 15] filt_scores = {}
+
+CODE 20 import matplotlib.pyplot as plt  import numpy as np %matplotlib inline 
+
+CODE 22 cv_acc_scores = [] tst_acc_scores = [] best_acc = 0
+
+CODE 23 import matplotlib.pyplot as plt %matplotlib inline 

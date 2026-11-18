@@ -1,85 +1,66 @@
-# Controller, reliability, integrity, time and cost comparison
+# Controller and network recovery comparison
 
-**Experiment status: complete attempt matrix; lesson-effect comparison inconclusive because of host-side DNS failures.**
+Prepared-v4 completed all sixty scientific cells under one unchanged freeze. Infrastructure attempts are retained separately and never satisfy a cell. An unsolved scientific outcome remains final.
 
-| Metric | prepared-v2 | prepared-v3 |
-|---|---:|---:|
-| Formal attempts / unique tasks | 60 / 15 | 60 / 15 |
-| A answer-solved, both repetitions | 11/30 (36.7%) | 0/30 (0.0%) |
-| B answer-solved, both repetitions | 9/30 (30.0%) | 1/30 (3.3%) |
-| All answer-solved attempts | 20/60 (33.3%) | 1/60 (1.7%) |
-| Answer-solved with unchanged prepared inputs | 20/60 | 1/60 |
-| Context-admission stops | 39 byte-proxy stops | 0 measured-token stops |
-| Count-request DNS failures | Not applicable: no native counter | 59 |
-| Other pre-model startup failures | 1 | 0 |
-| Zero-model-call attempts | 1 | 55 |
-| Source audits unchanged / changed / absent | 59 / 0 / 1 | 60 / 0 / 0 |
-| Model generations | 423 | 39 |
-| Sum of recorded sample runtime | 4540.40 s (75.67 min) | 1421.20 s (23.69 min) |
-| Calendar interval, first start to last completion | 76.93 min | 57.03 min |
-| Estimated returned model-usage cost | $0.75550 | $0.05651 |
-
-## Per-repetition outcomes
-
-| Condition / repetition | prepared-v2 solved | prepared-v3 solved | v3 solved with unchanged inputs |
+| Metric | v2 | v3 | v4 |
 |---|---:|---:|---:|
-| A1 | 6/15 | 0/15 | 0/15 |
-| B1 | 4/15 | 1/15 | 1/15 |
-| A2 | 5/15 | 0/15 | 0/15 |
-| B2 | 5/15 | 0/15 | 0/15 |
+| Retained attempts | 60 | 60 | 61 |
+| Answer-solved / 60 planned cells | 20/60 (33.3%) | 1/60 (1.7%) | 46/60 (76.7%) |
+| A solved / 30 | 11/30 | 0/30 | 25/30 |
+| B solved / 30 | 9/30 | 1/30 | 21/30 |
+| Solved with unchanged prepared inputs | 20 | 1 | 46 |
+| Legacy byte-bound stops | 39 | 0 | 0 |
+| Native-token context stops | 0 | 0 | 0 |
+| Terminal counting failures | 0 | 59 | 0 |
+| Infrastructure attempts | 1 | 59 | 1 |
+| Zero-generation attempts | 1 | 55 | 1 |
+| Source unchanged / changed / missing | 59 / 0 / 1 | 60 / 0 / 0 | 58 / 2 / 1 |
+| Model generations | 423 | 39 | 721 |
+| Sum of recorded sample time (minutes) | 75.67 | 23.69 | 143.07 |
+| First-start to last-completion interval (minutes) | 76.93 | 57.03 | 147.75 |
+| Estimated returned model-usage cost | $0.75550 | $0.05651 | $1.84094 |
+| Uncached cost upper bound (including reservations) | $1.49456 | $0.14628 | $4.67572 |
+| 20-call budget stops | 0 | 0 | 8 |
+| Monetary admission stops | 0 | 0 | 0 |
+| Other Inspect sample limits | {} | {} | {} |
+
+The 20-call cap is a separate, unchanged policy from the repaired request-size guard. Scientific budget stops remain final unsolved outcomes, rather than infrastructure retries.
 
 ## Interpretation
 
-All sixty frozen attempts are present, with no mid-run change, outcome replacement,
-or silent rerun. In prepared-v3, 59 attempts encountered `APIConnectionError` caused
-by `[Errno 8] nodename nor servname provided, or not known` while counting input.
-This is host-side name-resolution failure before any HTTP response. It is not
-an observed 429, quota exhaustion, authentication rejection, or scientific-code failure.
-Of those attempts, 55 made no model generation. The other four stopped after
-some model/tool activity. The sole completed successful attempt was capsule-1175539 B1.
+Prepared-v3 was infrastructure-invalid: 59 DNS failures, 55 zero-generation attempts, and only one answer-solved attempt. Its low cost and time reflect early aborts, not efficiency. v2 had 39 premature byte-bound stops and one startup failure. Neither problem should be interpreted as evidence against lessons.
 
-The frozen no-retry policy refused generation when counting failed. This was the
-specified behavior, but it meant the completed run matrix did not produce a useful
-lesson-effect comparison. The arithmetic average B-minus-A solved-count difference
-is +0.5, compared with -1.0 before; **this is not evidence that lessons improved**.
-Network failure dominates the new denominator. Do not report a conditional success
-rate on the tiny reachable subset as a replacement primary result.
+Under v4, A solved 12/15 and 13/15; B solved 10/15 and 11/15. Average B-minus-A solved count is -2.0. This is a descriptive observation on fifteen reused tasks, not a statistical-significance or unseen-generalization claim. Cross-version differences also include temporal and model-sampling variation.
 
-The repair's accounting mechanism did work on the requests that reached the API:
-39/39 native input counts matched returned input usage exactly, eight generations
-continued beyond the historical byte bound, and the largest observed input was
-13,296 tokens. No measured-token cap or monetary admission limit was reached.
-These observations validate those calls, not service reliability across the cohort.
-Zero new context stops must be read together with 59 DNS failures; they are not a
-standalone claim that the overall application became more reliable.
+Native counts matched returned input usage on 721 of 721 generations. 297 generated requests crossed the former byte guard. Retained request-level failures: 0; retained infrastructure attempts: 1. All-attempt answer success: 46/61.
 
-All sixty new input audits were unchanged, but 55 of those attempts had no model
-call. This is not an improvement in scientific fidelity over the previous study.
-Answer correctness, source integrity, and semantic evidence support remain distinct.
-The development B notebook data-loader edit remains documented separately.
+Sample timers include in-task retries and scientific execution. The calendar interval also includes between-cell preflights, cooldowns and scheduling gaps; neither is CPU time. Costs use returned token usage, exclude host/image/development costs, and are not an invoice. Unknown usage remains represented by conservative reservations. All infrastructure attempt time and cost are included.
 
-Lower model cost and recorded runtime mostly reflect early refusals and do not
-establish a speedup or better cost-effectiveness. Costs are estimates from returned
-usage, not billing receipts; they exclude development, host compute, and preparation.
-Recorded sample timers and the calendar interval measure different quantities.
-The latter includes gaps between attempts and must not be called CPU time.
+Source integrity is a separate criterion: correct answers produced after changing scientific inputs are not faithful unchanged-input reproductions. Audit absence is never treated as unchanged. See every run, including failed attempts, for evidence.
 
-A single post-run native-count connectivity probe succeeded on November 17, 2026
-(New York time). It made no model generation and changed no experimental result.
-This establishes connectivity at that later instant, not the cause or repair of
-the earlier DNS failures. The record is linked below.
+## Verification and retained evidence
 
-All fifteen official test tasks were previously evaluated. This is an iterative
-repair study on a reused cohort. Any future network-resilience change needs its own
-development validation, freeze, and complete experiment; it is not folded into v3.
-The current delivery preserves the failed experiment rather than selecting replacements.
+- [Frozen recovery protocol](network-recovery-protocol.md)
+- [Development validation](../reports/development-v4-validation.json)
+- [Live network and injected recovery validation](../reports/network-development-v4/validation.json)
+- [Full comparison data](../reports/controller-comparison.json)
+- [Per-task results](results.md)
+- [Portable evidence browser](../reports/index.html)
+- [All 59 historical DNS failures](../reports/transport-failures-v3.json)
+- [Archived v3 interpretation](../reports/archive-v3/controller-comparison.md)
 
-## Evidence
+The release retains v1, v2 and v3 experiments and their original public releases. The exact historical DNS root cause remains unknown; successful current requests and retry validation do not retroactively diagnose it.
 
-- [Machine-readable comparison](../reports/controller-comparison.json)
-- [All 59 transport failure records](../reports/transport-failures-v3.json)
-- [Post-run connectivity diagnostic](../reports/post-run-connectivity-v3.json)
-- [Old controller token audit](../reports/controller-v2-analysis.json)
-- [Development validation and source violation](../reports/development-v3-validation.json)
-- [Execution freeze](../experiments/prepared-v3/freeze.json)
-- [Complete per-run results](results.md)
+## Request and source exception audit
+
+Application operations recorded, including preflights: 1564. Failed application operations: 0. [Complete network ledger](../reports/network-audit-v4.json). These logs observe application requests, not individual TCP connection attempts. The historical DNS resolver root cause remains unknown; successful live traffic and injected retry recovery do not prove that retries caused the observed recovery.
+
+- `capsule-0504157` A1: source audit not recorded; answer-solved=False. [Run report](../reports/runs/20261118T053006883732Z-capsule-0504157-run-A1/report.html). Changed or missing original files: `[]`.
+- `capsule-0504157` A1: changed original input; answer-solved=False. [Run report](../reports/runs/20261118T053043940539Z-capsule-0504157-run-A1/report.html). Changed or missing original files: `['/code/manuscript_croco4_5.Rmd']`.
+- `capsule-3262218` B1: changed original input; answer-solved=False. [Run report](../reports/runs/20261118T060115837998Z-capsule-3262218-run-B1/report.html). Changed or missing original files: `['/data/processed/d_round2access.rds', '/data/processed/d_reference.rds', '/data/processed/d_contentAnalysis.rds', '/data/processed/d_citations.rds', '/data/processed/d_repCitations.rds', '/data/processed/d_coauthors.rds']`.
+
+[Source exception data](../reports/source-integrity-v4.json) retains absent audits separately from changed files.
+
+Across thirty task/repetition pairs, B-only answer success occurred 0 times and A-only success 4 times; both solved 21 and neither solved 5. These are descriptive paired observations on fifteen reused tasks. [Pair-level data](../reports/paired-outcomes-v4.json).
+
+The later [power-state incident analysis](network-incident-analysis.md) correlates all 59 v3 failure completions with sleep/background-wake transitions and retains the one successful DarkWake control. This is post-hoc association, not proof of the exact DNS mechanism.

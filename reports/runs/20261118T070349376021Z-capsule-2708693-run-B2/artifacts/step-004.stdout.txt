@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -ex
+
+# This is the master script for the capsule. When you click "Reproducible Run", the code in this file will execute.
+Rscript -e "rmarkdown::render(input = 'preregSR_manuscript.Rmd', output_dir = '../results', clean = TRUE)"
+---
+---
+title: "Estimating the prevalence of discrepancies between study registrations and publications: A systematic review and meta-analyses"
+author: "| TARG Meta-Research Group & Collaborators\n| (a contributorship statement
+  is included before the references)\n| \n| Address correspondence to robert.thibault@stanford.edu\n"
+output:
+  pdf_document: default
+header-includes: 
+  - \usepackage[labelformat=empty]{caption}
+  - \usepackage{tcolorbox}
+editor_options:
+  chunk_output_type: inline
+bibliography: preregSR_references.bib
+nocite: | 
+  @boonacker2011, @braakhekke2017, @bradley2017, @bonnot2016, @anand2014, @aggarwal2019,
+  @al-marzouki2008, @azar2019, @gopal2015, @goldacre2019a, @gandhi2011, @hahn2002,
+  @fleming2015, @delgado2017, @hartung2014, @dwan2013, @ewart2009, @hernandez2005,
+  @hildenbrand2019, @howard2017, @huic2011, @jones2018, @jones2012, @jones2017a, @juric2020,
+  @maund2014, @norris2014, @mathieu2012, @mathieu2009, @nankervis2012, @mhaskar2012,
+  @calmejane2018, @chahal2012, @chan2004, @chan2008, @chen2019, @claesen2019, @chan2004a,
+  @dekkers2015, @delgado2017a, @tricco2016, @vera-badillo2013, @walker2014, @su2015,
+  @vedula2009, @vedula2013, @thomas2016, @stockmann2014, @ofosu2019, @pandis2015,
+  @pinto2013, @pranic2016, @raghav2015, @rankin2017, @redmond2013, @riehm2015, @khan2012,
+  @li2013, @ludwig2019, @koufatzidou2019, @korevaar2017, @killeen2014, @krsticevic2019,
+  @khaleel, @kasenda2014, @rising2008, @rongen2016, @rosati2016, @rosenthal2013, @ross2019,
+  @ruegger2017, @saquib2013, @wandalkar2017, @wayant2017, @white2019, @wiebe2017,
+  @wildt2011, @won2019, @you2012, @zhang2017, @chan2017, @soares2004, @smith2012,
+  @shepshelovich2017, @shepshelovich2018, @smith2013, @scott2015, @shinohara2015,
+  @sendyk2019, @hannink2013, @annalsofinternalmedicineeditors2016\n
+csl: apa.csl
+always_allow_html: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = FALSE) # This option stops the code chunks from being output from the knit.
+```
+
+```{r load_packages}
+library(meta) # For meta-analyses and forest plots.
+library(irr) # For inter-rater agreement
+library(knitr) # For kable function.
+library(kableExtra) # For kable table styling.
+library(english) # To convert numbers to word equivalents via words(). 
+library(boot) # For inv.logit() function.
+library(tidyverse) # For cleaner code.
+```
+```{r function_metaDisc}
+# For running meta-analyses on proportions (most of the meta analyses in this review).
+
+metaDisc <- function(df){
+  # initialize a dataframe to hold all 40 meta-analytic estimates, CIs, PIs, and number of articles analyzed.
+  estim <- data.frame(matrix(ncol = 7, nrow = length(df)))
+  colnames(estim) <- c("b", "lower.random", "upper.random", "lower.predict", "upper.predict", "k", "n")
+  
+  # assign the colnames from df to the rownames for estim so that the results line up in the next section of code
+  rownames(estim) <- colnames(df)
+  
+  # initialize lists of lists to hold the results of the 40 meta-analyses
+  metaList<-list()
+  
+  # calculate the meta-analytic estimates, CIs, PIs, and number of articles analyzed for outcomes from prospectively registered studies

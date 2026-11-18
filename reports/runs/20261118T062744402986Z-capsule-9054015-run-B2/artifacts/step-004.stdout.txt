@@ -1,0 +1,70 @@
+26:# P_A                       prevalence (of A)
+27:# P_A(T+)                   sensitivity (of A)
+37:    tset <- gset %>% summarize(prevs=value[feature == 'prevalence'],
+38:                               tests=value[feature == 'prevalence']*
+39:                                     value[feature == 'sensitivity'] *
+43:    iset <- gset %>% summarize(cancers=value[feature == 'prevalence']*
+44:                                       value[feature == 'sensitivity']*
+49:                                     value[feature == 'sensitivity']*
+59:# 1. varying sensitivity of both cancers=0.5 to 0.9
+60:# 2. fixed prevalence of cancer A=0.001
+61:# 3. varying prevalence of cancer B=0 to 0.01
+66:    dset <- expand_grid(prevalence.a=0.005,
+67:                        prevalence.b=c(0, 0.001, 0.005, 0.01, 0.02),
+68:                        sensitivity.a=seq(0.5, 0.9, by=0.1),
+72:                            sensitivity=sensitivity.a,
+74:                            prevalence=prevalence.b,
+75:                            sensitivity.b=sensitivity.a,
+79:                                     sensitivity,
+81:                                     prevalence),
+87:                              sensitivity,
+90:                              prevalence)
+106:    dset <- dset %>% rename(prevalence='Diagnosis.Rate',
+170:    if(type == 'sensitivity'){
+171:        dset <- dset %>% filter(prevalence == 0.005,
+173:        dset <- dset %>% select(-prevalence, -localization, -CD, -LS)
+174:        dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+175:                                                   levels=unique(sensitivity),
+176:                                                   labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+179:    if(type == 'prevalence'){
+180:        dset <- dset %>% filter(sensitivity == 0.7,
+181:                                prevalence != 0,
+183:        dset <- dset %>% select(-sensitivity, -localization, -CD, -LS)
+184:        dset <- dset %>% mutate(prevalence=factor(prevalence,
+185:                                                  levels=unique(prevalence),
+186:                                                  labels=sprintf('%3.1f%%', 100*unique(prevalence))))
+199:        dset <- dset %>% filter(sensitivity == 0.7,
+200:                                prevalence == 0.005)
+201:        dset <- dset %>% select(-sensitivity, -prevalence, -CD, -LS)
+244:    dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+245:                                               levels=unique(sensitivity),
+246:                                               labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+249:    gg <- gg+geom_line(aes(x=prevalence,
+251:                           alpha=sensitivity),
+278:empirical_age_plot <- function(dset, figureno, ext='png', sensitivity=FALSE, saveit=FALSE){
+307:    if(sensitivity){
+324:    if(!sensitivity)
+329:    if(!sensitivity)
+352:    dset <- dset %>% filter(prevalence > 0, sensitivity %in% c(0.5, 0.8))
+353:    dset <- dset %>% arrange(sensitivity,
+356:                             prevalence)
+357:    dset <- dset %>% mutate(sensitivity=sprintf('%2.0f', 100*sensitivity),
+360:                            prevalence=sprintf('%5.2f', 100*prevalence),
+363:    dset <- dset %>% rename('Sensitivity, %'='sensitivity',
+366:                            'Prevalence, %'='prevalence',
+379:    dset <- dset %>% select(site, age, prevalence, mortality)
+387:                            prevalence=sprintf(fmt, 100*prevalence),
+392:                            '5-year probability of diagnosis, %'=prevalence,
+393:                            '15-year probability of death, %'=mortality)
+405:                            'Test sensitivity, %'='sensitivity',
+407:                            'Marginal sensitivity, %'='marginal',
+441:# Format table for sensitivity analyses
+483:pset <- tribble(~site, ~sensitivity, ~localization,
+490:pset <- pset %>% mutate(marginal=sensitivity*localization,
+504:mset <- mset %>% mutate(sensitivity=0.869, localization=1)
+513:hypothetical_euc_plot(type='sensitivity', saveit=TRUE)
+560:hypothetical_euc_plot(type='prevalence', saveit=TRUE)
+567:empirical_age_plot(figs2, figureno='S2', sensitivity=TRUE, saveit=TRUE)
+576:empirical_age_plot(figs3, figureno='S3', sensitivity=TRUE, saveit=TRUE)
+584:empirical_age_plot(figs4, figureno='S4', sensitivity=TRUE, saveit=TRUE)
+--- tail stdout ---

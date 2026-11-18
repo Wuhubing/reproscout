@@ -1,0 +1,663 @@
+{
+  "messages": [
+    {
+      "id": "QKvPVqv3s8WhRBv9qfm7V9",
+      "content": "You are ReproScout, a scientific reproduction agent.\nExecute the supplied author's code to answer the task questions. Read /code/README.md\nand /REPRODUCING.md first. The controller has already provisioned the author's image:\nrun commands directly inside this container, not through nested Docker. Work in /code;\ndata are in /data and /results starts empty. Network access is disabled. Do not alter\nexperimental code, hardcode answers, or use remembered/published results.\nIf blocked, submit null values for unanswered questions, with evidence of the blocker\nand an optional explanation field. Do not invent values to complete the report. If a required\ncode change is necessary, explain the blocker instead of silently patching it.\nKeep every response in English. Tool outputs include controller-owned artifact IDs and\n1-based line numbers. Submit each question's value with evidence from THIS execution.\nFor plots, use view_image on generated raster files or PDF pages; cite the returned\nimage artifact without line numbers. Use the submit_report tool with a JSON object keyed by question IDs, for example:\n{\"q1\":{\"value\":12.3,\"evidence\":[{\"artifact\":\"artifacts/step-002.stdout.txt\",\n\"line_start\":2,\"line_end\":2}]}}. The example number is not an answer.\nAn existing file reference does not prove correctness; cite actual computed output.\n",
+      "source": null,
+      "metadata": null,
+      "role": "system"
+    },
+    {
+      "id": "EH8uavgckb778mZ4TbyUBw",
+      "content": "Run 'manuscript.Rmd'using Rscript and render it as a pdf. Store the output in the ../results directory. Set clean to 'TRUE'.\nQuestions:\n{\n  \"q1\": \"fig Report the number of methods counter-arguments provided to defend the original study in light of the contradictory replication results.\"\n}",
+      "source": "input",
+      "metadata": null,
+      "role": "user",
+      "tool_call_id": null
+    },
+    {
+      "id": "h5JmhMdRcKRUPeuToD7oUK",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_MmnY9RC2yLJTtEcekSq7v7i1",
+          "function": "read_file",
+          "arguments": {
+            "path": "/code/README.md"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "9E88Q2X7ffgDVatvZjYDYe",
+      "content": "",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_MmnY9RC2yLJTtEcekSq7v7i1",
+      "function": "read_file",
+      "error": {
+        "type": "unknown",
+        "message": "File unavailable or too large"
+      }
+    },
+    {
+      "id": "FuhXZyjqs6kxUZTDwdbygT",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Considering command usage**\n\nI'm thinking I might need to use shell commands like \"cat\" or \"head\" for whatever task I\u2019m working on. These commands can be really useful for displaying file content or just showing the beginning of a file. I need to confirm the context to decide which command fits better. Okay, let's explore that further and choose the right approach for efficiency!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_OTWPMy87aHT8lQLIBtaKHgo1",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && ls -la && echo '---REPRODUCING---' && sed -n '1,220p' /REPRODUCING.md && echo '---README---' && sed -n '1,220p' README.md"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "RtcusJN6haJnT8tZYgNAvq",
+      "content": "Exit code: 2\nartifacts/step-001.stdout.txt\n1: total 148\n2: drwxr-xr-x 2 root root  4096 Nov 18 07:10 .\n3: drwxr-xr-x 1 root root  4096 Nov 18 07:10 ..\n4: -rwxr-xr-x 1 root root 13147 Jan  1  1970 appendix.Rmd\n5: -rwxr-xr-x 1 root root 21559 Jan  1  1970 functions.R\n6: -rwxr-xr-x 1 root root  1070 Jan  1  1970 LICENSE\n7: -rwxr-xr-x 1 root root 84887 Jan  1  1970 manuscript.Rmd\n8: -rwxr-xr-x 1 root root  6944 Jan  1  1970 preprocessing.R\n9: -rwxr-xr-x 1 root root   126 Jan  1  1970 run.sh\n10: ---REPRODUCING---\n11: This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.\n12: \n13: <sup>1</sup> You may need access to additional hardware and/or software licenses.\n14: \n15: # Prerequisites\n16: \n17: - [Docker Community Edition (CE)](https://www.docker.com/community-edition)\n18: - MATLAB/MOSEK/Stata licenses where applicable\n19: \n20: # Instructions\n21: \n22: ## The computational environment (Docker image)\n23: \n24: This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:\n25: `registry.codeocean.com/published/809de649-ccef-439d-a867-562e5be6c687:v3`\n26: \n27: ## Running the capsule to reproduce the results\n28: \n29: In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:\n30: ```shell\n31: docker run --platform linux/amd64 --rm \\\n32:   --workdir /code \\\n33:   --volume \"$PWD/data\":/data \\\n34:   --volume \"$PWD/code\":/code \\\n35:   --volume \"$PWD/results\":/results \\\n36:   registry.codeocean.com/published/809de649-ccef-439d-a867-562e5be6c687:v3 bash run.sh\n37: ```\n38: ---README---\nartifacts/step-001.stderr.txt\n1: sed: can't read README.md: No such file or directory",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_OTWPMy87aHT8lQLIBtaKHgo1",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "LSDwCH3kbYPWXWcTr49PEh",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Exploring Rmarkdown rendering**\n\nI need to check if the code's README is absent. I should be utilizing the manuscript.Rmd file and look for questions within the text. To render a PDF, I\u2019ll likely use `Rscript` with the `clean` option set to TRUE, focusing on `rmarkdown::render`. I need to determine if the output directory should be `../results` since it was requested to store it there from the `/code` path. I should also inspect any run instructions for `setwd`. Lastly, I\u2019ll search for \"counter-arguments.\"",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_zHKrNI5vcT4gG606THzJkL6R",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && grep -n \"counter-arguments\\|contradictory replication\\|replication\" -n manuscript.Rmd | head -20 && echo '--- head manuscript ---' && sed -n '1,120p' manuscript.Rmd"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "b8gXkyFnMquxPCf2ZbaQ3e",
+      "content": "Exit code: 141\nartifacts/step-002.stdout.txt\n1: 2:title             : \"Citation patterns following a strongly contradictory replication result: Four case studies from psychology\"\n2: 3:shorttitle        : \"Post-replication citation patterns\"\n3: 45:   Replication studies that contradict prior findings may facilitate scientific self-correction by triggering a reappraisal of the original studies; however, the research community's response to replication results has not been studied systematically. One approach for gauging responses to replication results is to examine how they impact citations to original studies. In this study, we explored post-replication citation patterns in the context of four prominent multi-laboratory replication attempts published in the field of psychology that strongly contradicted and outweighed prior findings. Generally, we observed a small post-replication decline in the number of favourable citations and a small increase in unfavourable citations. This indicates only modest corrective effects and implies considerable perpetuation of belief in the original findings. Replication results that strongly contradict an original finding do not necessarily nullify its credibility; however, one might at least expect the replication results to be acknowledged and explicitly debated in subsequent literature. By contrast, we found substantial citation bias: the majority of articles citing the original studies neglected to cite relevant replication results. Of those articles that did cite the replication, but continued to cite the original study favourably, approximately half offered an explicit defence of the original study. Our findings suggest that even replication results that strongly contradict original findings do not necessarily prompt a corrective response from the research community. \n4: 96:replicationYears <- c(2016, 2016, 2016, 2014, 2014)\n5: 118:    replicationYear = replicationYears[i]\n6: 126:It is often assumed that science is a self-correcting enterprise: the veracity of scientific knowledge should progressively improve as inaccurate claims are abandoned and accurate claims are reinforced (Vazire & Holcombe, 2020). Replication studies are considered to be a key driver of this process because they may indicate that prior results are exaggerated or erroneous (Ioannidis, 2012; Zwaan et al., 2018). Although interpreting the outcome of replication studies is not necessarily straightforward (Collins, 1985; Earp & Trafimow, 2015; Maxwell et al., 2015), one might expect a replication result that strongly contradicts[^footnote1] and outweighs the results of a prior (\u2018original\u2019) study to impact how that study is cited in subsequent academic literature. For example, if a replication undermines belief in the credibility of an original finding, one might expect to see a change in the frequency and valence (favourability) of citations to the original study; specifically, a decrease in favourable citations accompanied by an increase in unfavourable citations. However, as discussed below, a variety of interesting patterns could emerge depending on how the research community responds to a replication result. The goal of the present study was to empirically explore and describe post-replication citation patterns in the context of four prominent multi-laboratory replication attempts published in the field of psychology that strongly contradicted and outweighed the findings of prior studies.\n7: 128:[^footnote1]: Determining whether a replication finding contradicts an original finding is a complex issue which we largely side-step here by only examining cases that are strongly contradictory - that is, according to several reasonable quantitative criteria (e.g., effect size magnitude, p-values, Bayes Factors, etc.) the results of the original study and replication study lead to opposing inferences (e.g., absence vs. presence of an effect). Also note that one can accept that results are strongly contradictory and remain agnostic about the explanation for the contradiction.\n8: 130:Table \\@ref(tab:patterns) outlines several citation patterns that might follow a contradictory replication result, each reflecting different types of response by the research community. We have tentatively categorised these response patterns as being \u2018progressive\u2019 or \u2018regressive\u2019 depending on their expected impact on the accumulation of scientific knowledge[^footnote2]. The first set of patterns, belief correction/perpetuation, refer to what is often considered a primary functional role of (contradictory) replication studies - to change belief in the credibility of exaggerated or erroneous original findings (Ioannidis, 2012; Vazire & Holcombe, 2020; Zwaan et al., 2018). In the absence of an explicit defence of an original study that convincingly explains a strongly contradictory replication result (see \u2018explicit defence\u2019 below), a progressive response might involve a decrease in favourable citations and an increase in unfavourable citations, reflecting updated beliefs about the credibility of the original finding. Conversely, a regressive response might involve maintenance of (or even increase in) favourable citations, and relatively few unfavourable citations, suggesting a perpetuation of belief in the credibility of the original finding despite the contradictory replication result. Prior research has documented how favourable citations to observational epidemiology studies can persist despite the claims of those studies being strongly contradicted in subsequent randomized trials (Tatsioni et al., 2007). Similarly, it has been reported that even when articles are retracted, they can continue to receive favourable citations (Budd et al., 1998; Fernandez & Vadillo, 2020). Thus, there is evidence that belief in the credibility of original findings can perpetuate even when subsequent events cast doubt on their credibility; however, we are unaware of similar evidence in the context of studies that were explicitly designed to test the replicabiity of prior findings.\n9: 134:The second set of patterns in Table \\@ref(tab:patterns), citation balance/bias, generally refers to whether positive (supportive) evidence is preferentially cited relative to negative (non-supportive) evidence (Bastiaansen et al., 2015; Greenberg, 2009). This pattern has previously been observed in the context of research on inclusion body myositis; citation content analysis showed that the accumulating literature heavily cited the theory that beta amyloid is involved, ignoring multiple studies that contradicted this theory (Greenberg, 2009). In the present study, these patterns specifically refer to whether articles citing an original study also cite the subsequent contradictory replication study. A progressive response would be to cite both studies (citation balance), as this involves considering and reporting highly relevant evidence (even if the implications of the replication are disputed, see \u2018explicit defence\u2019 below). By contrast, citation bias could occur if articles citing an original study neglect to cite a relevant replication study. Regardless of whether this occurs through lack of awareness or deliberate omission, it can be considered a regressive response pattern because highly relevant evidence is not being reported or considered.\n10: 136:The third set of patterns in Table \\@ref(tab:patterns), explicit/absent defence, refers to whether researchers who continue to favourably cite the original finding despite the strongly contradictory replication result offer a concrete defence of the original study. As implied above, even when the result of a replication study strongly contradicts the results of an original study, this does not necessarily nullify the credibility of the original findings; the same criticisms that one might apply to an original study in order to infer that its findings are erroneous or exaggerated may also be applied to replication studies (Collins, 1985; Earp & Trafimow, 2015; Maxwell et al., 2015). Thus, if proponents of the original claim mount an explicit defence that counters the implications of the replication results, this might still be considered a progressive response (though obviously one could disagree with the arguments that are presented). By contrast, if favourable citations to the original study are not accompanied by explicit argumentation about the replication result (an absent defence) this might be considered a regressive response because the replication result is apparently discounted without providing any rationale.\n11: 142:Articles that cite the original study may also cite the contradictory replication, reflecting that relevant evidence has been considered (a balanced citation pattern).\", \"*Explicit defence*\n12: 143:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer concrete counter-arguments that state why the credibility of the original finding has not been undermined (an explicit defence pattern).\"),\n13: 146:Articles that cite the original study may neglect to also cite the contradictory replication, reflecting that relevant evidence has been neglected, either through lack of awareness or deliberate omission (a citation bias pattern).\", \"*Absent defence*\n14: 147:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer no concrete counter-arguments that state why the credibility of the original finding has not been undermined (an absent defence pattern).\")\n15: 149:  kable(booktabs = T, longtable = T, caption = \"Progressive or regressive responses to strongly contradictory replication results and their expected impact on citation patterns for original studies.\") %>%\n16: 154:In the present study, we explored the post-replication citation patterns described above in the context of four case studies in the field of psychology where the findings of a replication study strongly contradicted and outweighed the findings of an original study (Table \\@ref(tab:studyDetails)). In two of the cases, the replication studies were part of a single \u2018Many Labs\u2019 project (Klein et al., 2014) and addressed the \u2018flag priming effect\u2019 (T. J. Carter et al., 2011) and \u2018money priming effect\u2019 (Caruso et al., 2013) respectively. The other two cases involved \u2018Registered Replication Reports\u2019 (Simons et al., 2014), examining influential demonstrations of the \u2018facial feedback effect\u2019 (cf. Strack et al., 1988; Wagenmakers et al., 2016) and the \u2018ego-depletion effect\u2019 (cf. Baumeister et al., 1998; Hagger et al., 2016; Sripada et al., 2014) respectively. For methodological reasons (see Hagger et al., 2016), the ego-depletion replication was aimed at a classic study in the field (Baumeister et al., 1998), but actually employed a modified computer-based version of the original paradigm (Sripada et al., 2014). For this particular case study, we examined citation patterns to both of these original studies. \n17: 156:We adopted a case study approach in order to develop a \u2018narrow and deep\u2019 understanding of the topic, as opposed to a \u2018broad and shallow\u2019 approach, which would have required a deliberate representative sampling strategy. We chose these particular case studies because they involved prominent pre-registered multi-laboratory replication attempts with sample sizes between 23 - 211 times larger than the original studies, thus providing highly visible and highly credible evidence that strongly contradicted and outweighed earlier findings[^footnote3]. This facilitates additional interpretative clarity about the citation patterns one might expect to observe.\n18: 158:[^footnote3]: We deliberately focused on a select group of case studies rather than other potentially larger samples in order to aid interpretative clarity; for example, the extent to which the results of the large-scale Reproducibility Project in Psychology (RPP; Open Science Collaboration, 2015) actually contradicted the original studies has been contested (Etz & Vandekerckhove, 2016). Additionally, original studies were not actually cited in the RPP research report, which may have diluted awareness about relevant replication studies.\n19: 160:The present study was exploratory in nature and intended to provide descriptive observations rather than test hypotheses. The three sets of expected citation patterns outlined in Table \\@ref(tab:patterns) were used to guide our study design and interpretation, but we do not claim that this is a comprehensive typology of the post-replication patterns that may occur. Such patterns may be more complex and idiosyncratic in other topic domains. In order to examine belief correction/perpetuation patterns, we downloaded citation histories (a list of citing articles) for each original study and classified the valence (favourable, equivocal, or unfavourable) of a set of pre-replication and post-replication citations. To examine citation balance/bias patterns, we manually checked whether post-replication citations of the original study were accompanied by citations to the replication study. Finally, to examine explicit/absent defence patterns, we extracted and categorised any counter-arguments offered in articles that cited the replication.\n20: 167:This was a retrospective observational study consisting of four case studies. Primary outcome variables were annual citation counts for original studies, citation valence (favourable, equivocal, unfavourable), co-citation of original and replication studies, frequency/type of counter-arguments.\nartifacts/step-002.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_zHKrNI5vcT4gG606THzJkL6R",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "YTFKb4AfwbSQoQczSmmQqk",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Searching for counter-arguments**\n\nI need to look for counting methods for any counter-arguments in the results or possibly in an appendix. It's important to have a solid understanding of these counter-arguments, so I'll search for \"counter-arguments\" to find relevant resources. This will help me ensure that I've covered all bases in my analysis and gathered a thorough perspective on the topic. Let\u2019s see what I can find!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_V9J7yhREVUWdjBxHRawQjzAF",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && grep -n \"counter-arguments\\|counter argument\\|argument\" manuscript.Rmd | head -80"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "oVGrVueh6h3mVodQ6V8xzT",
+      "content": "Exit code: 0\nartifacts/step-003.stdout.txt\n1: 136:The third set of patterns in Table \\@ref(tab:patterns), explicit/absent defence, refers to whether researchers who continue to favourably cite the original finding despite the strongly contradictory replication result offer a concrete defence of the original study. As implied above, even when the result of a replication study strongly contradicts the results of an original study, this does not necessarily nullify the credibility of the original findings; the same criticisms that one might apply to an original study in order to infer that its findings are erroneous or exaggerated may also be applied to replication studies (Collins, 1985; Earp & Trafimow, 2015; Maxwell et al., 2015). Thus, if proponents of the original claim mount an explicit defence that counters the implications of the replication results, this might still be considered a progressive response (though obviously one could disagree with the arguments that are presented). By contrast, if favourable citations to the original study are not accompanied by explicit argumentation about the replication result (an absent defence) this might be considered a regressive response because the replication result is apparently discounted without providing any rationale.\n2: 143:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer concrete counter-arguments that state why the credibility of the original finding has not been undermined (an explicit defence pattern).\"),\n3: 147:Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer no concrete counter-arguments that state why the credibility of the original finding has not been undermined (an absent defence pattern).\")\n4: 160:The present study was exploratory in nature and intended to provide descriptive observations rather than test hypotheses. The three sets of expected citation patterns outlined in Table \\@ref(tab:patterns) were used to guide our study design and interpretation, but we do not claim that this is a comprehensive typology of the post-replication patterns that may occur. Such patterns may be more complex and idiosyncratic in other topic domains. In order to examine belief correction/perpetuation patterns, we downloaded citation histories (a list of citing articles) for each original study and classified the valence (favourable, equivocal, or unfavourable) of a set of pre-replication and post-replication citations. To examine citation balance/bias patterns, we manually checked whether post-replication citations of the original study were accompanied by citations to the replication study. Finally, to examine explicit/absent defence patterns, we extracted and categorised any counter-arguments offered in articles that cited the replication.\n5: 167:This was a retrospective observational study consisting of four case studies. Primary outcome variables were annual citation counts for original studies, citation valence (favourable, equivocal, unfavourable), co-citation of original and replication studies, frequency/type of counter-arguments.\n6: 220:To examine the explicit/absent defence pattern (Table \\@ref(tab:patterns)), the primary coder flagged articles that co-cited the original and replication studies and also contained any explicit defence of the original study. Subsequently, two team members (ORA and SC) re-examined all of the flagged cases, extracted verbatim counter-arguments, and developed a post-hoc categorisation scheme that summarised them as concisely and informatively as possible (Table \\@ref(tab:caCategories)). Coding disagreements were resolved through discussion and a third coder (TEH) arbitrated when necessary.\n7: 222:In additional exploratory (not pre-registered) analyses, we examined overlap of authorship for articles that provided counter-arguments with (1) any of the authors of the original studies; and (2) any prior collaborators of the first authors of the original studies. These analyses are complicated by the fact that author names in bibliographic records do not always adhere to the same grammatical standards - for example, whether forenames are initialised or middle names are included - so it is not straightforward to isolate individual authors within bibliographic databases. In order to identify prior collaborators of the first authors of the original studies, we downloaded bibliographic records (on 2nd February, 2021) for all papers published by each of the original study first authors, according to their author record in the Web of Science Core Collection. These author records are automatically generated by an algorithm that attempts to identify all documents likely published by an individual author using several variations of their name (for example, \u201cHardwicke, Tom E.\u201d, \u201cHardwicke, Tom\u201d,  \u201cHardwicke, T. E.\u201d), but errors can still occur and incomplete database coverage means that this method likely misses some of the authors\u2019 prior publications and consequently some of their collaborators. Nevertheless, the method supports a reasonable lower-bound estimate of authorship overlap with articles providing counter-arguments. To identify authorship overlap, we used string manipulation tools in R to extract only author surnames from bibliographic records and then used string matching to automatically detect the presence of original author or collaborator surnames amongst the surnames of authors of articles that provided counter-arguments. When a match was detected, it was verified by manual examination of the authors\u2019 full names.\n8: 388:# prepare table of counter-argument frequency\n9: 390:## get proportion of counter arguments for each individual case\n10: 398:## get proportion of counter arguments across all cases\n11: 411:## get proportion of counter arguments for each individual case where articles cited original favourably\n12: 420:## get proportion of counter arguments across all cases where articles cited original favourably\n13: 441:# for counter-argument categories table (below)\n14: 447:Table \\@ref(tab:caFreq) shows whether articles that cited the original study and replication study (\u201cco-citing articles\u201d), and the subset of co-citing articles that cited the original study favourably, provided any explicit counter-arguments to defend the credibility of the original finding (an explicit defence) or not (an absent defence). Overall, fewer than half of the `r d_contentAnalysis %>% filter(citesReplication==T) %>% nrow()` co-citing articles provided any counter-arguments. Of the `r d_contentAnalysis %>% filter(citesReplication==T,citationClassificationAgreed=='favourable') %>% nrow()` co-citing articles that cited the original study favourably, around half provided counter-arguments. We identified `r counterArgCategories %>% mutate(totalCA = sum(evidence,methods,expertise)) %>% pull(totalCA)` discrete counter-arguments in `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% nrow()` citing articles (`r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` of which were unique articles, as `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% count(doi) %>% filter(n>1) %>% nrow()` of them were cited in two of the case studies) and allocated them to one of three categories (Table \\@ref(tab:caCategories)).\n15: 451:  kable(\"latex\", booktabs = T, caption = \"Counts and percentages (in brackets) for whether articles that cited both the original study and replication study provided any explicit argumentation to defend the original study. Data are displayed for co-citing articles with any citation valence classification and the subset of co-citing articles with favourable citation valence classifications.\") %>%\n16: 457:  apa_table(caption = \"Categorisation of counter-arguments provided to defend the original study in light of the contradictory replication result. 57 discrete counter-arguments were identified in 50 articles (45 unique articles across cases).\")\n17: 461:# exploratory analyses of articles containing counter-arguments\n18: 463:# get all articles containing counter arguments\n19: 467:# which journals are counter-argument articles published in?\n20: 476:# get article types for counter-argument articles\n21: 513:# author surnames for counter-argument papers\n22: 549:# now we will do some string matching to identify overlap of authorship between counter-argument article (CAA) authors and (1) original authors and (2) collaborators of original first authors.\n23: 603:In additional exploratory analyses (not pre-registered) we examined other characteristics of the `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` unique articles that contained counter-arguments. The articles were published in `r nrow(ca_journals)` individual journals, with *Frontiers in Psychology* publishing `r ca_journals %>% filter(journal == 'FRONTIERS IN PSYCHOLOGY') %>% pull(n)` of the articles, *Social Psychology* publishing `r ca_journals %>% filter(journal == 'SOCIAL PSYCHOLOGY') %>% pull(n)` of the articles, and all other journals publishing only 1 or 2 of the articles. `r ca_noData` of the articles did not involve empirical data, `r ca_existData` involved reanalysis or meta-analysis of existing data, and `r ca_novData` involved collection of novel data. The articles had `r nrow(ca_auth_freq)` individual authors of whom all contributed to a single article except for `r ca_auth_freq %>% filter(Freq > 1) %>% nrow()` individuals who had (co)authored 2 articles. `r org_auths_overlap` articles were (co)authored by one of the original authors and `r co_auths_overlap` articles were (co)authored by at least one prior collaborator of one of the first authors of the original articles. `r overlapArtTypes %>% filter(articleType == \"No empirical data\") %>% pull(n)` of these articles did not involve empirical data and `r overlapArtTypes %>% filter(articleType != \"No empirical data\") %>% pull(n) %>% sum()` of them involved novel data collection.\n24: 647:It has been proposed that replication studies can facilitate scientific self-correction by modifying scientists\u2019 belief in the credibility of published findings (Ioannidis, 2012; Vazire & Holcombe, 2020; Zwaan et al., 2018); however, the extent to which this occurs in practice is unclear. In this study, we investigated how the research community responded to four strongly contradictory replications in the field of psychology by examining post-replication citation patterns for original studies. We observed some \u2018progressive\u2019 response patterns in the form of modest active correction (a small decline in favourable citations and a small increase in unfavourable citations), but also even more prominent \u2018regressive\u2019 response patterns in the form of unchallenged belief perpetuation (sustained levels of favourable citations and few unfavourable citations, particularly in the Baumeister case) and considerable citation bias (neglecting to cite the replication study; in all cases aside from Sripada). When authors cited the original study favourably despite the replication result, only half of the articles provided any explicit counter arguments in defence of the original study (an explicit defence). Overall, these findings are consistent with prior observations that favourable citation patterns appear relatively unperturbed by subsequent publication of contradictory results in studies with lower risk of bias (Tatsioni et al., 2007) or even by full retraction (Budd et al., 1998; Fernandez & Vadillo, 2020), and that positive (supportive) evidence is preferentially cited relative to negative (non-supportive) evidence once a theory gets entrenched, despite overwhelming evidence against it (Bastiaansen et al., 2015; Greenberg, 2009).\n25: 653:The second issue of authors ignoring highly relevant replications seems undesirable and implies a biased appraisal or presentation of the evidence. Contradictory replication results do not necessarily nullify the credibility of an original study (Collins, 1985; Earp & Trafimow, 2015; Maxwell et al., 2015), but we would still expect highly relevant replication results to be cited and explicitly debated. In fact, we found that when authors continued to favourably cite original studies despite the replication results, around half did not provide explicit counter-arguments in defence of the original study. Although our study did not examine researchers\u2019 individual beliefs, one recent study reported that when research psychologists were confronted with replication evidence, they often did update their (self-reported) beliefs, albeit modestly (McDiarmid et al., 2021). However, there are several reasons to be uncertain about whether the results from this artificial setting might generalize to real-world settings, including potential participant reactivity (i.e., participants behaving differently because they are under observation and/or responding to the perceived expectations of the research team) and the possibility that individuals may behave differently in settings where they have substantial personal investment and may be publicly scrutinized. Additionally, cognitive psychology studies have obtained some evidence of a \u2018continued influence effect\u2019 wherein an individual's beliefs and behaviour can continue to be influenced by false or misleading information despite subsequent efforts to reject it (Lewandowsky et al., 2012). It is plausible that various cognitive biases, such as confirmation bias (preferentially seeking out and processing evidence that supports pre-existing beliefs) or motivated reasoning (constructing and evaluating arguments based on what is desirable rather than what is rationally justifiable), may partly explain researchers' tendency to ignore or dismiss the replication evidence (Bishop, 2019; Kunda, 1990; Nickerson, 1998). \n26: 655:We observed that when counter-arguments were raised, most of them tried to dismiss the contradictory replication by claiming that the original and the replication studies differed in important ways that moderated the absence/presence of the effect under investigation. In some cases, authors pointed to evidence from other studies as a rationale for their continued belief in the effect. In a minority of cases, the authors challenged the competence of replicators. We found that articles presenting counter-arguments were published in a variety of journals (rather than clustered in a few journals), and involved collection of new data in around half of the cases. They were also published by a sizeable group of investigators, only a minority of whom were one of the original authors or had previously collaborated with one of the original first authors. This suggests that the explicit defence of the original study came from a variety of sources rather than being confined to a small number of investigators. However, note that this analysis may underestimate authorship overlap due to difficulties isolating individual researcher identities (see methods section) and articles published in the same year as the replication were not included.\n27: 663:We should also highlight that particular aspects of our study were inherently subjective, specifically, the identification of citation context, the classification of citation valence, and the identification, extraction, and categorisation of counter-arguments. In order to minimize subjectivity, a team of six investigators performed coding in duplicate, with a third investigator arbitrating if necessary. As disagreements between primary and secondary coders were infrequent, we are confident that the classifications are meaningful, but there may be some edge cases when an independent observer might reasonably disagree with our classifications.\nartifacts/step-003.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_V9J7yhREVUWdjBxHRawQjzAF",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "Lmgs5GkGLLfAkTu83azzSd",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Extracting counter-arguments**\n\nI'm looking at the question regarding the number of methods counter-arguments in light of the original study's contradictory replication results. It seems I need to find this information likely in a figure or table of the manuscript. I plan to render the PDF and inspect it, possibly extracting data by knitting. To do this, I'll run the R script with proper commands and set the cleaning option. Hopefully, all dependencies are in place!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_FMgwjOTJ7gEqeUuWgPuyXSN0",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render('manuscript.Rmd', clean=TRUE, output_dir='/results')\"",
+            "timeout": 1200000
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "HDGZijrRq8bjthCLpUb4su",
+      "content": "",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_FMgwjOTJ7gEqeUuWgPuyXSN0",
+      "function": "shell",
+      "error": {
+        "type": "parsing",
+        "message": "Found 1 validation errors parsing tool input arguments:\n- Additional properties are not allowed ('timeout' was unexpected)"
+      }
+    },
+    {
+      "id": "haRz8iFKLGoogeNRSaiP9S",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_lMlqVNjrtEvo0MGpF7OrJb9Z",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"rmarkdown::render('manuscript.Rmd', clean=TRUE, output_dir='/results')\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "7PJjHr9RLo8BWoQqKtxUWY",
+      "content": "Exit code: 1\nartifacts/step-004.stdout.txt\n\nartifacts/step-004.stderr.txt\n1: Segmentation fault (core dumped)\n2: Error in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\n3: Calls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\n4: In addition: Warning message:\n5: In system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n6:   running command ''/usr/bin/pandoc' --version' had status 139\n7: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_lMlqVNjrtEvo0MGpF7OrJb9Z",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "Jsfq7A5xEkc4PCqvpdq85m",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Investigating pandoc issues**\n\nI think I might be facing a blocker with pandoc causing a segfault. Maybe I could use an alternative if it\u2019s installed elsewhere? There\u2019s also the option of using Rscript with the PANDOC environment, but I\u2019m not completely sure about that. First, I should check the available pandoc versions to see what\u2019s going on. This might help me troubleshoot the issue more effectively!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_nNgWLQMdQiq3sG5HKk2efU1n",
+          "function": "shell",
+          "arguments": {
+            "command": "which pandoc || true; ls -l /usr/bin/pandoc || true; /usr/bin/pandoc --version || true; Rscript -e \"cat(R.version.string,'\\n'); cat('rmarkdown', as.character(packageVersion('rmarkdown')), '\\n')\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "TpCsQAHhrpwV8N3AFBjpa4",
+      "content": "Exit code: 0\nartifacts/step-005.stdout.txt\n1: /usr/bin/pandoc\n2: -rwxr-xr-x 1 root root 61226152 Nov 27  2019 /usr/bin/pandoc\n3: R version 4.0.3 (2020-10-10) \n4: rmarkdown 2.6 \nartifacts/step-005.stderr.txt\n1: bash: line 1:   278 Killed                  /usr/bin/pandoc --version",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_nNgWLQMdQiq3sG5HKk2efU1n",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "hNJzh4ZnRLc8uYoY5f93x2",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Considering Pandoc issues**\n\nI\u2019m facing a hiccup with Pandoc being killed. I might need to use `rmarkdown::render` with a self-contained option, which could be tricky. I\u2019m thinking maybe TinyTeX could help, but I still need Pandoc. Should I look for an alternative Pandoc version from an R package? I could search for Pandoc in RStudio to see if \"quarto\" or \"pandoc\" is bundled there. Let\u2019s figure this out!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_rOr3uQ4Xth2uZG6ihp5jbnbR",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"cat('rmarkdown pandoc: ', rmarkdown::pandoc_available(), '\\n'); print(Sys.which('pandoc')); print(list.files('/usr/local/bin', pattern='pandoc', full.names=TRUE)); print(list.files('/opt', pattern='pandoc', recursive=TRUE, full.names=TRUE)[1:20])\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "9fzFzcgJDcqd9ouZCYaQGY",
+      "content": "Exit code: 1\nartifacts/step-006.stdout.txt\n\nartifacts/step-006.stderr.txt\n1: Killed\n2: Error in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\n3: Calls: cat ... <Anonymous> -> find_pandoc -> lapply -> FUN -> get_pandoc_version\n4: In addition: Warning message:\n5: In system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n6:   running command ''/usr/bin/pandoc' --version' had status 137\n7: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_rOr3uQ4Xth2uZG6ihp5jbnbR",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "LzBv389zgbtLPJaMLaBocA",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Exploring PDF rendering workarounds**\n\nI need to find a workaround for using R Markdown to render a PDF since it typically requires Pandoc. I\u2019m wondering if I could use `knitr::knit` to convert to Markdown and then take another route for conversion. I could also try using LaTeX directly, but I still need to handle the Markdown conversion. Maybe I can use TinyTeX or pdflatex on the LaTeX generated by knit. I'll also need to gather information from the manuscript text and tables around specific lines.",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_4capAdrA6IoiWMOgdwXrC3K7",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && sed -n '380,470p' manuscript.Rmd"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "FzDcd6GgD8jZBUArw7Ep6Y",
+      "content": "Exit code: 0\nartifacts/step-007.stdout.txt\n1:     left = text_grob(\"Standardized citation count\", rot = 90, size = 20),\n2:     bottom = text_grob(\"Publication year\", size = 20)\n3:   )\n4: ```\n5: \n6: ## Explicit defence and absent defence\n7: \n8: ```{r}\n9: # prepare table of counter-argument frequency\n10: \n11: ## get proportion of counter arguments for each individual case\n12: ca <- d_contentAnalysis %>%\n13:   filter(citesReplication == T) %>%\n14:   group_by(case, counterArguments, .drop = F) %>%\n15:   summarise(n = n()) %>%\n16:   mutate(all = paste0(n, \" (\", round(n / sum(n), 2), \")\")) %>%\n17:   select(-n)\n18: \n19: ## get proportion of counter arguments across all cases\n20: ca_everycase <- d_contentAnalysis %>%\n21:   filter(citesReplication == T) %>%\n22:   group_by(counterArguments, .drop = F) %>%\n23:   summarise(n = n()) %>%\n24:   mutate(\n25:     case = factor(\"all cases\"),\n26:     all = paste0(n, \" (\", round(n / sum(n), 2), \")\")\n27:   ) %>%\n28:   select(-n)\n29: \n30: ca <- rbind(ca, ca_everycase)\n31: \n32: ## get proportion of counter arguments for each individual case where articles cited original favourably\n33: ca_fav <- d_contentAnalysis %>%\n34:   filter(citesReplication == T) %>%\n35:   filter(citationClassificationAgreed == \"favourable\") %>%\n36:   group_by(case, counterArguments, .drop = F) %>%\n37:   summarise(n = n()) %>%\n38:   mutate(fav = paste0(n, \" (\", round(n / sum(n), 2), \")\")) %>%\n39:   select(-n)\n40: \n41: ## get proportion of counter arguments across all cases where articles cited original favourably\n42: ca_fav_everycase <- d_contentAnalysis %>%\n43:   filter(citesReplication == T) %>%\n44:   filter(citationClassificationAgreed == \"favourable\") %>%\n45:   group_by(counterArguments, .drop = F) %>%\n46:   summarise(n = n()) %>%\n47:   mutate(\n48:     case = factor(\"all cases\"),\n49:     fav = paste0(n, \" (\", round(n / sum(n), 2), \")\")\n50:   ) %>%\n51:   select(-n)\n52: \n53: ca_fav <- rbind(ca_fav, ca_fav_everycase)\n54: \n55: # for caFreq table (below)\n56: caFreq <- left_join(ca, ca_fav) %>%\n57:   pivot_wider(id_cols = case, names_from = counterArguments, values_from = c(all, fav)) %>%\n58:   rename(\"No\" = all_FALSE, \"No \" = fav_FALSE, \"Yes\" = all_TRUE, \"Yes \" = fav_TRUE)\n59: ```\n60: \n61: ```{r }\n62: # for counter-argument categories table (below)\n63: counterArgCategories <- d_contentAnalysis %>%\n64:   filter(citesReplication == T, counterArguments == T) %>%\n65:   summarise(evidence = sum(as.logical(evidenceCounter), na.rm = T), methods = sum(as.logical(methodsCounter), na.rm = T), expertise = sum(as.logical(expertiseCounter), na.rm = T))\n66: ```\n67: \n68: Table \\@ref(tab:caFreq) shows whether articles that cited the original study and replication study (\u201cco-citing articles\u201d), and the subset of co-citing articles that cited the original study favourably, provided any explicit counter-arguments to defend the credibility of the original finding (an explicit defence) or not (an absent defence). Overall, fewer than half of the `r d_contentAnalysis %>% filter(citesReplication==T) %>% nrow()` co-citing articles provided any counter-arguments. Of the `r d_contentAnalysis %>% filter(citesReplication==T,citationClassificationAgreed=='favourable') %>% nrow()` co-citing articles that cited the original study favourably, around half provided counter-arguments. We identified `r counterArgCategories %>% mutate(totalCA = sum(evidence,methods,expertise)) %>% pull(totalCA)` discrete counter-arguments in `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% nrow()` citing articles (`r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` of which were unique articles, as `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% count(doi) %>% filter(n>1) %>% nrow()` of them were cited in two of the case studies) and allocated them to one of three categories (Table \\@ref(tab:caCategories)).\n69: \n70: ```{r caFreq}\n71: caFreq %>%\n72:   kable(\"latex\", booktabs = T, caption = \"Counts and percentages (in brackets) for whether articles that cited both the original study and replication study provided any explicit argumentation to defend the original study. Data are displayed for co-citing articles with any citation valence classification and the subset of co-citing articles with favourable citation valence classifications.\") %>%\n73:   add_header_above(c(\" \" = 1, \"All citation valences\" = 2, \"Favourable citation valences\" = 2))\n74: ```\n75: \n76: ```{r caCategories}\n77: counterArgCategories %>%\n78:   apa_table(caption = \"Categorisation of counter-arguments provided to defend the original study in light of the contradictory replication result. 57 discrete counter-arguments were identified in 50 articles (45 unique articles across cases).\")\n79: ```\n80: \n81: ```{r}\n82: # exploratory analyses of articles containing counter-arguments\n83: \n84: # get all articles containing counter arguments\n85: d_args <- d_contentAnalysis %>%\n86:   filter(counterArguments == T)\n87: \n88: # which journals are counter-argument articles published in?\n89: ca_journals <- left_join(d_args, d_citations, by = \"UT\") %>%\n90:   distinct(doi, .keep_all = T) %>% # unique articles only\n91:   count(SO) %>%\nartifacts/step-007.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_4capAdrA6IoiWMOgdwXrC3K7",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "fFTn6mVQQjVAgZ2nmr7stn",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_WS7PppNfpmGU5Q6vEmjs3pvY",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && grep -n \"d_contentAnalysis\\|methodsCounter\" -n preprocessing.R functions.R manuscript.Rmd | head -50"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "BA8da3Yr54Vdmsg8EMXbeb",
+      "content": "Exit code: 0\nartifacts/step-008.stdout.txt\n1: preprocessing.R:50:d_contentAnalysis <- data.frame() # create empty list to hold data frames for each case\n2: preprocessing.R:55:  d_contentAnalysis <- bind_rows(d_contentAnalysis, d) # append to dataframe\n3: preprocessing.R:68:d_round2access <- d_round2access %>% select(firstCoder, secondCoder, doi, authors,\tpubYear,\texcluded,\texclusionReason,\tarticleType,\tcitesReplication,\tcitationClassificationOriginal = citationClassificationFirstCoder, citationClassificationAgreed, counterArguments,\tevidenceCounter,\tevidenceVerbatim,\tmethodsCounter,\tmethodsVerbatim,\texpertiseCounter,\texpertiseVerbatim, UT =\twos_id,\tcase)\n4: preprocessing.R:72:d_contentAnalysis <- d_contentAnalysis %>% mutate(replace = ifelse(exclusionReason %in% c(\"No access\", \"Non-English language\"), T, F)) # tag articles to replace\n5: preprocessing.R:73:d_contentAnalysis <- d_contentAnalysis %>% filter(replace == F) %>% select(-replace) # remove articles to be replaced\n6: preprocessing.R:74:d_contentAnalysis <- rbind(d_contentAnalysis,d_round2access) # combine newly accessible/translated articles with content analysis data\n7: preprocessing.R:77:d_contentAnalysis <- d_contentAnalysis %>%\n8: preprocessing.R:91:d_contentAnalysis <- d_contentAnalysis %>%\n9: preprocessing.R:101:d_contentAnalysis <- d_contentAnalysis %>%\n10: preprocessing.R:112:write_csv(d_contentAnalysis, file = here(\"../data\", \"processed\", \"/d_contentAnalysis.csv\"))\n11: preprocessing.R:113:save(d_contentAnalysis, file = here(\"../data\", \"processed\", \"/d_contentAnalysis.rds\"))\n12: manuscript.Rmd:84:load(here(\"../data\", \"processed\", \"d_contentAnalysis.rds\"))\n13: manuscript.Rmd:117:    contentData = d_contentAnalysis %>% filter(case == caseNames[i]),\n14: manuscript.Rmd:211:classChange <- d_contentAnalysis %>%\n15: manuscript.Rmd:228:excluded_n <- d_contentAnalysis %>%\n16: manuscript.Rmd:231:excluded_reason <- d_contentAnalysis %>%\n17: manuscript.Rmd:243:notexcluded_n <- d_contentAnalysis %>%\n18: manuscript.Rmd:248:In total, `r d_citations %>% nrow()` articles cited one of the original studies of which `r d_contentAnalysis %>% nrow()` articles (after taking a 40% random sample in the Baumeister case) fell within the time period designated for qualitative assessment. Of these `r d_contentAnalysis %>% nrow()` articles, we excluded `r excluded_n` from the qualitative analysis because (1) we could not access the full text (n = `r noAccess_n`); (2) they included a citation to the original study in the reference section, but not in the main text (n = `r refCiteOnly_n`); or (3) manual inspection indicated that they did not actually appear to cite the original study at all (n = `r noCite_n`). Article type classifications for the remaining `r notexcluded_n` articles included in the qualitative analysis are shown in Table \\@ref(tab:articleTypes).\n19: manuscript.Rmd:251:d_contentAnalysis %>%\n20: manuscript.Rmd:391:ca <- d_contentAnalysis %>%\n21: manuscript.Rmd:399:ca_everycase <- d_contentAnalysis %>%\n22: manuscript.Rmd:412:ca_fav <- d_contentAnalysis %>%\n23: manuscript.Rmd:421:ca_fav_everycase <- d_contentAnalysis %>%\n24: manuscript.Rmd:442:counterArgCategories <- d_contentAnalysis %>%\n25: manuscript.Rmd:444:  summarise(evidence = sum(as.logical(evidenceCounter), na.rm = T), methods = sum(as.logical(methodsCounter), na.rm = T), expertise = sum(as.logical(expertiseCounter), na.rm = T))\n26: manuscript.Rmd:447:Table \\@ref(tab:caFreq) shows whether articles that cited the original study and replication study (\u201cco-citing articles\u201d), and the subset of co-citing articles that cited the original study favourably, provided any explicit counter-arguments to defend the credibility of the original finding (an explicit defence) or not (an absent defence). Overall, fewer than half of the `r d_contentAnalysis %>% filter(citesReplication==T) %>% nrow()` co-citing articles provided any counter-arguments. Of the `r d_contentAnalysis %>% filter(citesReplication==T,citationClassificationAgreed=='favourable') %>% nrow()` co-citing articles that cited the original study favourably, around half provided counter-arguments. We identified `r counterArgCategories %>% mutate(totalCA = sum(evidence,methods,expertise)) %>% pull(totalCA)` discrete counter-arguments in `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% nrow()` citing articles (`r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` of which were unique articles, as `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% count(doi) %>% filter(n>1) %>% nrow()` of them were cited in two of the case studies) and allocated them to one of three categories (Table \\@ref(tab:caCategories)).\n27: manuscript.Rmd:464:d_args <- d_contentAnalysis %>%\n28: manuscript.Rmd:603:In additional exploratory analyses (not pre-registered) we examined other characteristics of the `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` unique articles that contained counter-arguments. The articles were published in `r nrow(ca_journals)` individual journals, with *Frontiers in Psychology* publishing `r ca_journals %>% filter(journal == 'FRONTIERS IN PSYCHOLOGY') %>% pull(n)` of the articles, *Social Psychology* publishing `r ca_journals %>% filter(journal == 'SOCIAL PSYCHOLOGY') %>% pull(n)` of the articles, and all other journals publishing only 1 or 2 of the articles. `r ca_noData` of the articles did not involve empirical data, `r ca_existData` involved reanalysis or meta-analysis of existing data, and `r ca_novData` involved collection of novel data. The articles had `r nrow(ca_auth_freq)` individual authors of whom all contributed to a single article except for `r ca_auth_freq %>% filter(Freq > 1) %>% nrow()` individuals who had (co)authored 2 articles. `r org_auths_overlap` articles were (co)authored by one of the original authors and `r co_auths_overlap` articles were (co)authored by at least one prior collaborator of one of the first authors of the original articles. `r overlapArtTypes %>% filter(articleType == \"No empirical data\") %>% pull(n)` of these articles did not involve empirical data and `r overlapArtTypes %>% filter(articleType != \"No empirical data\") %>% pull(n) %>% sum()` of them involved novel data collection.\nartifacts/step-008.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_WS7PppNfpmGU5Q6vEmjs3pvY",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "TUzqHNTZovPMQmXBUkqku4",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_c1a0deb2a4524d9caccfa363e9116448",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"load('../data/processed/d_contentAnalysis.rds')\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "6Q3QvqZS5TxodhkQBgWAbe",
+      "content": "Exit code: 0\nartifacts/step-009.stdout.txt\n\nartifacts/step-009.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_c1a0deb2a4524d9caccfa363e9116448",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "WL9cnhwdZJdk288JNwoAUj",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Verifying file existence**\n\nI\u2019m wondering if the loading process is working correctly. It seems that the load on RDS might be wrong, especially since it returned nothing. Maybe the file simply isn\u2019t found? I should double-check to see if the file actually exists. This step is essential to ensure I\u2019m on the right track and that any further troubleshooting will be effective.",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_7f395dde402b43228ccb5277ef811075",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && ls -l ../data/processed && Rscript -e \"x <- readRDS('../data/processed/d_contentAnalysis.rds'); cat(nrow(x), ncol(x), '\\n'); print(head(x[,c('counterArguments','evidenceCounter','methodsCounter','expertiseCounter')]))\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "LUYAyD5bwUZgG9Qn5PuzH7",
+      "content": "Exit code: 1\nartifacts/step-010.stdout.txt\n1: total 4296\n2: -rwxr-xr-x 1 root root   11098 Jan  1  1970 data_codebook.txt\n3: -rwxr-xr-x 1 root root 1088974 Jan  1  1970 d_citations.csv\n4: -rwxr-xr-x 1 root root  261957 Jan  1  1970 d_citations.rds\n5: -rwxr-xr-x 1 root root  925660 Jan  1  1970 d_coauthors.csv\n6: -rwxr-xr-x 1 root root  236363 Jan  1  1970 d_coauthors.rds\n7: -rwxr-xr-x 1 root root  182013 Jan  1  1970 d_contentAnalysis.csv\n8: -rwxr-xr-x 1 root root   45835 Jan  1  1970 d_contentAnalysis.rds\n9: -rwxr-xr-x 1 root root    1777 Jan  1  1970 d_reference.csv\n10: -rwxr-xr-x 1 root root     574 Jan  1  1970 d_reference.rds\n11: -rwxr-xr-x 1 root root 1244478 Jan  1  1970 d_repCitations.csv\n12: -rwxr-xr-x 1 root root  371377 Jan  1  1970 d_repCitations.rds\n13: -rwxr-xr-x 1 root root    4737 Jan  1  1970 d_round2access.csv\n14: -rwxr-xr-x 1 root root    1495 Jan  1  1970 d_round2access.rds\nartifacts/step-010.stderr.txt\n1: Error in readRDS(\"../data/processed/d_contentAnalysis.rds\") : \n2:   unknown input format\n3: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_7f395dde402b43228ccb5277ef811075",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "BYryCQmSjNuWjWd4eFpFj5",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Considering file loading**\n\nI think I need to shift my approach here. Instead of trying to use RDS directly, it seems like the save() function created an .rds file, and now I should be looking into loading that file. So, I'll use the load(file) function instead. This way, I can get the data I need more efficiently. Let's move forward with that!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_fz3BGZxDW5GfiPyzlDO5Og8t",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"load('../data/processed/d_contentAnalysis.rds'); cat(exists('d_contentAnalysis'), '\\n'); cat(nrow(d_contentAnalysis), ncol(d_contentAnalysis), '\\n'); print(head(d_contentAnalysis[,c('counterArguments','evidenceCounter','methodsCounter','expertiseCounter')]))\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "Nx7pPsKkpNv9xxDdR6NjNt",
+      "content": "Exit code: 0\nartifacts/step-011.stdout.txt\n1: TRUE \n2: 632 21 \n3:   counterArguments evidenceCounter methodsCounter expertiseCounter\n4: 1             <NA>            <NA>           <NA>             <NA>\n5: 2             <NA>            <NA>           <NA>             <NA>\n6: 3             <NA>            <NA>           <NA>             <NA>\n7: 4             <NA>            <NA>           <NA>             <NA>\n8: 5             <NA>            <NA>           <NA>             <NA>\n9: 6             <NA>            <NA>           <NA>             <NA>\nartifacts/step-011.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_fz3BGZxDW5GfiPyzlDO5Og8t",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "bE52pnRBE42EtkEg4Ltcpk",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": null,
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_U1RKaBcbJxnSkhIvVIwRi24a",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e \"load('../data/processed/d_contentAnalysis.rds'); x <- subset(d_contentAnalysis, citesReplication==TRUE & counterArguments==TRUE); cat('rows', nrow(x), '\\n'); cat('methods sum', sum(as.logical(x$methodsCounter), na.rm=TRUE), '\\n'); cat('evidence sum', sum(as.logical(x$evidenceCounter), na.rm=TRUE), '\\n'); cat('expertise sum', sum(as.logical(x$expertiseCounter), na.rm=TRUE), '\\n'); print(table(x$methodsCounter, useNA='ifany'))\""
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "A7PmcxeKFZEx9HBFeUZdJe",
+      "content": "Exit code: 1\nartifacts/step-012.stdout.txt\n1: rows 51 \nartifacts/step-012.stderr.txt\n1: Error in cat(\"methods sum\", sum(as.logical(x), na.rm = TRUE), \"\\n\") : \n2:   'list' object cannot be coerced to type 'logical'\n3: Execution halted",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_U1RKaBcbJxnSkhIvVIwRi24a",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "iNp5mAcdDnAovwK92QcYPg",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Considering shell expansion**\n\nI'm thinking about how shell expansion works with my `$methodsCounter`. It looks like I need to escape it using single quotes around the Rscript expression. This could help ensure that it handles special characters correctly. It's always a bit tricky working with shell syntax, but I want to make sure I get it right for reliable execution. I\u2019ll double-check that I\u2019m using the right quoting to avoid any errors.",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_50mCy9N8luzbT65YiMe782NH",
+          "function": "shell",
+          "arguments": {
+            "command": "cd /code && Rscript -e 'load(\"../data/processed/d_contentAnalysis.rds\"); x <- subset(d_contentAnalysis, citesReplication==TRUE & counterArguments==TRUE); cat(\"rows\", nrow(x), \"\\n\"); cat(\"methods sum\", sum(as.logical(x$methodsCounter), na.rm=TRUE), \"\\n\"); cat(\"evidence sum\", sum(as.logical(x$evidenceCounter), na.rm=TRUE), \"\\n\"); cat(\"expertise sum\", sum(as.logical(x$expertiseCounter), na.rm=TRUE), \"\\n\"); print(table(x$methodsCounter, useNA=\"ifany\"))'"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "kRb5eDJNXVujs8qRsMpZgy",
+      "content": "Exit code: 0\nartifacts/step-013.stdout.txt\n1: rows 51 \n2: methods sum 45 \n3: evidence sum 11 \n4: expertise sum 2 \n5: \n6: TRUE <NA> \n7:   45    6 \nartifacts/step-013.stderr.txt\n",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_50mCy9N8luzbT65YiMe782NH",
+      "function": "shell",
+      "error": null
+    },
+    {
+      "id": "BBu5u5vyDc4Pduuq4mUeGH",
+      "content": [
+        {
+          "internal": null,
+          "type": "reasoning",
+          "reasoning": "[Encrypted provider payload omitted from public export; retained in local raw log.]",
+          "summary": "**Evaluating report rendering**\n\nI need to answer question one, which is about reporting the number of methods and counter-arguments. I'll check previous evidence lines for relevant data. Since the user specifically requested a PDF render but I hit a blocker, I might mention that while I can still provide an answer based on the data, I can't render the PDF due to issues. It's crucial to provide the necessary counts even if the PDF render fails. I'll consider running an R script for better clarity.\n\n**Gathering submission details**\n\nFor report question one, I need to confirm the value as 45. It's essential to finalize and submit the report without any delays. I want to make sure everything's clear and concise. If there are any specific formats or additional details required, I should keep those in mind before submitting. I'll double-check that all data is accurate and ready to go. Submitting accurately is my priority!",
+          "signature": null,
+          "redacted": true
+        }
+      ],
+      "source": "generate",
+      "metadata": null,
+      "role": "assistant",
+      "tool_calls": [
+        {
+          "id": "call_2I4N1qRAm0fyrVbtSwgAHiKc",
+          "function": "submit_report",
+          "arguments": {
+            "answers_json": "{\"q1\":{\"value\":45,\"evidence\":[{\"artifact\":\"artifacts/step-013.stdout.txt\",\"line_start\":1,\"line_end\":4}],\"explanation\":\"Rendering manuscript.Rmd to PDF was blocked because pandoc crashed with a segmentation fault, so I computed the requested count directly from the processed content-analysis data used by the manuscript.\"}}"
+          },
+          "parse_error": null,
+          "view": null,
+          "type": "function"
+        }
+      ],
+      "model": "gpt-5.4-mini-2026-03-17"
+    },
+    {
+      "id": "CqxjCzQ4AxSm5QEogUeovB",
+      "content": "{\"q1\": {\"value\": 45, \"evidence\": [{\"artifact\": \"artifacts/step-013.stdout.txt\", \"line_start\": 1, \"line_end\": 4}], \"explanation\": \"Rendering manuscript.Rmd to PDF was blocked because pandoc crashed with a segmentation fault, so I computed the requested count directly from the processed content-analysis data used by the manuscript.\"}}",
+      "source": null,
+      "metadata": null,
+      "role": "tool",
+      "tool_call_id": "call_2I4N1qRAm0fyrVbtSwgAHiKc",
+      "function": "submit_report",
+      "error": null
+    }
+  ],
+  "export_policy": "Encrypted provider reasoning payloads are omitted; visible messages, tool calls, outputs, and usage are retained. Raw Inspect logs remain local.",
+  "model_usage": {
+    "openai/gpt-5.4-mini-2026-03-17": {
+      "input_tokens": 16723,
+      "output_tokens": 2106,
+      "total_tokens": 135565,
+      "input_tokens_cache_write": null,
+      "input_tokens_cache_read": 116736,
+      "reasoning_tokens": 929,
+      "total_cost": 0.030774450000000002
+    }
+  },
+  "sample_error": null
+}

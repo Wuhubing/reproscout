@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, re, json\nnb = nbformat.read('PerformanveEval.ipynb', as_version=4)\nfor i,c in enumerate(nb.cells):\n    src = c.source\n    if '44' in src or 'elements' in src.lower() or 'mapping' in src.lower():\n        print('\\nCELL',i)\n        print(src[:1000])\n        if c.outputs:\n            print('outputs', len(c.outputs))\n            for o in c.outputs:\n                if 'text' in o:\n                    print('TEXT', o['text'][:500])\n                if 'data' in o and 'image/png' in o['data']:\n                    print('has image')\nPY",
+  "exit_code": 0,
+  "seconds": 0.7676309169619344,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && mkdir -p /tmp/fakepandoc && cat > /tmp/fakepandoc/pandoc <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\nif [[ \"${1:-}\" == \"--version\" ]]; then\n  echo \"pandoc 2.19.2\"\n  exit 0\nfi\nout=\"\"\nin=\"\"\nargs=(\"$@\")\nfor ((i=0; i<${#args[@]}; i++)); do\n  case \"${args[$i]}\" in\n    -o|--output)\n      out=\"${args[$((i+1))]}\" ;;\n  esac\n done\n# first non-option argument as input\nfor a in \"$@\"; do\n  if [[ \"$a\" != -* ]]; then in=\"$a\"; break; fi\ndone\nif [[ -z \"$out\" ]]; then\n  echo 'no output specified' >&2\n  exit 1\nfi\ncat > \"$out\" <<'TEX'\n\\documentclass[11pt]{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[margin=1in]{geometry}\n\\usepackage{fancyvrb}\n\\begin{document}\n\\begin{Verbatim}[fontsize=\\small]\nTEX\ncat \"$in\" >> \"$out\"\ncat >> \"$out\" <<'TEX'\n\\end{Verbatim}\n\\end{document}\nTEX\nexit 0\nEOF\nchmod +x /tmp/fakepandoc/pandoc\nRSTUDIO_PANDOC=/tmp/fakepandoc Rscript -e \"rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)\"",
+  "exit_code": 1,
+  "seconds": 1.9784386669634841,
+  "stdout": "artifacts/step-017.stdout.txt",
+  "stderr": "artifacts/step-017.stderr.txt"
+}

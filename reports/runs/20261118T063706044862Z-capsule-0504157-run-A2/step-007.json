@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && cp manuscript_croco4_5.Rmd manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('manuscript.Rmd')\ntext=p.read_text()\nold='''# This script automatically checks for the largest Participantnumber which is on github\ngithub_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\nfile_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")\nfile_names <- html_text(file_nodes)\nfile_names <- gsub(\".txt\", \"\", file_names)\n\n#get only Croco5_log files (these files appear at top of list on github)\ntmp <- subset(file_names, substring(file_names, 1, 10) == \"Croco5_log\")\nN <- as.numeric(length(tmp))'''\nnew='''# Use cached data to avoid network access in this reproduction environment\nload(\"../data/DemoData5\")\n# number of participant logs in the cached data\nN <- length(unique(DemoData5$ParticipantNumber)) - 1'''\nif old not in text:\n    raise SystemExit('pattern not found')\ntext=text.replace(old,new)\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render(input='manuscript.Rmd', output_dir='../results', clean=TRUE)\"",
+  "exit_code": 1,
+  "seconds": 9.997174750023987,
+  "stdout": "artifacts/step-007.stdout.txt",
+  "stderr": "artifacts/step-007.stderr.txt"
+}

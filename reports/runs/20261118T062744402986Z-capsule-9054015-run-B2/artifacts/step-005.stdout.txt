@@ -1,0 +1,113 @@
+                            prevalence=sprintf('%5.2f', 100*prevalence),
+                            EUC=sprintf('%4.1f', EUC),
+                            CD=sprintf('%3.1f', CD))
+    dset <- dset %>% rename('Sensitivity, %'='sensitivity',
+                            'Localization, %'='localization',
+                            'Specificity, %'='specificity',
+                            'Prevalence, %'='prevalence',
+                            'Exposed to unnecessary confirmation, n'='EUC',
+                            'Cancers detected, n'='CD')
+    if(saveit){
+        filename <- str_glue('supplemental_table1_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table of SEER incidence and mortality rates
+##################################################
+format_seer <- function(dset, fmt='%5.2f', saveit=FALSE){
+    dset <- dset %>% select(site, age, prevalence, mortality)
+    dset <- dset %>% mutate(site=factor(site, levels=c('Breast',
+                                                       'Colorectal',
+                                                       'Liver',
+                                                       'Lung',
+                                                       'Ovary',
+                                                       'Pancreas')),
+                            age=sub('-[567]4', '', age),
+                            prevalence=sprintf(fmt, 100*prevalence),
+                            mortality=sprintf(fmt, 100*mortality))
+    dset <- dset %>% arrange(site, age)
+    dset <- dset %>% rename('Tissue of origin'='site',
+                            'Age, y'='age',
+                            '5-year probability of diagnosis, %'=prevalence,
+                            '15-year probability of death, %'=mortality)
+    if(saveit){
+        filename <- str_glue('table1_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table for six cancers in Liu et al
+##################################################
+format_inputs <- function(dset, saveit=FALSE){
+    dset <- dset %>% rename('Tissue of origin'='site',
+                            'Test sensitivity, %'='sensitivity',
+                            'Localization probability, %'='localization',
+                            'Marginal sensitivity, %'='marginal',
+                            'Mortality reduction, %'='effect')
+    if(saveit){
+        filename <- str_glue('table2_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table for realistic six-cancer test
+##################################################
+format_empirical <- function(dset, saveit=FALSE){
+    dset <- dset %>% select(Test, age, EUC, CD, LS)
+    dset <- dset %>% mutate(age=sub('-[567]4', '', age),
+--- around 500 ---
+##################################################
+# Table 2
+##################################################
+pset <- tribble(~site, ~sensitivity, ~localization,
+                'Breast',     0.64, 0.96,
+                'Colorectal', 0.74, 0.97,
+                'Lung',       0.59, 0.92,
+                'Ovary',      0.67, 0.96,
+                'Pancreas',   0.78, 0.79,
+                'Liver',      0.68, 0.72)
+pset <- pset %>% mutate(marginal=sensitivity*localization,
+                        effect=0.1/marginal)
+format_inputs(pset, saveit=TRUE)
+sset <- full_join(sset, pset, by='site')
+
+##################################################
+# Table 3
+##################################################
+iset6 <- age_analysis_incremental(sset, setdiff(pset$site, 'Breast'))
+iset6 <- iset6 %>% mutate(Test='Pan-cancer')
+bset <- sset %>% filter(site == 'Breast')
+bset <- age_analysis(bset, bset[FALSE, ])
+bset <- bset %>% mutate(Test='Breast only')
+mset <- sset %>% filter(site == 'Breast')
+mset <- mset %>% mutate(sensitivity=0.869, localization=1)
+mset <- age_analysis(mset, mset[FALSE, ], specificity=0.889)
+mset <- mset %>% mutate(Test='Mammography')
+cset <- bind_rows(iset6, bset, mset)
+format_empirical(cset, saveit=TRUE)
+
+##################################################
+# Figure 1
+##################################################
+hypothetical_euc_plot(type='sensitivity', saveit=TRUE)
+hypothetical_cd_plot(saveit=TRUE)
+
+##################################################
+# Figure 2
+##################################################
+lset <- sset %>% mutate(effect=0.05/marginal)
+hset <- sset %>% mutate(effect=0.2/marginal)
+fig2l <- age_analysis_incremental(lset, 'Breast')
+fig2m <- age_analysis_incremental(sset, 'Breast')
+fig2h <- age_analysis_incremental(hset, 'Breast')
+fig2 <- full_join(fig2l, fig2m, by=c('site', 'age', 'EUC', 'CD'), suffix=c('_low', '_mid'))
+fig2 <- full_join(fig2, fig2h, by=c('site', 'age', 'EUC', 'CD'))
+fig2 <- fig2 %>% rename(LS_high=LS)
+empirical_age_plot(fig2, figureno=2, ext='pdf', saveit=TRUE)
+
+##################################################
+# Figure 3

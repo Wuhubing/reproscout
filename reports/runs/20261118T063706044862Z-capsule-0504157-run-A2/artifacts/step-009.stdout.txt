@@ -1,0 +1,101 @@
+   600	```
+   601	
+   602	We stopped data collection after `r allPP` participants took part in the study ($\mathit{N_{paid}}= 94$, all others received partial course credit), based on the results of the *t* tests (see below).
+   603	Six participants were excluded, as they either took part in previous studies of this series <!-- pp 4, 5, 7, 13, 160-->or because they were told about the procedure of this study by others before taking part. <!--30-->
+   604	One participant reported that she did not wear the headphone during the entire procedure and seven additional participants did not detect the surveillance target stimulus at least 7 times during the learning phase.
+   605	These participants were also excluded before running any of the analyses.
+   606	The total sample size in the following analyses was therefore N = `r length(unique(DemoData5$ParticipantNumber))` ($\mathit{M_{age}} = `r mean(DemoData5$Alter)`$, $\mathit{SD_{age}} = `r sd(DemoData5$Alter)`$; `r length(unique(DemoData5$ParticipantNumber[(DemoData5$Geschlecht %in% c("weiblich", "w", "weinlich", "Weiblich", "weibl. ", "Frau"))]))` female).
+   607	
+   608	# Results
+   609	
+   610	We first report the same analyses as in the previous experiment by Heycke et al. (2017) in order to test whether an EC effect could be found in the 30 and 1000 ms condition.
+   611	Afterwards we report additional analyses using the data from the visibility check.
+   612	
+   613	## Evaluation
+   614	
+   615	In the overall ANOVA, we found an interaction of the presentation time of the CSs and the US valence, `r printBF(aovBF5, index = 1, N = TRUE, id = "ParticipantNumber")`; `r aovBF5eta$estimate$USval_correspondingTime`, see Figure 1.
+   616	
+   617	The interaction was characterized by the fact that, when stimuli were presented for 1000 ms, an EC effect was found with a one-tailed t test, `r printBFt(allD1000, index = 1, N = TRUE)`.
+   618	We therefore replicated previous findings, showing that images shown while a positive (consonant) sound was played were evaluated more positively than images that were shown while a negative (dissonant) sound was played.
+   619	Contrary to our previous finding, we found statistical evidence for the absence of an EC effect in a one-tailed t test when stimuli were presented for 30 ms, `r printBFt(allD30, index = 1, N = TRUE)`.
+   620	
+   621	```{r figure1, message = FALSE, warning = FALSE, fig.cap = "EC effects, split by CS presentation time. Large horizontal bars represent the mean EC effect, with the 95% highest density intervals displayed around them. Dots represent individual EC effects and additionally the smoothed distribution for each presentation time condition is shown. \\label{fig:figure1}"}
+   622	
+   623	# idividual EC effects, Mean, HDI & smoothed distribution
+   624	ratingData5AggrW$pTime <- ifelse(as.character(ratingData5AggrW$correspondingTime) == "153", "30 ms", "1000 ms")
+   625	ratingData5AggrW$pTime <- as.factor(ratingData5AggrW$pTime)
+   626	
+   627	pirateplot(formula = EC ~ pTime,
+   628	           data = ratingData5AggrW,
+   629	           theme = 2,
+   630	           #pal = "black",
+   631	           gl = 0,
+   632	           gl.lwd = 2,
+   633	           inf.method = "hdi",
+   634	           inf.lwd = 0.7,
+   635	           jitter.val = 0.008,
+   636	           point.col = "black",
+   637	           point.o = c(0.5,0.5),
+   638	           xlab = "Presentation Time",
+   639	           ylab = "EC effect")
+   640	
+   641	```
+   642	
+   643	## Visibility
+   644	
+   645	```{r visCheck5}
+   646	# t test testing whether visibility was above chance
+   647	# chance level was 1/10 - in 40 trials which means 4 stimuli could be identified on chance
+   648	tmpVis$percentCorrect <- tmpVis$correctAnswer/40
+   649	
+   650	ttestVis <- ttestBF(subset(tmpVis, correspondingTime == 153)$percentCorrect - 0.1, mu = 0)
+   651	
+   652	```
+   653	
+   654	We tested whether stimuli were identified above chance in the visibility testing procedure which followed the learning and evaluation phase.
+   655	A two-tailed t test yielded that stimuli that were presented for 30 ms were indeed identified above chance, `r printBFt(ttestVis, N = TRUE)` (chance level = 0.1, average visibility = `r mean(subset(tmpVis, correspondingTime == 153)$percentCorrect)`, *SD* = `r sd(subset(tmpVis, correspondingTime == 153)$percentCorrect)`).
+   656	
+   657	## Exploratory analysis
+   658	
+   659	```{r exclVisStim2}
+   660	visData5Merge <- subset(visData5Aggr, !Length %in% c(158, 170))
+   661	
+   662	#remove participants from exclusion list
+   663	visData5Merge <- subset(visData5Merge, !(ParticipantNumber %in% ExclList5))
+   664	
+   665	#merge data frames (add correct identification to each pp in rating data frame)
+   666	names(ratingData5)[names(ratingData5)=="correspondingTime"] <- "Length"
+   667	ratingData5 <- merge(ratingData5, visData5Merge, by = c("ParticipantNumber", "CS", "Length"))
+   668	
+   669	rD5twoSeen <- subset(ratingData5, !(Length == "153" & correctAnswer > 2))
+   670	
+   671	rD5twoSeenAggr <- aggregate(likingRating ~ ParticipantNumber * USval * Length, rD5twoSeen, mean)
+   672	
+   673	rD5twoSeenAggr$ParticipantNumber <- as.factor(rD5twoSeenAggr$ParticipantNumber)
+   674	
+   675	#run t test for 30 ms condition and exclude all pp that do not have at least one value for pos or neg in 30 ms condition
+   676	
+   677	tmp30.two <- subset(rD5twoSeenAggr, Length == "153")
+   678	
+   679	tmp30.two <- spread(
+   680	  tmp30.two
+   681	  , key = "USval"
+   682	  , value = "likingRating"
+   683	)
+   684	
+   685	#exclude all pp that do not have at least one value for pos or neg in 30 ms condition
+   686	tmp30.two <- tmp30.two[complete.cases(tmp30.two), ]
+   687	
+   688	oneSeen30.two <- ttestBF(tmp30.two$positive,
+   689	                        tmp30.two$negative,
+   690	                        paired = TRUE,
+   691	                        rscale = "medium",
+   692	                        nullInterval = c(0, Inf))
+   693	
+   694	#same analysis as above but only for stimuli seen at least 3 times in vis check
+   695	rd5moreTwoSeen <- subset(ratingData5, Length == "153")
+   696	rd5moreTwoSeen <- subset(rd5moreTwoSeen, correctAnswer > 2)
+   697	rd5moreTwoSeen <- aggregate(likingRating ~ ParticipantNumber * USval, rd5moreTwoSeen, mean)
+   698	rd5moreTwoSeen$ParticipantNumber <- as.factor(rd5moreTwoSeen$ParticipantNumber)
+   699	tmp30.MoreTwo <- spread(rd5moreTwoSeen, key = "USval", value = "likingRating")
+   700	tmp30.MoreTwo <- tmp30.MoreTwo[complete.cases(tmp30.MoreTwo), ]

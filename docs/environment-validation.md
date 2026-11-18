@@ -54,3 +54,17 @@ failures during native token counting. No HTTP response was observed for these
 failures. This is separate from the deliberately offline scientific containers.
 A later post-run counting-only connectivity probe succeeded; it changed no outcome.
 See reports/transport-failures-v3.json and reports/post-run-connectivity-v3.json.
+
+## v0.4.0 network recovery delivery
+
+The frozen prepared-v4 study completed sixty scientific cells, with 1
+additional infrastructure attempts retained separately. A solved 25/30 and B
+21/30. The project now records bounded request retries, checks counting connectivity
+before each cell, and keeps scientific failures final. Thirty real counting probes,
+injected DNS recovery, ten development A/B outcomes, 31 software tests, and thirteen
+environment checks passed before formal evaluation. Historical v3 DNS failures
+remain evidence of an invalid infrastructure-limited comparison.
+
+See [the network protocol](network-recovery-protocol.md),
+[updated comparison](controller-comparison.md), and
+[development evidence](../reports/development-v4-validation.json).

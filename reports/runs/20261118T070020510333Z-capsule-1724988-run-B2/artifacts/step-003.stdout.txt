@@ -1,0 +1,355 @@
+library(tidyverse)
+library(rstatix)
+
+#Study 1 Calibration Errors
+
+incl <- read_csv("/data/summary_stats_LSS1.csv", na = "NaN")
+incl <- filter(incl, id != 35) #Bad posttest eye tracking accuracy
+
+ds <- read_csv("/data/calibration_LSS1.csv", na = "NaN")
+ds <- mutate(ds, id = factor(Participant))
+
+#Remove participants who weren't in the analysis
+ds <- filter(ds, id %in% incl$id)
+
+#Wide to long
+dsl <-  gather(ds, key = "check", value = "error", "error1","error2","error3","error4","error5","error1_pst","error2_pst","error3_pst","error4_pst","error5_pst")
+dsl$phase <- factor(ifelse(is.na(str_extract(dsl$check,"pst")),"search","post"))
+
+print("Error summary stats by participant for study 1")
+dsl  %>% group_by(id) %>% summarise(error = mean(error, na.rm = T), .groups = "drop_last") %>% get_summary_stats(error, type = "common")
+
+#Study 2 Calibration Errors
+
+incl <- read_csv("/data/summary_stats_LSS2.csv", na = "NaN")
+incl <- filter(incl, id != 212 & id != 203) 
+
+ds <- read_csv("/data/calibration_LSS2.csv", na = "NaN")
+ds <- mutate(ds, id = factor(Participant))
+
+#Remove participants who weren't in the analysis
+ds <- filter(ds, id %in% incl$id)
+
+#Wide to long
+dsl <-  gather(ds, key = "check", value = "error", "error1","error2","error3","error4","error5","error1_pst","error2_pst","error3_pst","error4_pst","error5_pst")
+dsl$phase <- factor(ifelse(is.na(str_extract(dsl$check,"pst")),"search","post"))
+
+print("Error summary stats by participant for study 2")
+dsl  %>% group_by(id) %>% summarise(error = mean(error, na.rm = T)) %>% get_summary_stats(error, type = "common")
+  --- lss1 ---
+library(multcomp)
+library(lsmeans)
+library(tidyverse)
+library(effects)
+library(lme4)
+library(lmerTest)
+library(rstatix)
+library(rcompanion)
+library(psych)
+library(ggforce)
+library(patchwork)
+
+cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+          "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+theme_update(text = element_text(size = 18),
+      axis.text.x = element_text(size = 18, color = "black"), axis.title.x = element_text(size = 21, margin = margin(t = 0, r = 0, b = 10, l = 0)),
+      axis.text.y = element_text(size = 18,  color = "black"), axis.title.y = element_text(size = 21, margin = margin(t = 0, r = 10, b = 0, l = 0)), 
+      panel.background = element_blank(),panel.border = element_blank(), panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"), 
+      axis.ticks.length = unit(.25, "cm"), axis.ticks = element_line(size = 1, lineend = "round"),
+      legend.key = element_rect(fill = "white")) 
+
+print("LSS 1 Analyses, QJEP Paper Study 1")
+
+# CREATE DATA SET ---------------------------------------------------------------
+ds <- read_csv("/data/summary_stats_LSS1.csv", na = "NaN")
+ds <- mutate(ds, id = factor(id))
+ds <- filter(ds, id != 35) #Bad posttest eye tracking accuracy, excluded from all analyses
+ds[ds["id"] == 13, "search_eyex_speed"] <- NA #Outlier removed, detected below
+
+# POSITION SD MEANS --------------
+dsl <-  gather(ds, key = "cond", value = "std", "walk_eyex_std","search_eyex_std","walk_eyey_std","search_eyey_std")
+dsl$dim <- factor(ifelse(is.na(str_extract(dsl$cond,"x")),"y","x"))
+dsl$task <- factor(ifelse(is.na(str_extract(dsl$cond,"walk")),"search","walk"),levels = c("walk","search"),labels = c("Walk","Search"))
+
+print("Summary stats and t-tests for spread of eye movements")
+dsl %>% filter(dim == "x") %>% group_by(task) %>% get_summary_stats(std, type = "mean_sd")
+dsl %>% filter(dim == "x") %>% t_test(std ~ task, paired = TRUE, var.equal = T, detailed = T) %>% add_significance()
+dsl %>% filter(dim == "x") %>% cohens_d(std ~ task, paired = TRUE) 
+
+## Spread figure
+dsl %>% group_by(dim, task) %>% filter(dim == "x") %>% 
+  summarise(stdev = mean(std, na.rm = T), n = n(), se = sd(std, na.rm = T)/sqrt(n), ymin = stdev - se, ymax = stdev + se) %>% 
+  ggplot() + 
+  labs(x = "", y = "Position SD (º)") + 
+  geom_sina(data = filter(dsl, dim == "x"), aes(y = std, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3) +
+  geom_errorbar(aes(x = task, group = task,ymin = ymin, ymax = ymax), size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  scale_y_continuous(breaks = c(0,10,20,30,40), limits = c(0,40))
+ggsave("/results/lss1_position_sd.pdf", units = "in", width = 4, height = 4)
+  
+#Check for spread outliers -- none detected
+dsl %>% group_by(dim, task) %>% 
+  summarise(ym = mean(std, na.rm = T), lower = ym - 3*sd(std, na.rm = T), upper = ym + 3*sd(std, na.rm = T), ymin = min(std, na.rm =T), ymax = max(std, na.rm = T), x = 1) %>% 
+  ggplot(aes(x = interaction(dim, task))) + geom_boxplot(aes(ymin = ymin, lower = lower, middle = ym, upper = upper, ymax = ymax), stat = "identity") +
+  geom_point(data = dsl, aes(y = std, group = interaction(dim, task)), na.rm = T)
+
+# GPS DATA  --------------
+#SPEED BY TASK
+
+ds %>% gather(key = "task", value = "speed", "walk_path_speed", "search_path_speed") %>% 
+mutate(task = factor(task, levels = c("walk_path_speed", "search_path_speed"), labels = c("Walk", "Search"))) -> dsl
+
+print("Summary stats and t-tests for walking speed")
+dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+  
+dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Walking speed (m/s)") + 
+  scale_y_continuous(breaks = c(.25, .5, .75, 1, 1.25, 1.5), limits = c(.25, 1.5)) +
+    theme(legend.position = "none") -> p1
+
+#SPEED SD BY TASK
+ds %>% gather(key = "task", value = "speed", "walk_path_speed_sd", "search_path_speed_sd") %>% 
+  mutate(task = factor(task, levels = c("walk_path_speed_sd", "search_path_speed_sd"), labels = c("Walk", "Search"))) -> dsl
+
+print("Summary stats and t-tests for walking speed SD")
+dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+
+dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Walking speed SD (m/s)") +
+  scale_y_continuous(breaks = c(0, .25, .5, .75, 1), limits = c(0,1)) +
+  theme(legend.position = "none") -> p2
+
+#STRAIGHTNESS BY TASK
+ds %>% gather(key = "task", value = "speed", "walk_straightness", "search_straightness") %>% 
+  mutate(task = factor(task, levels = c("walk_straightness", "search_straightness"), labels = c("Walk", "Search"))) -> dsl
+
+print("Summary stats and t-tests for walking straightness")
+dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+
+dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Straightness ratio") + 
+  scale_y_continuous(breaks = c(0, 2.5, 5, 7.5), limits = c(0,7.5)) +
+  theme(legend.position = "none") -> p3
+
+  p1 + p2 + p3
+  ggsave("/results/lss1_walking_stats_composite.pdf", units = "in", width = 9, height = 4)
+  --- lss2 summary ---
+library(multcomp)
+library(lsmeans)
+library(tidyverse)
+library(ggforce)
+library(lme4)
+library(lmerTest)
+library(rstatix)
+library(patchwork)
+
+cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73","#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+theme_update(text = element_text(size = 18),
+             axis.text.x = element_text(size = 18, color = "black"), axis.title.x = element_text(size = 21, margin = margin(t = 0, r = 0, b = 10, l = 0)),
+             axis.text.y = element_text(size = 18,  color = "black"), axis.title.y = element_text(size = 21, margin = margin(t = 0, r = 10, b = 0, l = 0)), 
+             panel.background = element_blank(),panel.border = element_blank(), panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"), 
+             axis.ticks.length = unit(.25, "cm"), axis.ticks = element_line(size = 1, lineend = "round"),
+             legend.key = element_rect(fill = "white")) 
+
+print("LSS 2 Analyses, QJEP Paper Study 2")
+
+# CREATE DATA SET ---------------------------------------------------------------
+ds <- read_csv("/data/summary_stats_LSS2.csv", na = "NaN")
+ds <- mutate(ds, id = factor(id))
+ds <- filter(ds, id != 212 & id != 203) #Excluding participants with technical problems
+
+# POSITION SD MEANS --------------
+dsl <-  gather(ds, key = "cond", value = "std", "walk_posx_std","search_posx_std","walk_posy_std","search_posy_std","walk_eyex_std","search_eyex_std","walk_eyey_std","search_eyey_std")
+dsl$eyehead <- factor(ifelse(is.na(str_extract(dsl$cond,"eye")),"head","eye"), levels = c("eye","head"),labels = c("Eyes","Head"))
+dsl$dim <- factor(ifelse(is.na(str_extract(dsl$cond,"x")),"y","x"))
+dsl$task <- factor(ifelse(is.na(str_extract(dsl$cond,"walk")),"search","walk"), levels = c("walk","search"),labels = c("Walk","Search"))
+
+print("Analysis of Spread")
+dsl %>% filter(dim == "x") %>% lmer(std ~ eyehead*task + (1|id),data = .) -> res
+anova(res)
+emmeans(res,pairwise~eyehead|task, adjust = "Holm")
+emmeans(res,pairwise~task|eyehead, adjust = "Holm")
+
+print("Descriptives for Spread")
+dsl %>% group_by(dim, eyehead, task) %>% filter(dim == "x") %>% 
+  summarise(spread = mean(std, na.rm = T), n = n(), SD = sd(std, na.rm = T))
+  
+#CHECK FOR OUTLIERS -- NONE FOUND
+dsl %>% group_by(dim, eyehead, task) %>% 
+  summarise(ym = mean(std, na.rm = T), lower = ym - 3*sd(std, na.rm = T), upper = ym + 3*sd(std, na.rm = T), ymin = min(std, na.rm =T), ymax = max(std, na.rm = T), x = 1) %>% 
+  ggplot(aes(x = interaction(dim, task, eyehead))) + geom_boxplot(aes(ymin = ymin, lower = lower, middle = ym, upper = upper, ymax = ymax), stat = "identity") +
+  geom_point(data = dsl, aes(y = std, group = interaction(dim, task, eyehead)), na.rm = T)
+
+#POSITION MEANS WITH TOTAL GAZE INCLUDED --------
+dsl <-  gather(ds, key = "cond", value = "std", "walk_posx_std","search_posx_std","walk_eyex_std","search_eyex_std","walk_gazex_std","search_gazex_std")
+dsl$eye <- factor(ifelse(is.na(str_extract(dsl$cond,"eye")),"","Eye"))
+dsl$head <- factor(ifelse(is.na(str_extract(dsl$cond,"pos")),"","Head"))
+dsl$total <- factor(ifelse(is.na(str_extract(dsl$cond,"gaze")),"","Gaze"))
+dsl$eyehead <- factor(str_c(dsl$eye,dsl$head,dsl$total,sep = ""))
+dsl$eyehead <- factor(dsl$eyehead, levels = c("Eye", "Head","Gaze"))
+dsl$task <- factor(ifelse(is.na(str_extract(dsl$cond,"walk")),"search","walk"), levels = c("walk","search"),labels = c("Walk","Search"))
+
+dsl %>% group_by(eyehead, task) %>% 
+  summarise(stdev = mean(std, na.rm = T), n = n(), se = sd(std, na.rm = T)/sqrt(n), ymin = stdev - se, ymax = stdev + se) %>% 
+  ggplot() + 
+  labs(x = "", y = "Position SD (º)") + 
+  geom_sina(data = filter(dsl), aes(y = std, x = eyehead, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3) +
+  geom_errorbar(aes(x = eyehead, group = task,ymin = ymin, ymax = ymax), size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  scale_y_continuous(breaks = c(0,10,20,30,40), limits = c(0,40))
+ggsave("/results/lss2_position_sd.pdf", units = "in", width = 5, height = 4)
+
+# LONG FORMAT POSITION TOTAL SD --------------
+dsl <-  gather(ds, key = "cond", value = "std", "walk_gazex_std","walk_gazey_std","search_gazex_std","search_gazey_std")
+dsl$dim <- factor(ifelse(is.na(str_extract(dsl$cond,"x")),"y","x"))
+dsl <- filter(dsl, dsl$dim == "x")
+dsl$task <- factor(ifelse(is.na(str_extract(dsl$cond,"walk")),"search","walk"),levels = c("walk","search"),labels = c("Walk","Search"))
+
+print("T-test of total gaze")
+dsl %>% group_by(task) %>% get_summary_stats(std, type = "mean_sd")
+dsl %>% t_test(std ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(std ~ task, paired = TRUE) 
+
+
+# GPS DATA  --------------
+#SPEED BY TASK
+
+  ds %>% gather(key = "task", value = "speed", "walk_path_speed", "search_path_speed") %>% 
+  mutate(task = factor(task, levels = c("walk_path_speed", "search_path_speed"), labels = c("Walk", "Search"))) -> dsl
+  
+  print("Walking Speed")
+  dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+  dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+  dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+  
+  dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Walking speed (m/s)") + 
+  scale_y_continuous(breaks = c(.25, .5, .75, 1, 1.25, 1.5), limits = c(.25, 1.5)) + 
+  theme(legend.position = "none") -> p1
+
+#SPEED SD BY TASK
+
+ds %>% gather(key = "task", value = "speed", "walk_path_speed_sd", "search_path_speed_sd") %>% 
+  mutate(task = factor(task, levels = c("walk_path_speed_sd", "search_path_speed_sd"), labels = c("Walk", "Search"))) -> dsl
+
+print("Walking Speed SD")
+dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+
+dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Walking speed SD (m/s)") + 
+  scale_y_continuous(breaks = c(0, .25, .5, .75, 1), limits = c(0,1)) + 
+  theme(legend.position = "none") -> p2
+
+#STRAIGHTNESS BY TASK
+
+ds %>% gather(key = "task", value = "speed", "walk_straightness", "search_straightness") %>% 
+  mutate(task = factor(task, levels = c("walk_straightness", "search_straightness"), labels = c("Walk", "Search"))) -> dsl
+
+print("Walking Straightness")
+dsl %>% group_by(task) %>% get_summary_stats(speed, type = "mean_sd")
+dsl %>% t_test(speed ~ task, paired = TRUE) %>% add_significance()
+dsl %>% cohens_d(speed ~ task, paired = TRUE) 
+
+dsl %>%  group_by(task) %>% 
+  summarise(Speed = mean(speed, na.rm = T), n = n(), se = sd(speed, na.rm = T)/sqrt(n), ymin = Speed - se, ymax = Speed + se) %>%
+  ggplot() + 
+  geom_sina(data = dsl, aes(y = speed, x = task, color = task), maxwidth = .5, position = position_dodge(.6), alpha = .5, size = 3, na.rm = T) +
+  geom_errorbar(aes(x = task, ymin = ymin, ymax = ymax), color = "black", size =1, width = .3, position = position_dodge(.6)) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + 
+  labs(x = "", y = "Straightness ratio") + 
+  scale_y_continuous(breaks = c(0, 2.5, 5, 7.5), limits = c(0,7.5)) + 
+  theme(legend.position = "none") -> p3
+
+p1 + p2 + p3
+ggsave("/results/lss2_walking_stats_composite.pdf", units = "in", width = 9, height = 4)
+
+
+  t.test(ds$walk_headxspeed_corr,ds$search_headxspeed_corr, paired = T)--- lss2 peak ---
+library(multcomp)
+library(emmeans)
+library(tidyverse)
+library(effects)
+library(lme4)
+library(lmerTest)
+library(psych)
+library(ggforce)
+
+cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73",
+          "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+theme_update(text = element_text(size = 18),
+             axis.text.x = element_text(size = 18, color = "black"), axis.title.x = element_text(size = 21, margin = margin(t = 0, r = 0, b = 10, l = 0)),
+             axis.text.y = element_text(size = 18,  color = "black"), axis.title.y = element_text(size = 21, margin = margin(t = 0, r = 10, b = 0, l = 0)), 
+             panel.background = element_blank(),panel.border = element_blank(), panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(), axis.line = element_line(colour = "white"), 
+             axis.ticks.length = unit(.25, "cm"), axis.ticks = element_line(size = 1, lineend = "round"),
+             legend.key = element_rect(fill = "white")) 
+
+print("LSS 2 Analyses, QJEP Paper Study 2, Head Contribution")
+
+# CREATE DATA SET ---------------------------------------------------------------
+ds <- read_csv("/data/summary_stats_LSS2_peaks.csv", na = "NaN")
+ds <- filter(ds, ds$opp == 0) #Remove peaks when eyes and head are in opposition
+ds <- mutate(ds, id = factor(id))
+ds$task <- factor(ds$cond, levels = c("Walk","Search"))
+ds$bin[ds$bin > 7] <- 7
+ds$bin <- factor(ds$bin, levels = c(0,1,2,3,4,5,6,7), labels = c("10","20","30","40","50","60","70","80+"))
+ds$eye_prop <- abs(ds$eye_prop)
+ds$head_prop <- abs(ds$head_prop)
+ds$eye <- abs(ds$eye)
+ds$head <- abs(ds$head)
+
+# Head contribution --------------
+
+print("LMM of head contribution by bin and task")
+ds %>% group_by(task,id, bin) %>% 
+  summarise(head_prop = mean(head_prop), na.rm = T) %>% 
+  lmer(head_prop ~ bin*task + (1|id), data = .) -> res
+anova(res)
+emmeans(res, pairwise~task|bin,adjust = "Holm")
+
+
+ds %>% group_by(task, bin) %>% 
+  summarise(eye = mean(abs(eye_prop), na.rm = T), n = n(), se_eye = sd(abs(eye_prop), na.rm = T)/sqrt(n), ymin_eye = eye - se_eye, ymax_eye = eye + se_eye, head = mean(abs(head_prop), na.rm = T), se_head = sd(abs(head_prop), na.rm = T)/sqrt(n), ymin_head = head - se_head, ymax_head = head + se_head) %>% 
+  ggplot(aes(x = bin, color = task, y = head, ymin = ymin_head, ymax = ymax_head)) + 
+  labs(x = "Total gaze shift (º)", y = "Head contribution (prop.)") + #facet_wrap(~ task) + 
+  #geom_pointrange(aes(x = bin, color = task, y = eye, ymin = ymin_eye, ymax = ymax_eye), size =1, position = position_dodge(.6)) +
+  geom_pointrange(size =1.25, shape = 22, fill = NA, na.rm = T) +
+  scale_color_manual(values = cbp1[c(7,6)], name = "Task") + #geom_smooth(method = "loess", na.rm = T) + 
+  theme(legend.position = "bottom") +
+  ylim(c(.3,.7))
+ggsave("/results/head_contribution.pdf", units = "in", width = 5, height = 4)

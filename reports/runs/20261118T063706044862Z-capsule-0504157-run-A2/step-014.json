@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nload('../data/ratingData5')\nload('../data/visData5')\nExclList5 <- c(4, 5, 7, 13, 30, 66, 160)\nratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))\nratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS),1,1)=='p','positive','negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)\nratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)\nratingData5AggrW <- tidyr::spread(ratingData5Aggr, key='USval', value='likingRating')\ntmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))\ntmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)\nnames(tmpVis)[names(tmpVis)=='Length'] <- 'correspondingTime'\nratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c('ParticipantNumber','correspondingTime'))\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS",
+  "exit_code": 1,
+  "seconds": 1.12097749998793,
+  "stdout": "artifacts/step-014.stdout.txt",
+  "stderr": "artifacts/step-014.stderr.txt"
+}

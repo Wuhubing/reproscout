@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python3 - <<'PY'\nfrom pathlib import Path\np=Path('manuscript_croco4_5.Rmd')\ntext=p.read_text()\nold='''# This script automatically checks for the largest Participantnumber which is on github\ngithub_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\nfile_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")\nfile_names <- html_text(file_nodes)\nfile_names <- gsub(\".txt\", \"\", file_names)\n\n#get only Croco5_log files (these files appear at top of list on github)\ntmp <- subset(file_names, substring(file_names, 1, 10) == \"Croco5_log\")\nN <- as.numeric(length(tmp))'''\nnew='''# Use cached/local data in this environment; N is only needed when loading directly from GitHub.\nN <- 160'''\nif old not in text:\n    raise SystemExit('pattern not found')\ntext=text.replace(old,new)\np.write_text(text)\nPY\nsed -n '396,410p' manuscript_croco4_5.Rmd",
+  "exit_code": 0,
+  "seconds": 0.1295596249983646,
+  "stdout": "artifacts/step-011.stdout.txt",
+  "stderr": "artifacts/step-011.stderr.txt"
+}

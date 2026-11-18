@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nlibrary(meta)\nlibrary(tidyverse)\ndf <- read.csv('/data/preregSR_dataClean.csv')\ndf$disclosedNum <- as.numeric(df$disclosedNum)\ndfMeta <- df %>% filter(!is.na(disclosedNum))\nmeta <- meta::metaprop(dfMeta$disclosedNum, dfMeta$disclosedDenom, method='GLMM', method.tau='ML', method.tau.ci='J', comb.random=TRUE, prediction=TRUE, level.predict=0.95, hakn=TRUE)\ncat('k=', meta$k, '\\n')\ncat('sum(meta$n)=', sum(meta$n), '\\n')\ncat('meta$n.e? ', paste(meta$n.e, collapse=','), '\\n')\ncat('meta$n.c? ', paste(meta$n.c, collapse=','), '\\n')\ncat('dfMeta rows=', nrow(dfMeta), '\\n')\nRS",
+  "exit_code": 0,
+  "seconds": 7.8606021660380065,
+  "stdout": "artifacts/step-014.stdout.txt",
+  "stderr": "artifacts/step-014.stderr.txt"
+}

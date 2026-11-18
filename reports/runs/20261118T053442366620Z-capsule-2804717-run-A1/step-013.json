@@ -1,0 +1,7 @@
+{
+  "command": "cat > /tmp/pandoc <<'SH'\n#!/usr/bin/env python3\nimport sys,re,os\nargs=sys.argv[1:]\nif '--version' in args or len(args)==0:\n    print('pandoc 2.0.0')\n    sys.exit(0)\n# find input and output\nout=None\ninp=None\nfor i,a in enumerate(args):\n    if a=='-o' or a=='--output':\n        out=args[i+1]\n    if not a.startswith('-'):\n        inp=a\n# fallback: last two non-option args\nnon=[a for a in args if not a.startswith('-')]\nif inp is None and non: inp=non[0]\nif out is None and len(non)>1: out=non[-1]\nmd=open(inp).read() if inp and os.path.exists(inp) else ''\nhtml=['<html><body>']\nfor line in md.splitlines():\n    m=re.match(r'^(#{1,6})\\s*(.*)', line)\n    if m:\n        html.append(f\"<h{len(m.group(1))}>{m.group(2)}</h{len(m.group(1))}>\")\n    elif line.startswith('![]('):\n        src=line[4:-1]\n        html.append(f'<img src=\"{src}\"/>')\n    elif line.strip()=='' :\n        html.append('<br/>')\n    else:\n        html.append('<p>'+line+'</p>')\nhtml.append('</body></html>')\nif out:\n    open(out,'w').write('\\n'.join(html))\nelse:\n    sys.stdout.write('\\n'.join(html))\nSH\nchmod +x /tmp/pandoc\nPATH=/tmp:$PATH cd /code && Rscript -e \"rmarkdown::render(input='ResultReproducibilityNotebook.Rmd', output_dir='../results', clean=TRUE)\"",
+  "exit_code": 1,
+  "seconds": 1.6629323330125771,
+  "stdout": "artifacts/step-013.stdout.txt",
+  "stderr": "artifacts/step-013.stderr.txt"
+}

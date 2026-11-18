@@ -1,0 +1,91 @@
+        filename <- str_glue('supplemental_table1_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table of SEER incidence and mortality rates
+##################################################
+format_seer <- function(dset, fmt='%5.2f', saveit=FALSE){
+    dset <- dset %>% select(site, age, prevalence, mortality)
+    dset <- dset %>% mutate(site=factor(site, levels=c('Breast',
+                                                       'Colorectal',
+                                                       'Liver',
+                                                       'Lung',
+                                                       'Ovary',
+                                                       'Pancreas')),
+                            age=sub('-[567]4', '', age),
+                            prevalence=sprintf(fmt, 100*prevalence),
+                            mortality=sprintf(fmt, 100*mortality))
+    dset <- dset %>% arrange(site, age)
+    dset <- dset %>% rename('Tissue of origin'='site',
+                            'Age, y'='age',
+                            '5-year probability of diagnosis, %'=prevalence,
+                            '15-year probability of death, %'=mortality)
+    if(saveit){
+        filename <- str_glue('table1_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table for six cancers in Liu et al
+##################################################
+format_inputs <- function(dset, saveit=FALSE){
+    dset <- dset %>% rename('Tissue of origin'='site',
+                            'Test sensitivity, %'='sensitivity',
+                            'Localization probability, %'='localization',
+                            'Marginal sensitivity, %'='marginal',
+                            'Mortality reduction, %'='effect')
+    if(saveit){
+        filename <- str_glue('table2_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table for realistic six-cancer test
+##################################################
+format_empirical <- function(dset, saveit=FALSE){
+    dset <- dset %>% select(Test, age, EUC, CD, LS)
+    dset <- dset %>% mutate(age=sub('-[567]4', '', age),
+                            EUC.CD=EUC/CD,
+                            EUC.LS=EUC/LS)
+    dset <- dset %>% mutate(EUC=sprintf('%4.1f', EUC),
+                            CD=sprintf('%3.1f', CD),
+                            LS=sprintf('%3.1f', LS),
+                            EUC.CD=sprintf('%3.1f', EUC.CD),
+                            EUC.LS=sprintf('%3.1f', EUC.LS))
+    dset <- dset %>% rename('Screening age, y'='age',
+                            'Exposed to unnecessary confirmation, n'='EUC',
+                            'Cancers detected, n'='CD',
+                            'Lives saved, n'='LS',
+                            'EUC/CD'='EUC.CD',
+                            'EUC/LS'='EUC.LS')
+    if(saveit){
+        filename <- str_glue('table3_{datestamp}.csv')
+        write_csv(dset, file.path(resupath, filename))
+    }
+}
+
+##################################################
+# Format table for sensitivity analyses
+##################################################
+format_supplemental <- function(dset, tableno, saveit=FALSE){
+    dset <- dset %>% select(age, site, EUC, CD, LS_low, LS_mid, LS_high)
+    dset <- dset %>% mutate(age=sub('-[567]4', '', age),
+                            site=factor(site, levels=c('Colorectal',
+                                                       'Liver',
+                                                       'Lung',
+                                                       'Ovary',
+                                                       'Pancreas')),
+                            EUC=sprintf('%4.1f', EUC),
+                            CD=sprintf('%3.1f', CD),
+                            LS_low=sprintf('%3.1f', LS_low),
+                            LS_mid=sprintf('%3.1f', LS_mid),
+                            LS_high=sprintf('%3.1f', LS_high))
+    dset <- dset %>% arrange(age, site)
+    dset <- dset %>% rename('Tissue of origin'='site',
+                            'Screening age, y'='age',
+                            'Exposed to unnecessary confirmation, n'='EUC',
+                            'Cancers detected, n'='CD',

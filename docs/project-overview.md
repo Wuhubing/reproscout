@@ -99,7 +99,7 @@ research result is a separate question. The original +2 solved improvement targe
 prompts are not automatically satisfied by a working application. Report these as
 unestablished unless the corresponding experiment has actually been conducted.
 
-## Current v0.3.0 research status
+## Historical v0.3.0 research status
 
 The repaired controller passed a five-task A/B development accounting check and
 then completed a frozen sixty-attempt matrix on the same fifteen test tasks.
@@ -108,3 +108,17 @@ the lesson comparison is therefore inconclusive. The application delivers an
 auditable failed experiment, with old/new success, control failures, input audits,
 time and cost visible together. It does not present completion of the run matrix
 as proof of a successful scientific comparison. All previous releases remain intact.
+
+## v0.4.0 network recovery delivery
+
+The frozen prepared-v4 study completed sixty scientific cells, with 1
+additional infrastructure attempts retained separately. A solved 25/30 and B
+21/30. The project now records bounded request retries, checks counting connectivity
+before each cell, and keeps scientific failures final. Thirty real counting probes,
+injected DNS recovery, ten development A/B outcomes, 31 software tests, and thirteen
+environment checks passed before formal evaluation. Historical v3 DNS failures
+remain evidence of an invalid infrastructure-limited comparison.
+
+See [the network protocol](network-recovery-protocol.md),
+[updated comparison](controller-comparison.md), and
+[development evidence](../reports/development-v4-validation.json).

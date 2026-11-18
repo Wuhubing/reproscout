@@ -1,0 +1,39 @@
+[1] TRUE
+A single object matching ‘find_pandoc’ was found
+It was found in the following places
+  package:rmarkdown
+  namespace:rmarkdown
+with value
+
+function (cache = TRUE, dir = NULL, version = NULL) 
+{
+    if (!cache) 
+        set_pandoc_info(NULL)
+    if (!is.null(.pandoc$dir) && (is.null(version) || version == 
+        .pandoc$version)) 
+        return(as.list(.pandoc))
+    sources <- if (length(dir) == 0) 
+        c(Sys.getenv("RSTUDIO_PANDOC"), dirname(find_program("pandoc")), 
+            "~/opt/pandoc")
+    else dir
+    sources <- path.expand(sources)
+    versions <- lapply(sources, function(src) {
+        if (dir_exists(src)) 
+            get_pandoc_version(src)
+        else numeric_version("0")
+    })
+    found_src <- NULL
+    found_ver <- numeric_version("0")
+    for (i in seq_along(sources)) {
+        ver <- versions[[i]]
+        if ((!is.null(version) && ver == version) || (is.null(version) && 
+            ver > found_ver)) {
+            found_ver <- ver
+            found_src <- sources[[i]]
+        }
+    }
+    set_pandoc_info(found_src, found_ver)
+    as.list(.pandoc)
+}
+<bytecode: 0x4001c75a28>
+<environment: namespace:rmarkdown>

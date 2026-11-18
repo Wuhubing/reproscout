@@ -1,0 +1,71 @@
+
+return(t)
+  }
+```
+
+```{r importData}
+# Import the samples sizes and types of analyses for the fMRI review. Two separate tables: one for behvaiour/clinical measurements, and one for neurofeedback regulation ability.
+dMRIreg <- read.csv("/data/fMRInf_regulation.csv", header = TRUE)
+dMRIbeh <- read.csv("/data/fMRInf_behaviour.csv", header = TRUE)
+
+# Import the same data for the fNIRS review.
+dNIRSreg <- read.csv("/data/fNIRSnf_regulation.csv", header = TRUE)
+dNIRSbeh <- read.csv("/data/fNIRSnf_behaviour.csv", header = TRUE)
+```
+
+```{r makeTables}
+# Recalculate power and sensitivity using the funcion output() we defined earlier
+dMRIreg <- output(dMRIreg)
+dMRIbeh <- output(dMRIbeh)
+dNIRSreg <- output(dNIRSreg)
+dNIRSbeh <- output(dNIRSbeh)
+
+# Create tabular data using the tableMRI() and tableNIRS() function we defined earlier
+tMRIreg <- tableMRI(dMRIreg)
+tMRIbeh <- tableMRI(dMRIbeh)
+tNIRSreg <- tableNIRS(dNIRSreg)
+tNIRSbeh <- tableNIRS(dNIRSbeh)
+
+# remove pilot studies from the MRI numbers so that it matches Table 3 of the review
+tMRIout <- rbind(tMRIreg[1:2,], tMRIbeh[1:2,])
+
+# assign names to rows and columns so it matches Table 3 of the review
+rownames(tMRIout) <- c("Mean (regulation)", "Median (regulation)", "Mean (clinical)", "Median (clinical)")
+colnames(tMRIout) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+# import original data for to compare with recalculated values and to calculate the 'overestimation factor'
+tMRIoriginal <- read.csv("/data/fMRInf_originalSummary.csv", row.names=1, header = TRUE)
+colnames(tMRIoriginal) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+# calculate the 'overestimation factor'. It is inversed for the sensitivity calucations
+tMRIdif <- (tMRIoriginal/tMRIout)
+tMRIdif[,5:6] <-  tMRIdif[,5:6]^-1
+
+# assign row names for the tables which include the recalculated values, original values, and overestimation factors. Note, we use blank spaces beacuse R doesn't allow 2 rows to have the same name.
+tMRI <- rbind(tMRIout, tMRIoriginal, tMRIdif)
+rownames(tMRI) <- c("Mean (regulation)", "Median (regulation)", "Mean (clinical)", "Median (clinical)","Mean (regulation) ", "Median (regulation) ", "Mean (clinical) ", "Median (clinical) ","Mean (regulation)  ", "Median (regulation)  ", "Mean (clinical)  ", "Median (clinical)  ")
+
+# calculate the mean overestimation factor across all the power calculations 
+difMRIPower <- tMRI[9:12,2:4] %>% as.vector() %>% colMeans() %>% mean()
+# calculate the mean overestimation factor across all the sensitivity calculations 
+difMRISensitivity <- tMRI[9:12,5:6] %>% as.vector() %>% colMeans() %>% mean()
+
+##### fNIRS. The code below is the same as for the first half of this chunk, but for the fNIRS data.
+
+tNIRSout <- rbind(tNIRSreg[1:2,], tNIRSbeh[1:2,])
+rownames(tNIRSout) <- c("Mean (regulation)", "Median (regulation)", "Mean (behavioural)", "Median (behavioural)")
+colnames(tNIRSout) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+tNIRSoriginal <- read.csv("/data/fNIRSnf_originalSummary.csv", row.names=1, header = TRUE)
+colnames(tNIRSoriginal) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+tNIRSdif <- (tNIRSoriginal/tNIRSout) 
+tNIRSdif[,5:6] <-  tNIRSdif[,5:6]^-1 
+
+tNIRS <- rbind(tNIRSout, tNIRSoriginal, tNIRSdif)
+rownames(tNIRS) <- c("Mean (regulation)", "Median (regulation)", "Mean (behavioural)", "Median (behavioural)","Mean (regulation) ", "Median (regulation) ", "Mean (behavioural) ", "Median (behavioural) ","Mean (regulation)  ", "Median (regulation)  ", "Mean (behavioural)  ", "Median (behavioural)  ")
+
+difNIRSPower <- tNIRS[9:12,2:4] %>% as.vector() %>% colMeans() %>% mean()
+difNIRSSensitivity <- tNIRS[9:12,5:6] %>% as.vector() %>% colMeans() %>% mean()
+
+# round the values in the tables to two decimal places

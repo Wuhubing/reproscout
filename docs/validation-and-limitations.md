@@ -21,7 +21,7 @@ billing receipt. Failed or interrupted calls can retain reserved unknown cost.
 
 ## Limits of interpretation
 
-- The v3 cohort has fifteen unique capsules, all previously evaluated. In v2,
+- The v3 and v4 cohorts have fifteen unique capsules, all previously evaluated. In v2,
   two had previous v0.1.0 exposure and thirteen were newly evaluated. Repeated runs do
   not increase the number of independent tasks. Neither significance nor broad
   language/modality performance should be inferred from these counts.
@@ -148,3 +148,23 @@ the DNS-failure finding and its zero-call label was made cause-neutral. Markdown
 reports distinguish primary answer scoring, input integrity, runtime and transport
 failure. These are presentation artifacts, not replacement experimental records.
 Regenerating the generic exporter alone does not recreate all editorial annotations.
+
+## v4 network recovery and completion semantics
+
+The new network and scheduler tests cover transient recovery, persistent failures,
+non-retryable authentication/quota responses, refusal to retry ambiguous generation,
+and preservation of infrastructure failures outside scientific completion counts.
+The development gate includes thirty real calls through the same Inspect adapter,
+two injected DNS failures followed by live recovery, and ten training A/B outcomes.
+These bounded observations do not guarantee future network stability or identify
+the historical resolver root cause.
+
+Only non-infrastructure scientific outcomes fill the sixty-cell matrix. All attempts
+remain exported, and failed attempts consume the original shared cell cost, call,
+and time allowances. Scientific budget failures and incorrect submissions are final.
+Preflight exhaustion or exhausted infrastructure retry budgets leave the experiment
+incomplete rather than manufacturing a completed matrix. See the frozen network
+protocol and complete comparison for exact results. No frozen file changed during
+or after v4 evaluation; report narratives are separate delivery artifacts.
+
+The request JSONL ledger records application-level operations. The pinned underlying HTTP transport may retry a connection internally; the ledger is not a packet-level or individual TCP-attempt trace. The historical sleep/DarkWake correlation and successful control are documented separately in [the incident analysis](network-incident-analysis.md).

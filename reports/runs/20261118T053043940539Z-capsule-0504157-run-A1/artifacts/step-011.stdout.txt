@@ -1,0 +1,15 @@
+
+```{r getPPN}
+
+# This script automatically checks for the largest Participantnumber which is on github
+github_page <- read_html("https://github.com/methexp/rawdata/tree/master/croco5")
+file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+file_names <- html_text(file_nodes)
+file_names <- gsub(".txt", "", file_names)
+
+#get only Croco5_log files (these files appear at top of list on github)
+tmp <- subset(file_names, substring(file_names, 1, 10) == "Croco5_log")
+N <- as.numeric(length(tmp))
+```
+
+```{r Demographics5, warning = FALSE}

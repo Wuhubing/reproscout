@@ -1,0 +1,31 @@
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r output}
+# create a function to output the power and sensitivity of each study included in the reviews.
+output <- function(d){
+  
+for (i in 1:nrow(d)){
+  
+# calculate power for small, medium, and large cohen's effect sizes, using d = f*2. Also calculate sensitivity for power = 0.8 and 0.95. The type of anova to run is coded in the data, where type = 2 is for interactions, and type = 1 is for between groups. 
+  if (d$test[i] == "anova"){
+    d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.1, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$medium[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.25, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$large[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.4, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$p80[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .80, type = d$type[i])$f*2
+    d$p95[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .95, type = d$type[i])$f*2
+    #the *2 is to convert effect sizes of type "f" to effect sizes in Cohen's d
+    
+  # as for above for independent sample t-tests.  
+  # floor() rounds down and ceiling() rounds up for studies with an uneven number of participants
+  } else if (d$test[i] == "ttest2") {
+    d$small[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for one sample t-tests and paired sample t-tests
+  } else if (d$test[i] == "ttest1"){
+    d$small[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power

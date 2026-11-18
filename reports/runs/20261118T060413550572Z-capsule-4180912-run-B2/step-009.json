@@ -1,0 +1,5 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport pandas as pd, numpy as np\nfrom sklearn.neural_network import MLPClassifier\nfrom sklearn.preprocessing import scale\nimport sklearn.metrics as mt\nfrom sklearn.model_selection import GridSearchCV, train_test_split\n\ntable = pd.read_csv('/data/diabeticos2.csv')\ny = table['Tipo'].to_numpy()\ndel table['Tipo']; del table['G120']; del table['I120']\nX = scale(table.to_numpy())\nNUM_TRIALS=2\nacc=[]\nfor i in range(NUM_TRIALS):\n    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.20)\n    cv = GridSearchCV(MLPClassifier(), {'learning_rate_init':[0.001],'alpha':[0.0005],'hidden_layer_sizes':[(50,)],'max_iter':[10000]}, cv=5, n_jobs=-1)\n    cv.fit(X_train, y_train)\n    pred = cv.predict(X_test)\n    acc.append(mt.accuracy_score(y_test,pred))\nprint(np.mean(acc))\nPY",
+  "status": "timeout",
+  "seconds": 180.17185970797436
+}

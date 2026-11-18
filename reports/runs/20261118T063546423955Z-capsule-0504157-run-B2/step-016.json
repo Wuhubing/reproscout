@@ -1,0 +1,7 @@
+{
+  "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nlibrary(tidyr)\n# aggregate ratings per participant, time, and US valence\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber + correspondingTime + correspondingUS, ratingData5, FUN = mean)\nratingData5Aggr$USval <- ifelse(substr(as.character(ratingData5Aggr$correspondingUS),1,1)=='p','positive','negative')\nratingData5AggrW <- spread(ratingData5Aggr, key = 'USval', value = 'likingRating')\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS",
+  "exit_code": 1,
+  "seconds": 1.1463607500190847,
+  "stdout": "artifacts/step-016.stdout.txt",
+  "stderr": "artifacts/step-016.stderr.txt"
+}

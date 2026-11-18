@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && jupyter nbconvert --to notebook --execute FGBR_OC.ipynb --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.allow_errors=True --output FGBR_OC_executed.ipynb --output-dir /results >/tmp/nb.log 2>&1; cat /tmp/nb.log && python - <<'PY'\nimport nbformat, json\nnb=nbformat.read('/results/FGBR_OC_executed.ipynb', as_version=4)\nfor i,c in enumerate(nb.cells):\n    if c.cell_type=='code' and c.outputs:\n        print('CELL',i)\n        for out in c.outputs:\n            if out.output_type=='stream':\n                print(out.text)\n            elif out.output_type=='execute_result':\n                print(out['data'].get('text/plain',''))\nPY",
+  "exit_code": 0,
+  "seconds": 12.56117391702719,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}

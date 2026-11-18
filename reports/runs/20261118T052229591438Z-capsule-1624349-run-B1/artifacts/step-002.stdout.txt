@@ -1,0 +1,16 @@
+CELL 1: import pandas as pd import numpy as np from sklearn.feature_selection import chi2, mutual_info_classif from sklearn.model_selection import train_test_split from
+CELL 2: seg_data = pd.read_csv('../data/segmentation-all.csv') print(seg_data.shape) seg_data.head()
+CELL 3: seg_data['Class'].value_counts()
+CELL 5: y = seg_data.pop('Class').values X_raw = seg_data.values  X_tr_raw, X_ts_raw, y_train, y_test = train_test_split(X_raw, y,                                      
+CELL 7: chi2_score, pval = chi2(X_train, y_train) chi2_score = np.nan_to_num(chi2_score) chi2_score # The chi square scores for the features
+CELL 8: i_scores = mutual_info_classif(X_train,y_train) i_scores # The i-gain scores for the features
+CELL 10: df=pd.DataFrame({'Mutual Info.':i_scores,'Chi Square':chi2_score,'Feature':feature_names}) df.set_index('Feature', inplace = True) df.sort_values('Mutual Info.'
+CELL 12: fig, ax = plt.subplots() rr = range(0,len(feature_names)) ax2 = ax.twinx() ax.plot(df.index, df["Mutual Info."], label='I-Gain') ax2.plot(df.index, df["Chi Squa
+CELL 13: from scipy import stats stats.spearmanr(chi2_score, i_scores)
+CELL 15: from sklearn.model_selection import train_test_split from sklearn.feature_selection import SelectKBest, mutual_info_classif from sklearn.metrics import accuracy
+CELL 17: model = KNeighborsClassifier(n_neighbors=3) model = model.fit(X_train,y_train) y_pred = model.predict(X_test) acc = accuracy_score(y_pred,y_test) acc
+CELL 18: n_features = X_train.shape[1] n_features
+CELL 19: filters = [mutual_info_classif, chi2] k_options = [n_features, 3, 6, 10, 15] filt_scores = {} chi_scores = {} i_gain_scores = {} 
+CELL 20: import matplotlib.pyplot as plt  import numpy as np %matplotlib inline   fig, ax = plt.subplots() width = 0.3
+CELL 22: cv_acc_scores = [] tst_acc_scores = [] best_acc = 0 best_k = 0 for kk in range(1, X_train.shape[1]+1):     FS_trans = SelectKBest(mutual_info_classif, 
+CELL 23: import matplotlib.pyplot as plt %matplotlib inline  n = len(df.index) rr = range(0,n) fig, ax = plt.subplots()

@@ -1,0 +1,7 @@
+{
+  "command": "python - <<'PY'\nfrom pathlib import Path\nimport shutil\nsrcdir=Path('/code')\nout=Path('/results/run')\nout.mkdir(exist_ok=True)\nfor fn in ['FGBR_OC.ipynb','fuzzy_operations.py','my_datasets.py']:\n    shutil.copy(srcdir/fn, out/fn)\n# patch my_datasets.py iris loader to use sklearn offline dataset\np=out/'my_datasets.py'\ntext=p.read_text()\nold='''def my_load_iris():\n    # Load the seaborn iris dataset  \n    df = sns.load_dataset(\"iris\", sep=\",\")\n    df = df.dropna()\n    Y=df[\"petal_width\"]\n    df=df.drop([\"species\",\"petal_width\"],axis=1)\n    X=df\n    \n    X_train, X_test, y_train, y_test = train_test_split(X, Y, random_state=0, test_size=0.1)\n    X_train = X_train.to_numpy()\n    X_test = X_test.to_numpy()\n    y_train = y_train.to_numpy()\n    y_test = y_test.to_numpy()\n    return X_train, X_test, y_train, y_test\n'''\nnew='''def my_load_iris():\n    # Offline iris dataset using scikit-learn\n    data = datasets.load_iris(as_frame=True)\n    df = data.frame\n    Y = df[\"petal width (cm)\"]\n    X = df.drop(columns=[\"target\", \"petal width (cm)\"])\n    X_train, X_test, y_train, y_test = train_test_split(X, Y, random_state=0, test_size=0.1)\n    return X_train.to_numpy(), X_test.to_numpy(), y_train.to_numpy(), y_test.to_numpy()\n'''\nif old not in text:\n    raise SystemExit('old block not found')\np.write_text(text.replace(old,new))\nprint('patched')\nPY",
+  "exit_code": 0,
+  "seconds": 0.2660173329641111,
+  "stdout": "artifacts/step-018.stdout.txt",
+  "stderr": "artifacts/step-018.stderr.txt"
+}

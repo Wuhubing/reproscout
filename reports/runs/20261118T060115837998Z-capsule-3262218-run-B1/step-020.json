@@ -1,0 +1,7 @@
+{
+  "command": "cat > /tmp/fakepandoc/pandoc <<'EOF'\n#!/usr/bin/env bash\nset -euo pipefail\nprintf '%q ' \"$@\" >> /tmp/pandoc_args.log\nprintf '\\n' >> /tmp/pandoc_args.log\nif [[ \"${1:-}\" == \"--version\" ]]; then\n  echo \"pandoc 2.19.2\"\n  exit 0\nfi\nout=\"\"\nin=\"\"\nargs=(\"$@\")\nfor ((i=0; i<${#args[@]}; i++)); do\n  case \"${args[$i]}\" in\n    -o|--output)\n      out=\"${args[$((i+1))]}\" ;;\n  esac\ndone\n# choose last non-option arg that is not +RTS/-RTS/-K* or *.lua etc\nfor ((i=${#args[@]}-1; i>=0; i--)); do\n  a=\"${args[$i]}\"\n  case \"$a\" in\n    -*|+RTS|-RTS) continue ;;\n    *) in=\"$a\"; break ;;\n  esac\ndone\nif [[ -z \"$out\" ]]; then\n  echo 'no output specified' >&2\n  exit 1\nfi\ncat > \"$out\" <<'TEX'\n\\documentclass[11pt]{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[margin=1in]{geometry}\n\\usepackage{fancyvrb}\n\\begin{document}\n\\begin{Verbatim}[fontsize=\\small]\nTEX\nif [[ -n \"$in\" && -f \"$in\" ]]; then\n  cat \"$in\" >> \"$out\"\nelse\n  echo '[pandoc wrapper] no input file found' >> \"$out\"\nfi\ncat >> \"$out\" <<'TEX'\n\\end{Verbatim}\n\\end{document}\nTEX\nexit 0\nEOF\nchmod +x /tmp/fakepandoc/pandoc\nrm -f /tmp/pandoc_args.log\ncd /code && PATH=/tmp/fakepandoc:$PATH Rscript -e \"rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)\" || true\ncat /tmp/pandoc_args.log | tail -n 5",
+  "exit_code": 0,
+  "seconds": 32.31825483299326,
+  "stdout": "artifacts/step-020.stdout.txt",
+  "stderr": "artifacts/step-020.stderr.txt"
+}

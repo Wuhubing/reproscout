@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse)\ndf <- read.csv('/data/preregSR_dataClean.csv')\ncat('nrow', nrow(df), '\\n')\nprint(sort(table(df$discipline), decreasing=TRUE))\ncat('medicine k:', sum(df$discipline == 'Medicine (MEDI)', na.rm=TRUE), '\\n')\n# table3 first row likely disclosedNum non-NA, n = ndisclosed. Need inspect columns.\nprint(names(df)[grepl('disclosed|favorSig|sigDisc|industryDisc|proDisc', names(df))])\ncat('non-NA disclosedNum:', sum(!is.na(df$disclosedNum)), '\\n')\ncat('ndisclosed maybe:', sum(df$disclosedDenom, na.rm=TRUE), '\\n')\ncat('sum proDisc non-NA:', sum(!is.na(df$proDisc)), '\\n')\ncat('sum proDisc denom:', sum(df$proDisc + df$retroDisc + 0, na.rm=TRUE), '\\n')\nRS",
+  "exit_code": 0,
+  "seconds": 4.026331334025599,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

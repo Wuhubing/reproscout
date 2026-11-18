@@ -1,0 +1,26 @@
+236:VisibilityCorrData4 <- aggregate(correctAnswer ~ ParticipantNumber * CS * Length, VisibilityData4, mean)
+277:VisibilityCorrData4B <- aggregate(correctAnswer ~ ParticipantNumber * CS * Length, VisibilityData4B, mean)
+495:visData5Aggr <- aggregate(correctAnswer ~ ParticipantNumber * CS + Length, visData5, sum)
+527:ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)
+555:  , fun_aggregate = mean
+561:ratingData5AggrW <- spread(
+569:allD30 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "153")$positive,
+570:        subset(ratingData5AggrW, correspondingTime == "153")$negative,
+576:allD1000 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "250")$positive,
+577:        subset(ratingData5AggrW, correspondingTime == "250")$negative,
+590:tmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)
+594:ratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c("ParticipantNumber", "correspondingTime"))
+596:ratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative
+599:# plot(subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "153")$EC, pch = 21,  col = "#045a8d", bg = "lightblue", ylab = "EC Effect", xlab = "mean visibility", main = "30 ms CS presentation")
+600:# abline(lm(subset(ratingData5AggrW, correspondingTime == "153")$EC ~ subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer), col="blue")
+603:# plot(subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "250")$EC, pch = 21,  col = "#b30000", bg = "#fc8d59", ylab = "EC Effect", xlab = "mean visibility", main = "1000 ms CS presentation")
+604:# abline(lm(subset(ratingData5AggrW, correspondingTime == "250")$EC ~ subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer), col="red")
+629:ratingData5AggrW$pTime <- ifelse(as.character(ratingData5AggrW$correspondingTime) == "153", "30 ms", "1000 ms")
+630:ratingData5AggrW$pTime <- as.factor(ratingData5AggrW$pTime)
+633:           data = ratingData5AggrW,
+676:rD5twoSeenAggr <- aggregate(likingRating ~ ParticipantNumber * USval * Length, rD5twoSeen, mean)
+702:rd5moreTwoSeen <- aggregate(likingRating ~ ParticipantNumber * USval, rd5moreTwoSeen, mean)
+718:ratingData5AggrW$adler <- ifelse(as.integer(as.character(ratingData5AggrW$ParticipantNumber)) %in% adler, "adler", "normalVision")
+719:ratingData5AggrW$adler <- as.factor(ratingData5AggrW$adler)
+722:adlerVsRest <- ttestBF(subset(ratingData5AggrW, correspondingTime == 250 & adler == "adler")$EC,
+723:                       subset(ratingData5AggrW, correspondingTime == 250 & adler == "normalVision")$EC,

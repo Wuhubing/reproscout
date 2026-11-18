@@ -1,0 +1,46 @@
+   520	
+   521	ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)
+   522	
+   523	#recode US as pos or neg into new variable
+   524	ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == "p", "positive", "negative")
+   525	ratingData5$USval <- as.factor(ratingData5$USval)
+   526	
+   527	ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)
+   528	
+   529	ratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)
+   530	ratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)
+   531	
+   532	
+   533	```
+   534	
+   535	```{r analyzeRate5}
+   536	if(cacheBF){
+   537	  load("../data/aovBF5")
+   538	} else{
+   539	aovBF5 <- anovaBF(
+   540	  likingRating ~ USval * correspondingTime + ParticipantNumber
+   541	  , data = ratingData5Aggr
+   542	  , whichRandom = "ParticipantNumber"
+   543	  , whichModels = "top"
+   544	  , rscaleFixed = "medium"
+   545	  , multicore = mcore
+   546	)
+   547	while(any(aovBF5@bayesFactor$error > 0.01)) aovBF5 <- recompute(aovBF5, multicore = mcore)
+   548	}
+   549	
+   550	aovBF5eta <- apa_print(aov_ez(
+   551	  dv = "likingRating" 
+   552	  , within = c("USval", "correspondingTime")
+   553	  , data = ratingData5Aggr
+   554	  , id = "ParticipantNumber"
+   555	  , fun_aggregate = mean
+   556	))
+   557	
+   558	
+   559	
+   560	# restructure data for t test
+   561	ratingData5AggrW <- spread(
+   562	  ratingData5Aggr
+   563	  , key = "USval"
+   564	  , value = "likingRating"
+   565	)

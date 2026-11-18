@@ -1,0 +1,60 @@
+   380	Repeated measures ANOVAs were performed to analyse the interaction between US valence and presentation time in the evaluative ratings and paired $t$ tests to examine interaction effects.
+   381	In the Bayes Factor ANOVA analyses, the following method of estimation whether a given interaction or factor should be considered to have an influence on the evaluative rating was used:
+   382	A full model with all main effects and interactions was compared to a model without the main effect or interaction (i.e., the predictor) of interest.
+   383	A Bayes factor for the alternative hypothesis over the null hypothesis (i.e., $\mathit{BF}_{10}$ > 1) could be interpreted as relative evidence for one model (i.e., the full model including our predictor term of interest) over the competing model (without the predictor interest).
+   384	As in the previous studies by Heycke et al. (2017), we used default multivariate Cauchy priors [@rouder_default_2012] with a scaling parameter of $r = 0.5$ in the Bayes factor ANOVA and Cauchy priors with a scaling parameter of $r = \sqrt{2}/2$ for all $t$ tests [@rouder_bayesian_2009].
+   385	All errors for Bayes factor estimates were less than 1%.
+   386	For all *t* tests we also report the median of the posterior distribution as an effect size estimate and its 95% highest density interval (HDI; with a probability of 95%, the true population effect size is within the 95% HDI). 
+   387	Additionally, for all analyses, the total number of individual participants included in the analysis is reported in brackets. 
+   388	
+   389	### Sample size rationale
+   390	
+   391	As part of the sequential Bayesian analyses paradigm, we started the data analysis after initially collecting the data of 30 participants, with the same stopping rules used by Heycke and colleagues (2017) in Experiment 3.
+   392	Specifically, we decided a priori to collect data until either the Bayes factors for both *t* tests of interest (i.e., for an EC effect in the 1000 ms condition and an EC effect in the 30 ms condition) were larger than 10 (for the null or alternative hypothesis) or until a maximum of 150 (paid) participants was reached.
+   393	We ran the analyses after every day of data collection and decided that signed-up participants were allowed to participate, even if we had already stopped the data collection based on the above specified analyses.
+   394	
+   395	### Participants
+   396	
+   397	```{r getPPN}
+   398	
+   399	# This script automatically checks for the largest Participantnumber which is on github
+   400	github_page <- read_html("https://github.com/methexp/rawdata/tree/master/croco5")
+   401	file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+   402	file_names <- html_text(file_nodes)
+   403	file_names <- gsub(".txt", "", file_names)
+   404	
+   405	#get only Croco5_log files (these files appear at top of list on github)
+   406	tmp <- subset(file_names, substring(file_names, 1, 10) == "Croco5_log")
+   407	N <- as.numeric(length(tmp))
+   408	```
+   409	
+   410	```{r Demographics5, warning = FALSE}
+   411	# Read in the Damographics data
+   412	if(cacheGitData){
+   413	  load("../data/DemoData5")
+   414	} else{
+   415	#list of all data files
+   416	file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/Data_Demographics_Croco5_", 1:N, ".txt")
+   417	#add data to a data frame
+   418	DemoData5 <- lapply(file_url, read.delim)
+   419	DemoData5 <- do.call("rbind", DemoData5)
+   420	}
+   421	
+   422	# number of humans who took part initially
+   423	# pp nr 66 was accedentially given and experiment aborted (no participant was present)
+   424	allPP  <- length(unique(DemoData5$ParticipantNumber))-1
+   425	
+   426	#exclude the following participants (see lab protocoll for details):
+   427	# Nr 4, 5, 7, 13, 160 were excluded as they participated in previous study
+   428	# Nr. 30 was excluded as he/she knew about this exact experiment but took part anyway
+   429	ExclList5 <- c(4, 5, 7, 13, 30, 66, 160)
+   430	
+--- data dir ---
+aovBF5
+DemoData5
+LICENSE
+ratingData5
+TrialData5
+visData5
+VisibilityData4
+VisibilityData4B

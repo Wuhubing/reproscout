@@ -1,0 +1,51 @@
+
+CELL 0 markdown
+# Feature Selection using Filters
+### Feature Scoring - two methods  
+1. Chi square statistic
+2. Information Gain
+
+CELL 1 code
+import pandas as pd
+import numpy as np
+from sklearn.feature_selection import chi2, mutual_info_classif
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt 
+
+CELL 2 code
+seg_data = pd.read_csv('../data/segmentation-all.csv')
+print(seg_data.shape)
+seg_data.head()
+
+CELL 3 code
+seg_data['Class'].value_counts()
+
+CELL 4 markdown
+Load the data, scale it and divide into train and test sets.  
+The filters are *trained* using the training data and then a classifier is trained on the feature subset and tested on the test set. 
+
+CELL 5 code
+y = seg_data.pop('Class').values
+X_raw = seg_data.values
+
+X_tr_raw, X_ts_raw, y_train, y_test = train_test_split(X_raw, y, 
+                                                       random_state=1, test_size=1/2)
+scaler = MinMaxScaler()
+X_train = scaler.fit_transform(X_tr_raw)
+X_test = scaler.transform(X_ts_raw)
+
+feature_names = seg_data.columns
+X_train.shape, X_test.shape
+
+CELL 6 markdown
+### Feature Scores  
+Determine the chi-squared and information gain scores for all features using the training set.   
+**Note:** The mutual information score returned by `mutual_info_classif` is effectively an information gain score.  
+
+CELL 7 code
+chi2_score, pval = chi2(X_train, y_train)
+chi2_score = np.nan_to_num(chi2_score)
+chi2_score
+# The chi square scores for the features

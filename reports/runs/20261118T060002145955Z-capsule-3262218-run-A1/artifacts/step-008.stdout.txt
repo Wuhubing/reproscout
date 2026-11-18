@@ -1,0 +1,51 @@
+## get proportion of counter arguments across all cases where articles cited original favourably
+ca_fav_everycase <- d_contentAnalysis %>%
+  filter(citesReplication == T) %>%
+  filter(citationClassificationAgreed == "favourable") %>%
+  group_by(counterArguments, .drop = F) %>%
+  summarise(n = n()) %>%
+  mutate(
+    case = factor("all cases"),
+    fav = paste0(n, " (", round(n / sum(n), 2), ")")
+  ) %>%
+  select(-n)
+
+ca_fav <- rbind(ca_fav, ca_fav_everycase)
+
+# for caFreq table (below)
+caFreq <- left_join(ca, ca_fav) %>%
+  pivot_wider(id_cols = case, names_from = counterArguments, values_from = c(all, fav)) %>%
+  rename("No" = all_FALSE, "No " = fav_FALSE, "Yes" = all_TRUE, "Yes " = fav_TRUE)
+```
+
+```{r }
+# for counter-argument categories table (below)
+counterArgCategories <- d_contentAnalysis %>%
+  filter(citesReplication == T, counterArguments == T) %>%
+  summarise(evidence = sum(as.logical(evidenceCounter), na.rm = T), methods = sum(as.logical(methodsCounter), na.rm = T), expertise = sum(as.logical(expertiseCounter), na.rm = T))
+```
+
+Table \@ref(tab:caFreq) shows whether articles that cited the original study and replication study (“co-citing articles”), and the subset of co-citing articles that cited the original study favourably, provided any explicit counter-arguments to defend the credibility of the original finding (an explicit defence) or not (an absent defence). Overall, fewer than half of the `r d_contentAnalysis %>% filter(citesReplication==T) %>% nrow()` co-citing articles provided any counter-arguments. Of the `r d_contentAnalysis %>% filter(citesReplication==T,citationClassificationAgreed=='favourable') %>% nrow()` co-citing articles that cited the original study favourably, around half provided counter-arguments. We identified `r counterArgCategories %>% mutate(totalCA = sum(evidence,methods,expertise)) %>% pull(totalCA)` discrete counter-arguments in `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% nrow()` citing articles (`r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% distinct(doi) %>% nrow()` of which were unique articles, as `r d_contentAnalysis %>% filter(citesReplication==T,counterArguments==T) %>% count(doi) %>% filter(n>1) %>% nrow()` of them were cited in two of the case studies) and allocated them to one of three categories (Table \@ref(tab:caCategories)).
+
+```{r caFreq}
+caFreq %>%
+  kable("latex", booktabs = T, caption = "Counts and percentages (in brackets) for whether articles that cited both the original study and replication study provided any explicit argumentation to defend the original study. Data are displayed for co-citing articles with any citation valence classification and the subset of co-citing articles with favourable citation valence classifications.") %>%
+  add_header_above(c(" " = 1, "All citation valences" = 2, "Favourable citation valences" = 2))
+```
+
+```{r caCategories}
+counterArgCategories %>%
+  apa_table(caption = "Categorisation of counter-arguments provided to defend the original study in light of the contradictory replication result. 57 discrete counter-arguments were identified in 50 articles (45 unique articles across cases).")
+```
+
+```{r}
+# exploratory analyses of articles containing counter-arguments
+
+# get all articles containing counter arguments
+d_args <- d_contentAnalysis %>%
+  filter(counterArguments == T)
+
+# which journals are counter-argument articles published in?
+ca_journals <- left_join(d_args, d_citations, by = "UT") %>%
+  distinct(doi, .keep_all = T) %>% # unique articles only
+  count(SO) %>%

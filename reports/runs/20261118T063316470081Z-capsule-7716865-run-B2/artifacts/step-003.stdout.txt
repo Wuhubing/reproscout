@@ -1,0 +1,125 @@
+15:output: 
+16:  pdf_document:
+33:library(tidyverse) # for cleaner code
+235:# effect size calculation (cohen's d) for height in US adults from Table 9 and Table 11 of https://www.cdc.gov/nchs/data/series/sr_03/sr03-046-508.pdf
+---head---
+---
+title             : "Excess significance and power miscalculations in neurofeedback research"
+author: |
+  | Robert T. Thibault^1,2^ (0000-0002-6561-3962) & Hugo Pedder^3^ (0000-0002-7813-3749)
+  | </br>
+  | ^1^Meta-Research Innovation Center at Stanford (METRICS), Stanford University
+  | ^2^School of Psychological Science, University of Bristol
+  | ^3^Department Population Health Sciences, Bristol Medical School, University of Bristol
+  | </br>
+  | Address correspondence to robert.thibault@stanford.edu
+  | </br>
+  | This manuscript has been accepted for publication in *NeuroImage: Clinical* 
+  | This is the authors' version of the mauscript which was accepted for publication
+
+output: 
+  pdf_document:
+    citation_package: natbib
+  
+header-includes:
+    - \usepackage{setspace}
+  
+bibliography: references.bib
+csl: apa.csl
+---
+
+\onehalfspacing
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r packages}
+library(tidyverse) # for cleaner code
+library(knitr) # for knitting and kable function
+library(kableExtra) # for kable table styling
+library(WebPower) # for power calculations
+library(scales) # to output numbers as percentages
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r output}
+# create a function to output the power and sensitivity of each study included in the reviews.
+output <- function(d){
+  
+for (i in 1:nrow(d)){
+  
+# calculate power for small, medium, and large cohen's effect sizes, using d = f*2. Also calculate sensitivity for power = 0.8 and 0.95. The type of anova to run is coded in the data, where type = 2 is for interactions, and type = 1 is for between groups. 
+  if (d$test[i] == "anova"){
+    d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.1, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$medium[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.25, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$large[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.4, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$p80[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .80, type = d$type[i])$f*2
+    d$p95[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .95, type = d$type[i])$f*2
+    #the *2 is to convert effect sizes of type "f" to effect sizes in Cohen's d
+    
+  # as for above for independent sample t-tests.  
+  # floor() rounds down and ceiling() rounds up for studies with an uneven number of participants
+  } else if (d$test[i] == "ttest2") {
+    d$small[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for one sample t-tests and paired sample t-tests
+  } else if (d$test[i] == "ttest1"){
+    d$small[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for correlations, using d = 2*r / sqrt(1 - r^2)
+  } else if (d$test[i] == "corr"){
+    d$small[i] <- wp.correlation(n = d$n[i], r = 0.1, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$medium[i] <- wp.correlation(n = d$n[i], r = 0.243, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$large[i] <- wp.correlation(n = d$n[i], r = 0.371, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .80, alpha = 0.05, alternative = d$tails[i])$r
+    d$p80[i] <- 2*r / sqrt(1 - r^2)
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .95, alpha = 0.05, alternative = d$tails[i])$r
+    d$p95[i] <- 2*r / sqrt(1 - r^2)
+    
+    
+  # as for above for linear regression, using f2 small medium and large effect size according to Cohen 1992
+  } else if (d$test[i] == "regression"){
+    d$small[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.1^2, power = NULL, alpha = 0.05)$power
+    d$medium[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.25^2, power = NULL, alpha = 0.05)$power
+    d$large[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.4^2, power = NULL, alpha = 0.05)$power
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .80, alpha = 0.05)$f2
+    d$p80[i] <- sqrt(f2) * 2 
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .95, alpha = 0.05)$f2
+    d$p95[i] <-  sqrt(f2) * 2
+    
+    
+  } else {
+    warning(paste("The test for", d$Publication, "cannot be identified"))
+  }
+}
+
+# return the dataframe with all the powers and sensitivities filled in
+  return(d)
+}
+
+```
+
+```{r tableMRI}
+#create function to make a the table output for the fMRI summary data.
+tableMRI <- function(d){
+  
+# t for table  
+  t <- data.frame(matrix(ncol = 6, nrow = 4))
+  # distinguish between summary data that includes vs excludes studies marker as "pilot"
+  rownames(t) <- c("mean no pilot", "median no pilot", "mean all", "median all")
+  colnames(t) <- c("n", "small", "medium", "large", "p80", "p95")
+  
+  # filter out pilot studies
+  dTrial <- d %>% filter(pilot=="N")

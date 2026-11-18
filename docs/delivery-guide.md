@@ -83,10 +83,10 @@ while retaining the same model, lessons, inputs, and primary execution budgets.
 See [registry recovery](registry-recovery.md) for the observed HTTP behavior,
 implemented retry policy, and cache verification evidence.
 
-## Review v0.3.0 accurately
+## Review historical v0.3.0 accurately
 
 Read `docs/controller-comparison.md` before interpreting the new solved count.
-The 60-cell matrix completed, but 59 count requests failed on host-side DNS
+Sixty attempts were recorded, but the scientific matrix was infrastructure-invalid: 59 count requests failed on host-side DNS
 resolution. All failures remain included. This is not evidence that lessons
 improved or that the application became faster or cheaper at completing science.
 The same fifteen test capsules had prior exposure.
@@ -109,3 +109,43 @@ observed DNS failures. Preserve that interpretation when regenerating the packag
 The native-counter dependency must be checked separately from Docker networking:
 the scientific container stays offline while the host connects to the model API.
 The post-run connectivity check is diagnostic only and does not replace any result.
+
+## Review and replay v0.4.0
+
+Start with `reports/index.html`, `docs/controller-comparison.md`, and
+`docs/network-recovery-protocol.md`. Inspect `all_attempts` as well as `runs` in
+`experiments/prepared-v4/results.json`. The first holds every attempt; the second
+holds exactly one final scientific outcome per cell. Failure records and network
+attempt logs remain accessible in `reports/runs/`.
+
+To verify the published v4 freeze, use tag v0.4.0 and call `verify_freeze` on
+`experiments/prepared-v4`. Replaying requires the exact prepared inputs and pinned
+images described by the manifests, private reference extraction, and API access.
+Use a fresh checkout without local v4 runs to avoid mixing executions. The published
+60-cell runner command is:
+
+```bash
+uv run python scripts/run_experiment.py experiments/prepared-v4 \
+  --key-file /absolute/path/to/your-key-file
+```
+
+The frozen retry policy and shared-budget accounting are scoped to v4. The low-level
+`freeze` helper alone does not add the network-study policy to arbitrary new IDs.
+A different study needs its own validated protocol and freeze; do not change this
+published freeze or overwrite its results. Historical source verification belongs
+at the respective v0.1.0, v0.2.0, and v0.3.0 tags.
+
+After a complete v4 replay, the evidence generators are:
+
+```bash
+uv run python scripts/export_delivery.py --experiment experiments/prepared-v4
+uv run python scripts/summarize_experiment.py experiments/prepared-v4
+uv run python scripts/summarize_recovery.py
+```
+
+The final command compares v2, v3 and v4 using retained local raw logs for calendar
+times. The public package already includes the generated comparison; reading it
+does not require private inputs or an API key. Narrative interpretation and demo
+text are curated delivery artifacts and should be reviewed against regenerated data.
+
+For macOS execution, see the [power-state incident analysis](network-incident-analysis.md): keep the laptop awake with its display open, and use the documented `caffeinate -i` launch. This protects against idle sleep only; the frozen network gate remains necessary.

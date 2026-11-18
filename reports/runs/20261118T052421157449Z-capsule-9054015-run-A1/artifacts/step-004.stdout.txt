@@ -1,0 +1,70 @@
+27:# P_A(T+)                   sensitivity (of A)
+39:                                     value[feature == 'sensitivity'] *
+44:                                       value[feature == 'sensitivity']*
+49:                                     value[feature == 'sensitivity']*
+59:# 1. varying sensitivity of both cancers=0.5 to 0.9
+68:                        sensitivity.a=seq(0.5, 0.9, by=0.1),
+72:                            sensitivity=sensitivity.a,
+75:                            sensitivity.b=sensitivity.a,
+79:                                     sensitivity,
+87:                              sensitivity,
+170:    if(type == 'sensitivity'){
+174:        dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+175:                                                   levels=unique(sensitivity),
+176:                                                   labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+180:        dset <- dset %>% filter(sensitivity == 0.7,
+183:        dset <- dset %>% select(-sensitivity, -localization, -CD, -LS)
+186:                                                  labels=sprintf('%3.1f%%', 100*unique(prevalence))))
+199:        dset <- dset %>% filter(sensitivity == 0.7,
+201:        dset <- dset %>% select(-sensitivity, -prevalence, -CD, -LS)
+204:                                                    labels=sprintf('%2.0f%%', 100*unique(sort(localization)))))
+225:    print(gg)
+244:    dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+245:                                               levels=unique(sensitivity),
+246:                                               labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+251:                           alpha=sensitivity),
+264:    print(gg)
+278:empirical_age_plot <- function(dset, figureno, ext='png', sensitivity=FALSE, saveit=FALSE){
+307:    if(sensitivity){
+324:    if(!sensitivity)
+329:    if(!sensitivity)
+336:    print(gg)
+352:    dset <- dset %>% filter(prevalence > 0, sensitivity %in% c(0.5, 0.8))
+353:    dset <- dset %>% arrange(sensitivity,
+357:    dset <- dset %>% mutate(sensitivity=sprintf('%2.0f', 100*sensitivity),
+358:                            specificity=sprintf('%2.0f', 100*specificity),
+359:                            localization=sprintf('%2.0f', 100*localization),
+360:                            prevalence=sprintf('%5.2f', 100*prevalence),
+361:                            EUC=sprintf('%4.1f', EUC),
+362:                            CD=sprintf('%3.1f', CD))
+363:    dset <- dset %>% rename('Sensitivity, %'='sensitivity',
+371:        write_csv(dset, file.path(resupath, filename))
+387:                            prevalence=sprintf(fmt, 100*prevalence),
+388:                            mortality=sprintf(fmt, 100*mortality))
+392:                            '5-year probability of diagnosis, %'=prevalence,
+393:                            '15-year probability of death, %'=mortality)
+396:        write_csv(dset, file.path(resupath, filename))
+405:                            'Test sensitivity, %'='sensitivity',
+406:                            'Localization probability, %'='localization',
+407:                            'Marginal sensitivity, %'='marginal',
+411:        write_csv(dset, file.path(resupath, filename))
+423:    dset <- dset %>% mutate(EUC=sprintf('%4.1f', EUC),
+424:                            CD=sprintf('%3.1f', CD),
+425:                            LS=sprintf('%3.1f', LS),
+426:                            EUC.CD=sprintf('%3.1f', EUC.CD),
+427:                            EUC.LS=sprintf('%3.1f', EUC.LS))
+436:        write_csv(dset, file.path(resupath, filename))
+441:# Format table for sensitivity analyses
+451:                            EUC=sprintf('%4.1f', EUC),
+452:                            CD=sprintf('%3.1f', CD),
+453:                            LS_low=sprintf('%3.1f', LS_low),
+454:                            LS_mid=sprintf('%3.1f', LS_mid),
+455:                            LS_high=sprintf('%3.1f', LS_high))
+466:        write_csv(dset, file.path(resupath, filename))
+483:pset <- tribble(~site, ~sensitivity, ~localization,
+490:pset <- pset %>% mutate(marginal=sensitivity*localization,
+504:mset <- mset %>% mutate(sensitivity=0.869, localization=1)
+513:hypothetical_euc_plot(type='sensitivity', saveit=TRUE)
+567:empirical_age_plot(figs2, figureno='S2', sensitivity=TRUE, saveit=TRUE)
+576:empirical_age_plot(figs3, figureno='S3', sensitivity=TRUE, saveit=TRUE)
+584:empirical_age_plot(figs4, figureno='S4', sensitivity=TRUE, saveit=TRUE)

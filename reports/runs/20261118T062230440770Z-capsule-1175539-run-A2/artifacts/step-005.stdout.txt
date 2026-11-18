@@ -1,0 +1,43 @@
+    60	dev.off()
+    61	
+    62	
+    63	
+    64	###################
+    65	####STATISTICAL ANALYSES####
+    66	###################
+    67	
+    68	
+    69	    options(digits = 3, scipen=999)
+    70	#### anova of cardiac factors over diagnosis ### 
+    71	cat("\n\nCalculate Anova of cardiac factors over diagnosis - p values not adjusted for multiple testing\n")
+    72	lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+    73	       function(x) summary(aov(x ~ d$dx)))
+    74	                                   
+    75	### calculate effect sizes: ##
+    76	cat("\n\nCalculate effect sizes of cardiac factors over diagnosis\n")
+    77	lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+    78	       function(x) cohen.d(x, d$dx))
+    79	       
+    80	
+    81	### Compute adjusted models: ##
+    82	cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for physical activity score - p values not adjusted for multiple testing\n")
+    83	res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+    84	        function(x) glm(x ~ d$dx  + d$Hvq_Activityscore ))
+    85	vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+    86	for (i in 1:12){print (vars[i])
+    87	  print(summary(res[[i]]))
+    88	}
+    89	cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for smoking levels - p values not adjusted for multiple testing\n")
+    90	res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+    91	        function(x) glm(x ~ d$dx  + d$cigarettes_day ))
+    92	vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+    93	for (i in 1:12){print (vars[i])
+    94	  print(summary(res[[i]]))
+    95	}
+    96	cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for scanner effect - p values not adjusted for multiple testing\n")
+    97	res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+    98	        function(x) glm(x ~ d$dx  + d$scanner ))
+    99	vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+   100	for (i in 1:12){print (vars[i])
+   101	  print(summary(res[[i]]))
+   102	}

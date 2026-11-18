@@ -23,39 +23,50 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
-## v0.3.0: completed rerun, network-limited evidence
+## v0.4.0: completed scientific matrix after network recovery
 
-**All 60 frozen attempts completed, but the A/B comparison is inconclusive.**
-The repaired controller encountered 59 host-side DNS failures while requesting
-native token counts; 55 attempts made no model call. No frozen file, condition,
-lesson, or outcome was changed mid-run, and no failed attempt was replaced.
+**All sixty scientific A/B cells completed under one unchanged freeze.**
+The scheduler distinguishes scientific outcomes from infrastructure attempts.
+It retains every failed attempt, checks connectivity before each cell, and applies
+bounded audited retries with shared cell budgets. Scientific failures are final;
+they are never rerun to improve scores.
 
-A solved 0/15 in both repetitions; B solved 1/15 and 0/15. The arithmetic +0.5
-B-minus-A average does not establish a lesson benefit. The previous v0.2.0 result
-was A=6/15 and 5/15, B=4/15 and 5/15, with 39 byte-proxy context stops.
+A solved 12/15 and 13/15; B solved
+10/15 and 11/15. Total answer success was
+46/60; 46 attempts combined
+correct answers with unchanged prepared inputs. Average B-minus-A solved count:
+-2.0. This is a descriptive result on fifteen previously evaluated tasks,
+not a significance claim or unseen generalization.
 
-On the 39 generations that did occur, native input counts matched returned usage
-exactly; eight requests continued beyond the old byte bound. Measured-token stops
-were zero, but that must be read alongside the 59 transport failures. All sixty
-source audits were unchanged, mostly on attempts with no generation. Formal model
-cost was about $0.05651; lower cost and runtime reflect early refusal, not efficiency.
+All-attempt estimated model cost was $1.84094.
+Retained infrastructure attempts: 1; terminal native-count
+failures: 0; measured-token stops: 0.
+All 721 generations are auditable; native counts matched returned
+input usage on 721. Source integrity, answer scoring,
+and semantic evidence support remain separate properties.
 
-[Download v0.3.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.3.0) ·
-[Portable results app](reports/index.html) · [Full comparison](docs/controller-comparison.md) ·
+[Download v0.4.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.4.0) ·
+[Portable results app](reports/index.html) · [Three-version comparison](docs/controller-comparison.md) ·
 [Per-run results](docs/results.md) · [Lessons analysis](docs/lessons-analysis.md) ·
 [English demo](deliverables/reproscout-demo.mp4)
 
-The delivery preserves 145 agent records: 60 new formal attempts, 68 earlier formal
-attempts, and 17 development attempts. Five training tasks completed A/B controller
-validation before freezing. One development B attempt changed its original data
-loader and is retained as a source-integrity violation despite correct answers.
-All fifteen test tasks have prior exposure; this is a repair study, not unseen
-generalization. Original v0.1.0 and v0.2.0 releases remain available.
+The delivery preserves 217 agent records and all earlier experiments. Before
+freezing, thirty real counting probes passed, two injected DNS failures recovered,
+and ten A/B training outcomes produced 82 generations with exact native counting
+and no network failures. One container startup failure was retained and retried.
+Thirteen deterministic environment checks and 31 software tests passed.
 
-See the [repair protocol](docs/controller-repair-protocol.md),
-[development evidence](reports/development-v3-validation.json),
+The [historical power-state investigation](docs/network-incident-analysis.md) records a sleep/wake association without claiming a proven resolver cause.
+
+The previous v3 matrix was **infrastructure-invalid**, with 59 DNS failures and
+55 zero-generation attempts. Its 1/60 success and low cost/time do not establish a
+lesson effect or efficiency. V2 had 20/60 successes and 39 byte-bound controller
+stops. Original v0.1.0, v0.2.0, and v0.3.0 releases remain available.
+
+See the [frozen network protocol](docs/network-recovery-protocol.md),
+[development evidence](reports/development-v4-validation.json),
 [project overview](docs/project-overview.md), and [reproduction guide](docs/delivery-guide.md).
-No API key is needed to inspect the saved evidence.
+No API key is needed to inspect saved evidence.
 
 ## Install
 
@@ -115,6 +126,8 @@ uv run inspect view --log-dir runs
 | `source-audit.json` | Whether original source/data changed |
 | `diagnosis.json` | Provisional failure category with evidence |
 | `budget.json` | Request reservations and actual returned usage |
+| `network-events.jsonl` | Each request attempt, failure class, backoff and recovery |
+| `retry-context.json` | Earlier infrastructure attempts and remaining shared budgets |
 | `logs/*.eval` | Inspect's original trajectory |
 | `index.sqlite` | Rebuildable index of trajectory events |
 
@@ -127,7 +140,7 @@ support on its own. Missing or failed runs are retained, not silently removed.
 The current configuration uses `gpt-5.4-mini-2026-03-17`, low reasoning, one model
 request at a time, at most 20 calls and 30 minutes per sample. Each command has a
 180-second timeout. Requests reserve a conservative cost before dispatch; retries
-are disabled and unknown failed-call costs retain their reservation.
+use a bounded audited policy: counting retries transient errors, while generation retries require a classified DNS failure without an HTTP response. Unknown failed-call costs retain their reservation. See the frozen network protocol.
 
 Standard API prices checked on November 17, 2026: $0.75/M uncached input tokens,
 $0.075/M cached input tokens, and $4.50/M output tokens. See the
@@ -148,7 +161,7 @@ uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 ```
 
-The release passes 22 software tests and 13 deterministic environment checks.
+The release passes 31 software tests and 13 deterministic environment checks.
 Tests cover unsafe archives, stale result exclusion, evidence boundaries, original
 numeric scoring, cached-token accounting, pre-dispatch reservations, and freeze
 integrity. Container checks are run separately through `validate`.

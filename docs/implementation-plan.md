@@ -64,3 +64,17 @@ were retained, but 59 DNS failures made the lesson-effect comparison inconclusiv
 The delivery includes the failure diagnosis and full comparison rather than a
 selective rerun. Network-resilience changes belong to a separately validated and
 frozen future experiment, not an in-place alteration of this release.
+
+## v0.4.0 network recovery delivery
+
+The frozen prepared-v4 study completed sixty scientific cells, with 1
+additional infrastructure attempts retained separately. A solved 25/30 and B
+21/30. The project now records bounded request retries, checks counting connectivity
+before each cell, and keeps scientific failures final. Thirty real counting probes,
+injected DNS recovery, ten development A/B outcomes, 31 software tests, and thirteen
+environment checks passed before formal evaluation. Historical v3 DNS failures
+remain evidence of an invalid infrastructure-limited comparison.
+
+See [the network protocol](network-recovery-protocol.md),
+[updated comparison](controller-comparison.md), and
+[development evidence](../reports/development-v4-validation.json).

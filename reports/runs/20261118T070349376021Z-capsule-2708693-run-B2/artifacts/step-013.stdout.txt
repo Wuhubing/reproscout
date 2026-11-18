@@ -1,0 +1,31 @@
+                          level.predict=0.95,
+                          hakn=TRUE
+      )
+      meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+      
+png("forestDisclosed.png", width = 800)
+meta::forest(meta,
+             leftlabs = c("Article", "n Disclosed", "n Studies"),
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             plotwidth = "11cm",
+             xlim = c(0,1),
+             fontsize = 12
+             )
+dev.off()      
+
+CIdisclosed <- paste0(round(inv.logit(meta$lower.random), 2)*100, "-",
+                      round(inv.logit(meta$upper.random), 2)*100, "%")
+
+PIdisclosed <- paste0(signif(inv.logit(meta$lower.predict), 1)*100, "-",
+                      round(inv.logit(meta$upper.predict), 2)*100, "%")
+
+ndisclosed <- sum(meta$n)                 
+```
+
+```{r meta_analysis_favor_significance}
+# run meta-analysis on the proportion of studies with discrepancies that favor statistical significance.
+
+dfMeta <- df %>% filter(!is.na(df[,grep("favorSig", colnames(df))]))

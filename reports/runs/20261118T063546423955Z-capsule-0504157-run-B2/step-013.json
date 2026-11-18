@@ -1,0 +1,7 @@
+{
+  "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nload('/data/VisibilityData4')\nload('/data/VisibilityData4B')\n# mimic script up to figure 1\nlibrary(tidyr)\n# aggregate ratings by participant,time,USval\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * correspondingTime * correspondingUS, ratingData5, FUN = mean)\n# add USval based on correspondingUS names; infer from filename prefix p/n\nratingData5Aggr$USval <- ifelse(substr(ratingData5Aggr$correspondingUS,1,1)=='p','positive','negative')\nratingData5AggrW <- spread(ratingData5Aggr, key='USval', value='likingRating')\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, subset(VisibilityData5 <- if (exists('VisibilityData5')) VisibilityData5 else VisibilityData5, TRUE), FUN = sum)\nRS",
+  "exit_code": 1,
+  "seconds": 1.1448739159968682,
+  "stdout": "artifacts/step-013.stdout.txt",
+  "stderr": "artifacts/step-013.stderr.txt"
+}

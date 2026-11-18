@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\nnb_path = Path('PerformanveEval.ipynb')\nout_dir = Path('/results')\nout_dir.mkdir(exist_ok=True)\nwith nb_path.open() as f:\n    nb = nbformat.read(f, as_version=4)\n\n# Execute with no timeout and allow errors\nep = ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\ntry:\n    ep.preprocess(nb, {'metadata': {'path': '/code'}})\nexcept Exception as e:\n    print('Execution raised exception (allowed):', type(e).__name__, e)\n\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(nb)\noutfile = out_dir / 'PerformanveEval_executed.html'\noutfile.write_text(body, encoding='utf-8')\nprint('Wrote', outfile)\nPY",
+  "exit_code": 0,
+  "seconds": 47.72296137502417,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\npath = Path('/code/FS-Filters.ipynb')\noutpath = Path('/results/FS-Filters.html')\nnb = nbformat.read(path, as_version=4)\n# ensure allow errors and no timeout\n\u10d4\u10de = ExecutePreprocessor(timeout=None, allow_errors=True, kernel_name='python3')\n# execute from /code so relative data path works\n\u10d4\u10de.preprocess(nb, {'metadata': {'path': '/code'}})\n# write executed notebook too maybe not needed\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(nb)\noutpath.write_text(body, encoding='utf-8')\nprint('saved', outpath)\n# print relevant outputs\nfor i, cell in enumerate(nb.cells):\n    if cell.cell_type=='code' and cell.outputs:\n        for out in cell.outputs:\n            if out.output_type=='stream':\n                txt=out.text.strip()\n                if txt:\n                    print('CELL', i, 'STREAM:', txt)\n            elif out.output_type=='execute_result':\n                print('CELL', i, 'RESULT:', out['data'].get('text/plain','')[:300])\nPY",
+  "exit_code": 0,
+  "seconds": 38.397565499995835,
+  "stdout": "artifacts/step-003.stdout.txt",
+  "stderr": "artifacts/step-003.stderr.txt"
+}

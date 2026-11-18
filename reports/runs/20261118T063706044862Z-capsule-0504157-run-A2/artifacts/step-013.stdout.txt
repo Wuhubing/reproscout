@@ -1,0 +1,33 @@
+519:ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == "p", "positive", "negative")
+520:ratingData5$USval <- as.factor(ratingData5$USval)
+   500	```{r Rating5, warning = FALSE}
+   501	# Read in the Damographics data
+   502	if(cacheGitData){
+   503	  load("../data/ratingData5")
+   504	} else{
+   505	  
+   506	#list of all data files
+   507	file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/DataRating_Croco5_", 1:N, ".txt")
+   508	#add data to a data frame
+   509	ratingData5 <- lapply(file_url, read.delim)
+   510	ratingData5 <- do.call("rbind", ratingData5)    
+   511	}
+   512	
+   513	#remove excluded participants (see above)
+   514	ratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))
+   515	
+   516	ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)
+   517	
+   518	#recode US as pos or neg into new variable
+   519	ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == "p", "positive", "negative")
+   520	ratingData5$USval <- as.factor(ratingData5$USval)
+   521	
+   522	ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)
+   523	
+   524	ratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)
+   525	ratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)
+   526	
+   527	
+   528	```
+   529	
+   530	```{r analyzeRate5}

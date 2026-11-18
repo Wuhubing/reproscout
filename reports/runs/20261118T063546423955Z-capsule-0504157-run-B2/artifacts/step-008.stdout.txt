@@ -1,0 +1,53 @@
+   626	```{r figure1, message = FALSE, warning = FALSE, fig.cap = "EC effects, split by CS presentation time. Large horizontal bars represent the mean EC effect, with the 95% highest density intervals displayed around them. Dots represent individual EC effects and additionally the smoothed distribution for each presentation time condition is shown. \\label{fig:figure1}"}
+   627	
+   628	# idividual EC effects, Mean, HDI & smoothed distribution
+   629	ratingData5AggrW$pTime <- ifelse(as.character(ratingData5AggrW$correspondingTime) == "153", "30 ms", "1000 ms")
+   630	ratingData5AggrW$pTime <- as.factor(ratingData5AggrW$pTime)
+   631	
+   632	pirateplot(formula = EC ~ pTime,
+   633	           data = ratingData5AggrW,
+   634	           theme = 2,
+   635	           #pal = "black",
+   636	           gl = 0,
+   637	           gl.lwd = 2,
+   638	           inf.method = "hdi",
+   639	           inf.lwd = 0.7,
+   640	           jitter.val = 0.008,
+   641	           point.col = "black",
+   642	           point.o = c(0.5,0.5),
+   643	           xlab = "Presentation Time",
+   644	           ylab = "EC effect")
+   645	
+   646	```
+   647	
+   648	## Visibility
+   649	
+   650	```{r visCheck5}
+--- nearby object definitions ---
+   600	# abline(lm(subset(ratingData5AggrW, correspondingTime == "153")$EC ~ subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer), col="blue")
+   601	# #no significant slope or intercept
+   602	# 
+   603	# plot(subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "250")$EC, pch = 21,  col = "#b30000", bg = "#fc8d59", ylab = "EC Effect", xlab = "mean visibility", main = "1000 ms CS presentation")
+   604	# abline(lm(subset(ratingData5AggrW, correspondingTime == "250")$EC ~ subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer), col="red")
+   605	```
+   606	
+   607	We stopped data collection after `r allPP` participants took part in the study ($\mathit{N_{paid}}= 94$, all others received partial course credit), based on the results of the *t* tests (see below).
+   608	Six participants were excluded, as they either took part in previous studies of this series <!-- pp 4, 5, 7, 13, 160-->or because they were told about the procedure of this study by others before taking part. <!--30-->
+   609	One participant reported that she did not wear the headphone during the entire procedure and seven additional participants did not detect the surveillance target stimulus at least 7 times during the learning phase.
+   610	These participants were also excluded before running any of the analyses.
+   611	The total sample size in the following analyses was therefore N = `r length(unique(DemoData5$ParticipantNumber))` ($\mathit{M_{age}} = `r mean(DemoData5$Alter)`$, $\mathit{SD_{age}} = `r sd(DemoData5$Alter)`$; `r length(unique(DemoData5$ParticipantNumber[(DemoData5$Geschlecht %in% c("weiblich", "w", "weinlich", "Weiblich", "weibl. ", "Frau"))]))` female).
+   612	
+   613	# Results
+   614	
+   615	We first report the same analyses as in the previous experiment by Heycke et al. (2017) in order to test whether an EC effect could be found in the 30 and 1000 ms condition.
+   616	Afterwards we report additional analyses using the data from the visibility check.
+   617	
+   618	## Evaluation
+   619	
+   620	In the overall ANOVA, we found an interaction of the presentation time of the CSs and the US valence, `r printBF(aovBF5, index = 1, N = TRUE, id = "ParticipantNumber")`; `r aovBF5eta$estimate$USval_correspondingTime`, see Figure 1.
+   621	
+   622	The interaction was characterized by the fact that, when stimuli were presented for 1000 ms, an EC effect was found with a one-tailed t test, `r printBFt(allD1000, index = 1, N = TRUE)`.
+   623	We therefore replicated previous findings, showing that images shown while a positive (consonant) sound was played were evaluated more positively than images that were shown while a negative (dissonant) sound was played.
+   624	Contrary to our previous finding, we found statistical evidence for the absence of an EC effect in a one-tailed t test when stimuli were presented for 30 ms, `r printBFt(allD30, index = 1, N = TRUE)`.
+   625	
+   626	```{r figure1, message = FALSE, warning = FALSE, fig.cap = "EC effects, split by CS presentation time. Large horizontal bars represent the mean EC effect, with the 95% highest density intervals displayed around them. Dots represent individual EC effects and additionally the smoothed distribution for each presentation time condition is shown. \\label{fig:figure1}"}
