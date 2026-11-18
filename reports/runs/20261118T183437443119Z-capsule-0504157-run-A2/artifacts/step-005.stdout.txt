@@ -1,0 +1,93 @@
+620:In the overall ANOVA, we found an interaction of the presentation time of the CSs and the US valence, `r printBF(aovBF5, index = 1, N = TRUE, id = "ParticipantNumber")`; `r aovBF5eta$estimate$USval_correspondingTime`, see Figure 1.
+--- around line 398 ---
+In the subsequent visibility test, all CS-US pairs (including the target and motivational stimulus) were shown again in the same order as in the learning phase.
+However, no target instructions were given; instead, after each trial, participants were presented with all 10 CS stimuli (8 CSs, 1 motivational stimulus, 1 surveillance target stimulus).
+Participants were instructed to click on the stimulus that had just been shown in that trial.
+At the end of the study, participants answered demographic questions (age, study, gender, was the headphone worn, goal of experiment, and comments) [^open].
+
+[^open]: The data of the pretest and the main study were collected under a Born Open Data protocol [@rouder_what_2016] in which they were automatically logged, uploaded, and made freely available after every day of data collection (github.com/methexp/rawdata/tree/master/croco4, github.com/methexp/rawdata/tree/master/croco4b, github.com/methexp/rawdata/tree/master/croco5).
+
+## Data analysis
+
+```{r cite_r}
+r_citations <- cite_r("r-references5.bib", pkgs = c("afex", "boot", "bitops", "xml2", "coda", "estimability", "Matrix", "Rcpp", "reshape2", "MASS", "polspline", "lsr", "StanHeaders", "MCMCpack", "ggplot2", "circlize", "jpeg", "beeswarm", "emmeans", "lme4", "lsmeans", "RCurl", "rvest"), footnote = TRUE)
+```
+
+We used the same outlier and exclusion criteria as in the previous study [@heycke_subliminal_2017].
+Before conducting any data analyses, we excluded participants who (a) reported that they did not wear the headphones during the experiment, (b) did not press the space bar often enough when a target image was shown (using Tukey's outlier criterion but only if the criterion reached 3 misses out of 10 trials, allowing for 1 or 2 misses), (c) aborted the experiment or (d) explicitly reported major (unexpected) problems during the experiment (e.g., distractions or difficulties with the instructions).
+
+For the data collection we used a sequential Bayesian analysis paradigm  [@schonbrodt_sequential_2015; @rouder_optional_2014], analyzing the data after every day of data collection and stopping after a pre-defined criterion was reached (see below).
+We use $\mathit{BF_{10}}$ to denominate the evidence for the alternative hypothesis relative to the null hypothesis (i.e., $\mathit{BF_{10}} > 1$ indicates support for the alternative hypothesis over the null hypothesis) while $\mathit{BF_{01}}$ denominates the evidence for the null hypothesis relative to the alternative hypothesis (i.e., $\mathit{BF_{01}} > 1$ indicates support for the null hypothesis).
+All data analyses were performed in `r r_citations$r`. `r r_citations$pkgs`
+
+Repeated measures ANOVAs were performed to analyse the interaction between US valence and presentation time in the evaluative ratings and paired $t$ tests to examine interaction effects.
+In the Bayes Factor ANOVA analyses, the following method of estimation whether a given interaction or factor should be considered to have an influence on the evaluative rating was used:
+A full model with all main effects and interactions was compared to a model without the main effect or interaction (i.e., the predictor) of interest.
+A Bayes factor for the alternative hypothesis over the null hypothesis (i.e., $\mathit{BF}_{10}$ > 1) could be interpreted as relative evidence for one model (i.e., the full model including our predictor term of interest) over the competing model (without the predictor interest).
+As in the previous studies by Heycke et al. (2017), we used default multivariate Cauchy priors [@rouder_default_2012] with a scaling parameter of $r = 0.5$ in the Bayes factor ANOVA and Cauchy priors with a scaling parameter of $r = \sqrt{2}/2$ for all $t$ tests [@rouder_bayesian_2009].
+All errors for Bayes factor estimates were less than 1%.
+For all *t* tests we also report the median of the posterior distribution as an effect size estimate and its 95% highest density interval (HDI; with a probability of 95%, the true population effect size is within the 95% HDI). 
+Additionally, for all analyses, the total number of individual participants included in the analysis is reported in brackets. 
+
+### Sample size rationale
+
+As part of the sequential Bayesian analyses paradigm, we started the data analysis after initially collecting the data of 30 participants, with the same stopping rules used by Heycke and colleagues (2017) in Experiment 3.
+Specifically, we decided a priori to collect data until either the Bayes factors for both *t* tests of interest (i.e., for an EC effect in the 1000 ms condition and an EC effect in the 30 ms condition) were larger than 10 (for the null or alternative hypothesis) or until a maximum of 150 (paid) participants was reached.
+We ran the analyses after every day of data collection and decided that signed-up participants were allowed to participate, even if we had already stopped the data collection based on the above specified analyses.
+
+### Participants
+
+```{r getPPN}
+
+# This script automatically checks for the largest Participantnumber which is on github
+github_page <- read_html("https://github.com/methexp/rawdata/tree/master/croco5")
+file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+file_names <- html_text(file_nodes)
+file_names <- gsub(".txt", "", file_names)
+
+#get only Croco5_log files (these files appear at top of list on github)
+tmp <- subset(file_names, substring(file_names, 1, 10) == "Croco5_log")
+N <- as.numeric(length(tmp))
+```
+
+```{r Demographics5, warning = FALSE}
+# Read in the Damographics data
+if(cacheGitData){
+  load("../data/DemoData5")
+} else{
+#list of all data files
+file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/Data_Demographics_Croco5_", 1:N, ".txt")
+#add data to a data frame
+DemoData5 <- lapply(file_url, read.delim)
+DemoData5 <- do.call("rbind", DemoData5)
+}
+
+# number of humans who took part initially
+# pp nr 66 was accedentially given and experiment aborted (no participant was present)
+allPP  <- length(unique(DemoData5$ParticipantNumber))-1
+
+#exclude the following participants (see lab protocoll for details):
+# Nr 4, 5, 7, 13, 160 were excluded as they participated in previous study
+# Nr. 30 was excluded as he/she knew about this exact experiment but took part anyway
+ExclList5 <- c(4, 5, 7, 13, 30, 66, 160)
+
+# add participant number 116 to exclusion list, because she reported not to have always worn the headphones
+# subset(DemoData5, Kopfhörer == "ein paar min.")$ParticipantNumber
+HP <- 116
+
+ExclList5 <- c(ExclList5, HP)
+```
+
+```{r TrialData5}
+
+if(cacheGitData){
+  load("../data/TrialData5")
+} else{
+#list of all data files
+file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/DataTrials_Croco5_", 1:N, ".txt")
+#add data to a data frame
+TrialData5 <- lapply(file_url, read.delim)
+TrialData5 <- do.call("rbind", TrialData5)  
+}
+
+#remove participants that had to be excluded

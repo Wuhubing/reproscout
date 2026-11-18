@@ -1,0 +1,461 @@
+  |                                                                              |                                                                      |   0%  |                                                                              |...                                                                   |   4%  |                                                                              |......                                                                |   8%  |                                                                              |........                                                              |  12%  |                                                                              |...........                                                           |  16%  |                                                                              |..............                                                        |  20%  |                                                                              |.................                                                     |  24%  |                                                                              |....................                                                  |  28%  |                                                                              |......................                                                |  32%  |                                                                              |.........................                                             |  36%  |                                                                              |............................                                          |  40%  |                                                                              |...............................                                       |  44%  |                                                                              |..................................                                    |  48%  |                                                                              |....................................                                  |  52%  |                                                                              |.......................................                               |  56%  |                                                                              |..........................................                            |  60%  |                                                                              |.............................................                         |  64%  |                                                                              |................................................                      |  68%  |                                                                              |..................................................                    |  72%  |                                                                              |.....................................................                 |  76%  |                                                                              |........................................................              |  80%  |                                                                              |...........................................................           |  84%  |                                                                              |..............................................................        |  88%  |                                                                              |................................................................      |  92%  |                                                                              |...................................................................   |  96%  |                                                                              |......................................................................| 100%
+[1] "/results/reproscout-author.R"
+
+> knitr::opts_chunk$set(include = FALSE)
+
+> library(tidyverse)
+
+> library(knitr)
+
+> library(kableExtra)
+
+> library(WebPower)
+
+> library(scales)
+
+> options(tinytex.verbose = TRUE)
+
+> output <- function(d) {
++     for (i in 1:nrow(d)) {
++         if (d$test[i] == "anova") {
++             d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d .... [TRUNCATED] 
+
+> tableMRI <- function(d) {
++     t <- data.frame(matrix(ncol = 6, nrow = 4))
++     rownames(t) <- c("mean no pilot", "median no pilot", "mean all", 
+ .... [TRUNCATED] 
+
+> tableNIRS <- function(d) {
++     t <- data.frame(matrix(ncol = 6, nrow = 2))
++     rownames(t) <- c("mean", "median")
++     colnames(t) <- c("n", "s ..." ... [TRUNCATED] 
+
+> dMRIreg <- read.csv("/data/fMRInf_regulation.csv", 
++     header = TRUE)
+
+> dMRIbeh <- read.csv("/data/fMRInf_behaviour.csv", 
++     header = TRUE)
+
+> dNIRSreg <- read.csv("/data/fNIRSnf_regulation.csv", 
++     header = TRUE)
+
+> dNIRSbeh <- read.csv("/data/fNIRSnf_behaviour.csv", 
++     header = TRUE)
+
+> dMRIreg <- output(dMRIreg)
+
+> dMRIbeh <- output(dMRIbeh)
+
+> dNIRSreg <- output(dNIRSreg)
+
+> dNIRSbeh <- output(dNIRSbeh)
+
+> tMRIreg <- tableMRI(dMRIreg)
+
+> tMRIbeh <- tableMRI(dMRIbeh)
+
+> tNIRSreg <- tableNIRS(dNIRSreg)
+
+> tNIRSbeh <- tableNIRS(dNIRSbeh)
+
+> tMRIout <- rbind(tMRIreg[1:2, ], tMRIbeh[1:2, ])
+
+> rownames(tMRIout) <- c("Mean (regulation)", "Median (regulation)", 
++     "Mean (clinical)", "Median (clinical)")
+
+> colnames(tMRIout) <- c("N", "d = 0.2", "d = 0.5", 
++     "d = 0.8", "Power = 80%", "Power = 95%")
+
+> tMRIoriginal <- read.csv("/data/fMRInf_originalSummary.csv", 
++     row.names = 1, header = TRUE)
+
+> colnames(tMRIoriginal) <- c("N", "d = 0.2", "d = 0.5", 
++     "d = 0.8", "Power = 80%", "Power = 95%")
+
+> tMRIdif <- (tMRIoriginal/tMRIout)
+
+> tMRIdif[, 5:6] <- tMRIdif[, 5:6]^-1
+
+> tMRI <- rbind(tMRIout, tMRIoriginal, tMRIdif)
+
+> rownames(tMRI) <- c("Mean (regulation)", "Median (regulation)", 
++     "Mean (clinical)", "Median (clinical)", "Mean (regulation) ", 
++     "Median  ..." ... [TRUNCATED] 
+
+> difMRIPower <- tMRI[9:12, 2:4] %>% as.vector() %>% 
++     colMeans() %>% mean()
+
+> difMRISensitivity <- tMRI[9:12, 5:6] %>% as.vector() %>% 
++     colMeans() %>% mean()
+
+> tNIRSout <- rbind(tNIRSreg[1:2, ], tNIRSbeh[1:2, ])
+
+> rownames(tNIRSout) <- c("Mean (regulation)", "Median (regulation)", 
++     "Mean (behavioural)", "Median (behavioural)")
+
+> colnames(tNIRSout) <- c("N", "d = 0.2", "d = 0.5", 
++     "d = 0.8", "Power = 80%", "Power = 95%")
+
+> tNIRSoriginal <- read.csv("/data/fNIRSnf_originalSummary.csv", 
++     row.names = 1, header = TRUE)
+
+> colnames(tNIRSoriginal) <- c("N", "d = 0.2", "d = 0.5", 
++     "d = 0.8", "Power = 80%", "Power = 95%")
+
+> tNIRSdif <- (tNIRSoriginal/tNIRSout)
+
+> tNIRSdif[, 5:6] <- tNIRSdif[, 5:6]^-1
+
+> tNIRS <- rbind(tNIRSout, tNIRSoriginal, tNIRSdif)
+
+> rownames(tNIRS) <- c("Mean (regulation)", "Median (regulation)", 
++     "Mean (behavioural)", "Median (behavioural)", "Mean (regulation) ", 
++     " ..." ... [TRUNCATED] 
+
+> difNIRSPower <- tNIRS[9:12, 2:4] %>% as.vector() %>% 
++     colMeans() %>% mean()
+
+> difNIRSSensitivity <- tNIRS[9:12, 5:6] %>% as.vector() %>% 
++     colMeans() %>% mean()
+
+> tMRI <- round(tMRI, 2)
+
+> tNIRS <- round(tNIRS, 2)
+
+> medMRI02 <- wp.t(n1 = 14, n2 = 13, d = 0.2, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> medMRI05 <- wp.t(n1 = 14, n2 = 13, d = 0.5, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> medMRI08 <- wp.t(n1 = 14, n2 = 13, d = 0.8, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> medMRI80 <- wp.t(n1 = 14, n2 = 13, d = NULL, alpha = 0.05, 
++     power = 0.8, type = "two.sample", alternative = "two.sided")$d
+
+> medMRI95 <- wp.t(n1 = 14, n2 = 13, d = NULL, alpha = 0.05, 
++     power = 0.95, type = "two.sample", alternative = "two.sided")$d
+
+> medNIRS02 <- wp.t(n1 = 10, n2 = 10, d = 0.2, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> med05NIRS <- wp.t(n1 = 10, n2 = 10, d = 0.5, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> medNIRS08 <- wp.t(n1 = 10, n2 = 10, d = 0.8, alpha = 0.05, 
++     power = NULL, type = "two.sample", alternative = "two.sided")$power
+
+> medNIRS80 <- wp.t(n1 = 10, n2 = 10, d = NULL, alpha = 0.05, 
++     power = 0.8, type = "two.sample", alternative = "two.sided")$d
+
+> medNIRS95 <- wp.t(n1 = 10, n2 = 10, d = NULL, alpha = 0.05, 
++     power = 0.95, type = "two.sample", alternative = "two.sided")$d
+
+> esHeight <- (175.3 - 161.3)/sqrt(((0.19 * sqrt(5092))^2 + 
++     (0.19 * sqrt(5510))^2)/2)
+
+> leucht <- c(1.39, 1.04, 0.99, 0.93, 0.87, 0.03, 0.83, 
++     0.77, 0.65, 0.56, 0.16, 0.56, 0.51, 0.41, 0.39, 0.38, 0.23, 
++     0.15, 0.12)
+
+> nLeucht <- wp.t(n1 = NULL, n2 = NULL, d = median(leucht), 
++     alpha = 0.05, power = 0.8, type = "two.sample", alternative = "two.sided")$n * 
++   .... [TRUNCATED] 
+
+> nAntiDep <- wp.t(n1 = NULL, n2 = NULL, d = 0.3, alpha = 0.05, 
++     power = 0.8, type = "two.sample", alternative = "two.sided")$n * 
++     2
+
+> write.csv(dMRIreg, "/results/fMRInf_recalculatedRegulation.csv", 
++     row.names = F)
+
+> write.csv(dMRIbeh, "/results/fMRInf_recalculatedBehaviour.csv", 
++     row.names = F)
+
+> write.csv(dNIRSreg, "/results/fNIRSnf_recalculatedRegulation.csv", 
++     row.names = F)
+
+> write.csv(dNIRSbeh, "/results/fNIRSnf_recalculatedBehaviour.csv", 
++     row.names = F)
+
+> knitr::kable(tMRI, caption = "Recalculated values for the fMRI-nf review (Tursic et al., 2020). ", 
++     booktabs = T, linesep = "", align = "c") % .... [TRUNCATED] 
+<table class="table table" style="margin-left: auto; margin-right: auto; margin-left: auto; margin-right: auto;">
+<caption>Recalculated values for the fMRI-nf review (Tursic et al., 2020). </caption>
+ <thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="2"></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Power</div></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Sensitivity (in Cohen’s d)</div></th>
+</tr>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:center;"> N </th>
+   <th style="text-align:center;"> d = 0.2 </th>
+   <th style="text-align:center;"> d = 0.5 </th>
+   <th style="text-align:center;"> d = 0.8 </th>
+   <th style="text-align:center;"> Power = 80% </th>
+   <th style="text-align:center;"> Power = 95% </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Recalculated</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 29.22 </td>
+   <td style="text-align:center;"> 0.08 </td>
+   <td style="text-align:center;"> 0.25 </td>
+   <td style="text-align:center;"> 0.47 </td>
+   <td style="text-align:center;"> 1.31 </td>
+   <td style="text-align:center;"> 1.68 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 22.00 </td>
+   <td style="text-align:center;"> 0.07 </td>
+   <td style="text-align:center;"> 0.20 </td>
+   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:center;"> 1.26 </td>
+   <td style="text-align:center;"> 1.62 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (clinical) </td>
+   <td style="text-align:center;"> 26.73 </td>
+   <td style="text-align:center;"> 0.07 </td>
+   <td style="text-align:center;"> 0.21 </td>
+   <td style="text-align:center;"> 0.45 </td>
+   <td style="text-align:center;"> 1.31 </td>
+   <td style="text-align:center;"> 1.68 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (clinical) </td>
+   <td style="text-align:center;"> 27.00 </td>
+   <td style="text-align:center;"> 0.07 </td>
+   <td style="text-align:center;"> 0.21 </td>
+   <td style="text-align:center;"> 0.48 </td>
+   <td style="text-align:center;"> 1.15 </td>
+   <td style="text-align:center;"> 1.47 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Original</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 29.90 </td>
+   <td style="text-align:center;"> 0.24 </td>
+   <td style="text-align:center;"> 0.61 </td>
+   <td style="text-align:center;"> 0.76 </td>
+   <td style="text-align:center;"> 0.77 </td>
+   <td style="text-align:center;"> 0.99 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 22.50 </td>
+   <td style="text-align:center;"> 0.15 </td>
+   <td style="text-align:center;"> 0.67 </td>
+   <td style="text-align:center;"> 0.98 </td>
+   <td style="text-align:center;"> 0.58 </td>
+   <td style="text-align:center;"> 0.73 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (clinical) </td>
+   <td style="text-align:center;"> 26.70 </td>
+   <td style="text-align:center;"> 0.31 </td>
+   <td style="text-align:center;"> 0.73 </td>
+   <td style="text-align:center;"> 0.85 </td>
+   <td style="text-align:center;"> 0.58 </td>
+   <td style="text-align:center;"> 0.74 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (clinical) </td>
+   <td style="text-align:center;"> 27.00 </td>
+   <td style="text-align:center;"> 0.30 </td>
+   <td style="text-align:center;"> 0.98 </td>
+   <td style="text-align:center;"> 0.99 </td>
+   <td style="text-align:center;"> 0.36 </td>
+   <td style="text-align:center;"> 0.46 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Overestimation factor (original/recalculated)</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 1.02 </td>
+   <td style="text-align:center;"> 2.91 </td>
+   <td style="text-align:center;"> 2.49 </td>
+   <td style="text-align:center;"> 1.61 </td>
+   <td style="text-align:center;"> 1.70 </td>
+   <td style="text-align:center;"> 1.69 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 1.02 </td>
+   <td style="text-align:center;"> 2.05 </td>
+   <td style="text-align:center;"> 3.34 </td>
+   <td style="text-align:center;"> 2.27 </td>
+   <td style="text-align:center;"> 2.17 </td>
+   <td style="text-align:center;"> 2.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (clinical) </td>
+   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 4.20 </td>
+   <td style="text-align:center;"> 3.48 </td>
+   <td style="text-align:center;"> 1.89 </td>
+   <td style="text-align:center;"> 2.26 </td>
+   <td style="text-align:center;"> 2.27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (clinical) </td>
+   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 4.10 </td>
+   <td style="text-align:center;"> 4.77 </td>
+   <td style="text-align:center;"> 2.05 </td>
+   <td style="text-align:center;"> 3.18 </td>
+   <td style="text-align:center;"> 3.21 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for clinical measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample sizes in the review differ slightly from ours, possibly due to a calculation error. We used the data provided in the review's supplementary material for these calculations.</td>
+</tr>
+</tfoot>
+</table>
+> knitr::kable(tNIRS, caption = "Recalculated values for the fNIRS-nf review (Kohl et al., 2020).", 
++     booktabs = T, linesep = "", align = "c") %> .... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Recalculated values for the fNIRS-nf review (Kohl et al., 2020).</caption>
+ <thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="2"></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="3"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Power</div></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="2"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Sensitivity (in Cohen’s d)</div></th>
+</tr>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:center;"> N </th>
+   <th style="text-align:center;"> d = 0.2 </th>
+   <th style="text-align:center;"> d = 0.5 </th>
+   <th style="text-align:center;"> d = 0.8 </th>
+   <th style="text-align:center;"> Power = 80% </th>
+   <th style="text-align:center;"> Power = 95% </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Recalculated</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 19.29 </td>
+   <td style="text-align:center;"> 0.14 </td>
+   <td style="text-align:center;"> 0.41 </td>
+   <td style="text-align:center;"> 0.67 </td>
+   <td style="text-align:center;"> 0.98 </td>
+   <td style="text-align:center;"> 1.29 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 19.00 </td>
+   <td style="text-align:center;"> 0.14 </td>
+   <td style="text-align:center;"> 0.43 </td>
+   <td style="text-align:center;"> 0.75 </td>
+   <td style="text-align:center;"> 0.85 </td>
+   <td style="text-align:center;"> 1.13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (behavioural) </td>
+   <td style="text-align:center;"> 22.10 </td>
+   <td style="text-align:center;"> 0.10 </td>
+   <td style="text-align:center;"> 0.31 </td>
+   <td style="text-align:center;"> 0.56 </td>
+   <td style="text-align:center;"> 1.11 </td>
+   <td style="text-align:center;"> 1.45 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (behavioural) </td>
+   <td style="text-align:center;"> 20.00 </td>
+   <td style="text-align:center;"> 0.08 </td>
+   <td style="text-align:center;"> 0.22 </td>
+   <td style="text-align:center;"> 0.42 </td>
+   <td style="text-align:center;"> 1.30 </td>
+   <td style="text-align:center;"> 1.66 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Original</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 22.11 </td>
+   <td style="text-align:center;"> 0.20 </td>
+   <td style="text-align:center;"> 0.55 </td>
+   <td style="text-align:center;"> 0.74 </td>
+   <td style="text-align:center;"> 0.88 </td>
+   <td style="text-align:center;"> 1.15 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 20.00 </td>
+   <td style="text-align:center;"> 0.16 </td>
+   <td style="text-align:center;"> 0.48 </td>
+   <td style="text-align:center;"> 0.80 </td>
+   <td style="text-align:center;"> 0.75 </td>
+   <td style="text-align:center;"> 1.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (behavioural) </td>
+   <td style="text-align:center;"> 22.10 </td>
+   <td style="text-align:center;"> 0.20 </td>
+   <td style="text-align:center;"> 0.68 </td>
+   <td style="text-align:center;"> 0.87 </td>
+   <td style="text-align:center;"> 0.66 </td>
+   <td style="text-align:center;"> 0.87 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (behavioural) </td>
+   <td style="text-align:center;"> 20.00 </td>
+   <td style="text-align:center;"> 0.22 </td>
+   <td style="text-align:center;"> 0.76 </td>
+   <td style="text-align:center;"> 0.97 </td>
+   <td style="text-align:center;"> 0.53 </td>
+   <td style="text-align:center;"> 0.69 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="7" style="border-bottom: 1px solid;"><strong>Overestimation factor (original/recalculated)</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (regulation) </td>
+   <td style="text-align:center;"> 1.15 </td>
+   <td style="text-align:center;"> 1.45 </td>
+   <td style="text-align:center;"> 1.33 </td>
+   <td style="text-align:center;"> 1.10 </td>
+   <td style="text-align:center;"> 1.12 </td>
+   <td style="text-align:center;"> 1.12 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (regulation) </td>
+   <td style="text-align:center;"> 1.05 </td>
+   <td style="text-align:center;"> 1.14 </td>
+   <td style="text-align:center;"> 1.12 </td>
+   <td style="text-align:center;"> 1.06 </td>
+   <td style="text-align:center;"> 1.14 </td>
+   <td style="text-align:center;"> 1.13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Mean (behavioural) </td>
+   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 1.97 </td>
+   <td style="text-align:center;"> 2.23 </td>
+   <td style="text-align:center;"> 1.55 </td>
+   <td style="text-align:center;"> 1.69 </td>
+   <td style="text-align:center;"> 1.67 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> Median (behavioural) </td>
+   <td style="text-align:center;"> 1.00 </td>
+   <td style="text-align:center;"> 2.86 </td>
+   <td style="text-align:center;"> 3.53 </td>
+   <td style="text-align:center;"> 2.30 </td>
+   <td style="text-align:center;"> 2.45 </td>
+   <td style="text-align:center;"> 2.41 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for behavioural measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample size in the review differ slightly from ours---whereas we calculated these valuse based on the sample size used in the statistical tests, Kohl et al. calculated them based on the total number of participants. We removed one study from our calculations because it only ran binomial tests within each participant but did not test for group effects. One study used biserial correlation, for which we calculated power as for a Pearson’s correlation. One study used an ANCOVA, for which we calculated power using a 2x2 repeated measures (mixed) ANOVA.</td>
+</tr>
+</tfoot>
+</table>

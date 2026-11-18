@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY' > /results/executed_output.txt\nimport nbformat\nfrom nbclient import NotebookClient\nnb=nbformat.read('FGBR_OC.ipynb', as_version=4)\nclient=NotebookClient(nb, timeout=-1, allow_errors=True)\nclient.execute()\nfor i, out in enumerate(nb.cells[0].outputs):\n    if out.output_type=='stream':\n        print('STREAM', i)\n        print(out.text)\n    elif out.output_type=='error':\n        print('ERROR', out.evalue)\nPY",
+  "exit_code": 0,
+  "seconds": 9.82019479200244,
+  "stdout": "artifacts/step-008.stdout.txt",
+  "stderr": "artifacts/step-008.stderr.txt"
+}

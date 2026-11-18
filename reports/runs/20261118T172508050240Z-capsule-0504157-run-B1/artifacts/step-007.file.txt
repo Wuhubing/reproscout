@@ -1,0 +1,40 @@
+  if(N == TRUE) s <- paste0('(', nrow(BF@data), ') ') 
+  if(as.character(class(BF@numerator[[names(BF@numerator)[index]]])) == "BFoneSample"){
+    rBF <- BayesFactor::ttestBF(BF@data[,1], mu = BF@numerator[[names(BF@numerator)[index]]]@prior$mu, rscale = BF@numerator[[names(BF@numerator)[index]]]@prior$rscale)
+  }
+  if(as.character(class(BF@numerator[[names(BF@numerator)[1]]])) == "BFindepSample"){
+      rBF <- BayesFactor::ttestBF(subset(BF@data, BF@data[,2] == "x")[,1] , subset(BF@data, BF@data[,2] == "y")[,1], rscale = BF@numerator[[names(BF@numerator)[index]]]@prior$rscale, paired = FALSE)
+    }
+  post <- BayesFactor::posterior(rBF, index = index, iterations = postit)
+  d <- median(post[, "delta"])
+  HDI <- coda::HPDinterval(post[, "delta"])
+  ifelse(b > OutputSize, paste0('$\\mathit{BF}_{', num, '}', s, '= ', as.scientific(b), '$', ', ', '$d = ', printnum(d), '$', ', ', '95% HDI [', printnum(HDI[1]), ', ', printnum(HDI[2]), ']'), paste0('$\\mathit{BF}_{', num, '}', s, '= ', printnum(b), '$', ', ', '$d = ', printnum(d), '$', ', ', '95% HDI [', printnum(HDI[1]), ', ', printnum(HDI[2]), ']'))
+}
+
+#Function reading data from github (does not work for main Experiment, as there are more than 1000 data files in the folder and not all are shown on git)
+read_gitdata <- function(page, extension){
+    github_page <- read_html(page)
+    file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+    file_names <- html_text(file_nodes)
+    file_url <- html_attr(file_nodes, "href")[grep(extension, file_names)]
+    file_names <- gsub(".txt", "", file_names)
+    file_url <- paste0("https://raw.githubusercontent.com", file_url)
+    file_url <- gsub("blob/", "", file_url)
+    #add data to a data frame
+    data <- lapply(file_url, read.delim)
+    data <- do.call("rbind", data)
+    data
+}
+
+
+#calculate HDI and plotting plot
+BFtHDIlow <- function(value, xpos = 1, postit = 100000){
+  post <- BayesFactor::posterior(BayesFactor::ttestBF(value, mu = 0), iterations = postit)
+  HDI <- coda::HPDinterval(post[, "mu"])
+  arrows(x0 = xpos, y0 = mean(value), y1 = HDI[1], angle = 90, length = 0.1)
+}
+BFtHDIup <- function(value, xpos = 1, postit = 100000){
+  post <- BayesFactor::posterior(BayesFactor::ttestBF(value, mu = 0), iterations = postit)
+  HDI <- coda::HPDinterval(post[, "mu"])
+  arrows(x0 = xpos, y0 = mean(value), y1 = HDI[2], angle = 90, length = 0.1)
+}

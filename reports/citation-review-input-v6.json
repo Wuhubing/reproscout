@@ -1,0 +1,1185 @@
+[
+  {
+    "run_id": "20261118T170359013908Z-capsule-4180912-run-B1",
+    "task_id": "capsule-4180912",
+    "repeat": 1,
+    "question": "Report the accuracy of the neural network classifier.",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-002.file.txt",
+          "line_start": 38,
+          "line_end": 40
+        },
+        "metadata": {
+          "sha256": "324be7c0bc66ed959bee71b6ab7dd7d9ed31cfe73c410c855cbfa1df21af4a3b",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador.py",
+          "source_line_start": 1
+        },
+        "excerpt": "    NUM_TRIALS = 10\n\n    table = pd.read_csv('/data/diabeticos2.csv')"
+      },
+      {
+        "reference": {
+          "artifact": "artifacts/step-002.file.txt",
+          "line_start": 89,
+          "line_end": 123
+        },
+        "metadata": {
+          "sha256": "324be7c0bc66ed959bee71b6ab7dd7d9ed31cfe73c410c855cbfa1df21af4a3b",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador.py",
+          "source_line_start": 1
+        },
+        "excerpt": "    for i in range(NUM_TRIALS):\n\n\n        #Splitting in training-test sets\n        X_train, X_test, y_train, y_test = train_test_split(X_res_scaled, table_results2,stratify=table_results2, test_size=0.20)\n\n        #counter = collections.Counter(y_test)\n        #print(counter)\n        #print(sum(counter.values()))\n\n        #sm = SMOTE(random_state=42,k_neighbors=1)\n        #X_res, y_res = sm.fit_resample(X_train,y_train)\n        X_res,y_res = X_train,y_train\n\n      \n        \n\n        #Model construction and training, only left the best paramaters, extend the param_xx with other parameters to do a grid search\n        \n        param_nn = {'learning_rate_init':[0.001],'alpha': [0.0005], 'hidden_layer_sizes': [(50,)], 'max_iter':[10000]}\n        nn = MLPClassifier()\n        cv_nn = GridSearchCV(nn,param_nn,cv=5)\n        cv_nn.fit(X_res,y_res)\n        print(\"Entrenado nn\\n\")\n\n        param_logit = {'solver':['lbfgs'],'multi_class':['multinomial'],'max_iter':[10000]}\n        logit = LogisticRegression()\n        cv_logit = GridSearchCV(logit,param_logit,cv=5)\n        cv_logit.fit(X_res,y_res)\n        print(\"entrenado logit\\n\")\n\n        param_svm = {'C': [1], 'gamma': ['auto'], 'kernel': ['rbf']}\n        svm = SVC()\n        cv_svm = GridSearchCV(svm,param_svm,cv=5)\n        cv_svm.fit(X_res,y_res)"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T170359013908Z-capsule-4180912-run-B1",
+    "task_id": "capsule-4180912",
+    "repeat": 1,
+    "question": "Report the macro f1 score for the random classifier.",
+    "value": 0.49302853885844244,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.stdout.txt",
+          "line_start": 55,
+          "line_end": 58
+        },
+        "metadata": {
+          "sha256": "20ed8357e11774a68908e58c5f7326af99ffc616f437c217d42083bd388ff1ea",
+          "kind": "command_stdout",
+          "step": 5,
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": "the macro f1 score for the classifiers are\n\nDT:  0.49778996915684176\nrandom:  0.49302853885844244"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T171149629326Z-capsule-1175539-run-B1",
+    "task_id": "capsule-1175539",
+    "repeat": 1,
+    "question": "fig Report the name of the patient group with the greater median concentricity.",
+    "value": "SCZ",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "ba5ff0f7454ad8ae57ae51043d2feea3653a9e769caf7c9259b0cf5ce0078017",
+          "source": "/results/figure-2-3-4.pdf",
+          "source_sha256": "993e141d7dda8d9235ab878d0c374f3fcc91bddb5427d23fd4df82cd51fc4c79",
+          "page": 1,
+          "dimensions": [
+            504,
+            504
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T171358853716Z-capsule-0921079-run-B1",
+    "task_id": "capsule-0921079",
+    "repeat": 1,
+    "question": "fig Report a Python list of three elements with the three Type-1 error rates (alpha values) measured in the estimate-comparison test and the sign-comparison test. Sort the list in descending order.",
+    "value": [
+      0.1,
+      0.05,
+      0.01
+    ],
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "cbc6611cf0f2a8182a81013c29e318164b7ca5dba60471d3173c80c8f4fd7494",
+          "source": "/results/Figure_2.pdf",
+          "source_sha256": "a385ee89ed41301f8e6bff6a848f743df4e8eab61929efa0011540b125af3d13",
+          "page": 1,
+          "dimensions": [
+            576,
+            288
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T171649402735Z-capsule-1624349-run-B1",
+    "task_id": "capsule-1624349",
+    "repeat": 1,
+    "question": "Report the best accuracy of the hybrid filter wrapper strategy.",
+    "value": 0.9506166187739464,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stdout.txt",
+          "line_start": 121,
+          "line_end": 121
+        },
+        "metadata": {
+          "sha256": "beefb513d350c31888ba21f48c5e5512c2c7e932e83cdca5858a6a74eee30456",
+          "kind": "command_stdout",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": "9 0.9506166187739464"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T171649402735Z-capsule-1624349-run-B1",
+    "task_id": "capsule-1624349",
+    "repeat": 1,
+    "question": "fig Report the name of the feature with the highest I-Gain.",
+    "value": "RAWRED-MEAN",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stdout.txt",
+          "line_start": 62,
+          "line_end": 65
+        },
+        "metadata": {
+          "sha256": "beefb513d350c31888ba21f48c5e5512c2c7e932e83cdca5858a6a74eee30456",
+          "kind": "command_stdout",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": "                      Mutual Info.  Chi Square\nFeature                                       \nRAWRED-MEAN               1.220748  290.963800\nINTENSITY-MEAN            1.159882  293.436006"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172003850773Z-capsule-9054015-run-B1",
+    "task_id": "capsule-9054015",
+    "repeat": 1,
+    "question": "fig Report the percentage sensitivity for cancers A and B that has the highest number of cancers detected per 1,000 women for a 1.0% prevalance of cancer B.",
+    "value": 90,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "3de14d2ffbe7ed285b4b7c74c85e4dbeb749f3fda5db4ec52409a5e3044799b5",
+          "source": "/results/hypothetical_cd_2021-05-15.png",
+          "source_sha256": "a7a04247ef23a1e332e9e27f49c2af5f57dae80619db76d83e8bde8fc798bc3b",
+          "page": 1,
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172003850773Z-capsule-9054015-run-B1",
+    "task_id": "capsule-9054015",
+    "repeat": 1,
+    "question": "Report the 5-year probability of diagnosis for breast tissue origin and age 50.",
+    "value": 1.24,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-007.file.txt",
+          "line_start": 2,
+          "line_end": 2
+        },
+        "metadata": {
+          "sha256": "005ac402a7c219ac57241fa7b739eed034066ce5b3a71cce77c03fe371d6d154",
+          "kind": "file_snapshot",
+          "source": "/results/table1_2021-05-15.csv",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "ff29ba0617876f19ba5721137109aa196ccad6618ea4cdee2371e24e5138b718"
+        },
+        "excerpt": "Breast,50, 1.24, 0.32"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172316245311Z-capsule-7716865-run-B1",
+    "task_id": "capsule-7716865",
+    "repeat": 1,
+    "question": "fig From Table 1, report the sensitivity for 80% power and recalculated mean (regulation).",
+    "value": 0.77,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.stdout.txt",
+          "line_start": 294,
+          "line_end": 300
+        },
+        "metadata": {
+          "sha256": "061e59d5668e6cad98e9669511c7267d17c75a686dfae6f1d796468fa7b74db2",
+          "kind": "command_stdout",
+          "step": 5,
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": "   <td style=\"text-align:left;padding-left: 2em;\" indentlevel=\"1\"> Mean (regulation) </td>\n   <td style=\"text-align:center;\"> 29.90 </td>\n   <td style=\"text-align:center;\"> 0.24 </td>\n   <td style=\"text-align:center;\"> 0.61 </td>\n   <td style=\"text-align:center;\"> 0.76 </td>\n   <td style=\"text-align:center;\"> 0.77 </td>\n   <td style=\"text-align:center;\"> 0.99 </td>"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172508050240Z-capsule-0504157-run-B1",
+    "task_id": "capsule-0504157",
+    "repeat": 1,
+    "question": "fig From figure 1, report the CS presentation time with the greatest mean EC effect (ignore units).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stderr.txt",
+          "line_start": 66,
+          "line_end": 68
+        },
+        "metadata": {
+          "sha256": "bb481b822927a74b869512b69b01e0efa3f05177f1ae457780ac2a31e51ef20b",
+          "kind": "command_stderr",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "Quitting from lines 398-408 (manuscript_croco4_5.Rmd) \nError in open.connection(x, \"rb\") : Could not resolve host: github.com\nCalls: <Anonymous> ... withVisible -> eval -> eval -> read_html -> read_html.default"
+      },
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.file.txt",
+          "line_start": 41,
+          "line_end": 42
+        },
+        "metadata": {
+          "sha256": "e12755d2e55a4c79ffa2c780bbfdac75eddfbfcdb801118d85cb9614faec37ea",
+          "kind": "file_snapshot",
+          "source": "/code/manuscript_croco4_5.Rmd",
+          "source_line_start": 360
+        },
+        "excerpt": "github_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\nfile_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172648139087Z-capsule-8807709-run-B1",
+    "task_id": "capsule-8807709",
+    "repeat": 1,
+    "question": "fig For the third subplot in the visualization of the experiments, report the color of the line with the greatest number of nodes at epoch 15.",
+    "value": "blue",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "11212971043b6179922ab7d6c9c6c35687b456357a32e378f8391ddd43c30ff5",
+          "source": "/results/visualisation.png",
+          "source_sha256": "e505f751eadff9e1f0bf69061549f7fe58f050cdc9ca65c2500f1508c15d55d2",
+          "page": 1,
+          "dimensions": [
+            1024,
+            768
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T172648139087Z-capsule-8807709-run-B1",
+    "task_id": "capsule-8807709",
+    "repeat": 1,
+    "question": "fig Report the name of the first subplot in the visualization of the experiments.",
+    "value": "ill",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "11212971043b6179922ab7d6c9c6c35687b456357a32e378f8391ddd43c30ff5",
+          "source": "/results/visualisation.png",
+          "source_sha256": "e505f751eadff9e1f0bf69061549f7fe58f050cdc9ca65c2500f1508c15d55d2",
+          "page": 1,
+          "dimensions": [
+            1024,
+            768
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T173425540614Z-capsule-2804717-run-B1",
+    "task_id": "capsule-2804717",
+    "repeat": 1,
+    "question": "fig Report the x-axis label of Figure 2 (a).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 3,
+          "line_end": 10
+        },
+        "metadata": {
+          "sha256": "6031581a6bac8bf72d30984113f142b0f1d870ee1a33380f51aba9f3bb321c6b",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "+ Rscript -e 'rmarkdown::render(input = '\\''ResultReproducibilityNotebook.Rmd'\\'', output_dir = '\\''../results'\\'', clean = TRUE)'\nKilled\nError in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\nCalls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\nIn addition: Warning message:\nIn system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n  running command ''/usr/bin/pandoc' --version' had status 137\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T173425540614Z-capsule-2804717-run-B1",
+    "task_id": "capsule-2804717",
+    "repeat": 1,
+    "question": "fig From the Network Density plot (Figure 4), report the label for the red line (ignore spaces).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 3,
+          "line_end": 10
+        },
+        "metadata": {
+          "sha256": "6031581a6bac8bf72d30984113f142b0f1d870ee1a33380f51aba9f3bb321c6b",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "+ Rscript -e 'rmarkdown::render(input = '\\''ResultReproducibilityNotebook.Rmd'\\'', output_dir = '\\''../results'\\'', clean = TRUE)'\nKilled\nError in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\nCalls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\nIn addition: Warning message:\nIn system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n  running command ''/usr/bin/pandoc' --version' had status 137\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T173916832267Z-capsule-3849634-run-B1",
+    "task_id": "capsule-3849634",
+    "repeat": 1,
+    "question": "fig Report N psychosis for Wium-Anderson et al, 2014 for the analysis adjusted for only age, sex, and BMI and CRP measured in adulthood/old age.",
+    "value": 131,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "7aa659032d7c9e920ef2e78856024ccea3e409f4fb397ceabb767afbf2fd5561",
+          "source": "/results/OR_AgeSexBmi_perSD_2026-11-18.png",
+          "source_sha256": "b787c585af385b970ac624adad64b4a7a7bedc4525a06034da2eff8b998923ae",
+          "page": 1,
+          "dimensions": [
+            1024,
+            485
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174126892319Z-capsule-1724988-run-B1",
+    "task_id": "capsule-1724988",
+    "repeat": 1,
+    "question": "fig Report the task name with the higher median walking speed (m/s).",
+    "value": "Walk",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "a105306c905cb3ae05d1b8a992527793fc94ec6c1c2b510038485a98b1bc7e50",
+          "source": "/results/lss1_walking_stats_composite.pdf",
+          "source_sha256": "036fa7deed0e0e18da85df712a8fd15dc2ecd116a62424b99921a9638c7128d4",
+          "page": 1,
+          "dimensions": [
+            648,
+            288
+          ],
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174126892319Z-capsule-1724988-run-B1",
+    "task_id": "capsule-1724988",
+    "repeat": 1,
+    "question": "fig Report the task name with the higher median straightness ratio.",
+    "value": "Search",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "a105306c905cb3ae05d1b8a992527793fc94ec6c1c2b510038485a98b1bc7e50",
+          "source": "/results/lss1_walking_stats_composite.pdf",
+          "source_sha256": "036fa7deed0e0e18da85df712a8fd15dc2ecd116a62424b99921a9638c7128d4",
+          "page": 1,
+          "dimensions": [
+            648,
+            288
+          ],
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174308072251Z-capsule-9052293-run-B1",
+    "task_id": "capsule-9052293",
+    "repeat": 1,
+    "question": "Report the closeness coefficient for location L1.",
+    "value": 0.844703753651819,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.file.txt",
+          "line_start": 2,
+          "line_end": 2
+        },
+        "metadata": {
+          "sha256": "93338452de7f175bd476d3e32c2997237e958815bbc7d07491b4ffee6b9f23df",
+          "kind": "file_snapshot",
+          "source": "/results/output_TCNS_ANP_TOPSIS.txt",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "4e315b69b45c270d9234929f543025ced95c2acf5f8f35000dbfb930128204b8"
+        },
+        "excerpt": "L1 0.844703753651819 4.0 "
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174434521537Z-capsule-2708693-run-B1",
+    "task_id": "capsule-2708693",
+    "repeat": 1,
+    "question": "fig From table 1, report the k value for the medicide discipline.",
+    "value": 81,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-008.stdout.txt",
+          "line_start": 773,
+          "line_end": 777
+        },
+        "metadata": {
+          "sha256": "761b3845c9e32bbe7cdb186ef20c4eff81dd39c01b6be74bea706e6db927e67d",
+          "kind": "command_stdout",
+          "step": 8,
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": "  <tr grouplength=\"5\"><td colspan=\"3\" style=\"border-bottom: 1px solid;\"><strong>Discipline</strong></td></tr>\n<tr>\n   <td style=\"text-align:left;padding-left: 2em;\" indentlevel=\"1\"> medicine </td>\n   <td style=\"text-align:right;\"> 81 </td>\n   <td style=\"text-align:right;\"> 6452 </td>"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174434521537Z-capsule-2708693-run-B1",
+    "task_id": "capsule-2708693",
+    "repeat": 1,
+    "question": "fig From table 3, report n for 'percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy'.",
+    "value": 620,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-008.stdout.txt",
+          "line_start": 1035,
+          "line_end": 1040
+        },
+        "metadata": {
+          "sha256": "761b3845c9e32bbe7cdb186ef20c4eff81dd39c01b6be74bea706e6db927e67d",
+          "kind": "command_stdout",
+          "step": 8,
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": "  <tr>\n   <td style=\"text-align:left;width: 10cm; \"> Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy </td>\n   <td style=\"text-align:left;width: 1.5cm; \"> 4-19% </td>\n   <td style=\"text-align:left;width: 1.5cm; \"> 0.3-74% </td>\n   <td style=\"text-align:right;width: 1cm; \"> 21 </td>\n   <td style=\"text-align:right;width: 1cm; \"> 620 </td>"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T174852443527Z-capsule-4671827-run-B1",
+    "task_id": "capsule-4671827",
+    "repeat": 1,
+    "question": "fig Report the name of the mapping with the higher execution time at 44 elements.",
+    "value": "Semantic-based",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-009.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "1fe36229f0c36e0be38c2dba84076ae40f54ed342b5e4e657448a6700dbebf8f",
+          "source": "/results/mapper-time-v2.eps",
+          "source_sha256": "ef60ce41b4c42a2604d6ce0a4cddffad8f4790071c817cd439374ba8e556524d",
+          "page": 1,
+          "dimensions": [
+            576,
+            432
+          ],
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T175144603047Z-capsule-3262218-run-B1",
+    "task_id": "capsule-3262218",
+    "repeat": 1,
+    "question": "fig Report the number of methods counter-arguments provided to defend the original study in light of the contradictory replication results.",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 1,
+          "line_end": 8
+        },
+        "metadata": {
+          "sha256": "c941ab165bee6eb87e1ff5b98f9fe6482ba3642e65d126524432efe92aa6eefc",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "+ Rscript -e 'rmarkdown::render(input = '\\''manuscript.Rmd'\\'', output_dir = '\\''../results'\\'', clean = TRUE)'\nKilled\nError in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\nCalls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\nIn addition: Warning message:\nIn system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n  running command ''/usr/bin/pandoc' --version' had status 137\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T175334896471Z-capsule-4180912-run-B2",
+    "task_id": "capsule-4180912",
+    "repeat": 2,
+    "question": "Report the accuracy of the neural network classifier.",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.file.txt",
+          "line_start": 38,
+          "line_end": 123
+        },
+        "metadata": {
+          "sha256": "9363e8f936575e559b2bfaee5fa18663ce8fea231c539d8ab5b90f2224e4d344",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador.py",
+          "source_line_start": 1
+        },
+        "excerpt": "    NUM_TRIALS = 10\n\n    table = pd.read_csv('/data/diabeticos2.csv')\n    table_results = table['Tipo']\n    del table['Tipo']\n    del table['G120']\n    del table['I120']\n    #del table['I0']\n    #del table['G0']\n    #del table['Edad']\n\n    #Convert to numpy array for sklearn\n    table2 = table.to_numpy()\n    table_results2 = table_results.to_numpy()\n    \n    X_res_scaled = scale(table2)\n    #X_res_scaled = table2\n    \n    logit_accu = np.zeros(NUM_TRIALS)\n    logit_pre_weighted = np.zeros(NUM_TRIALS)\n    logit_rec_weighted = np.zeros(NUM_TRIALS)\n    logit_f1_weighted = np.zeros(NUM_TRIALS)\n    logit_pre_micro = np.zeros(NUM_TRIALS)\n    logit_rec_micro = np.zeros(NUM_TRIALS)\n    logit_f1_micro = np.zeros(NUM_TRIALS)\n    logit_pre_macro = np.zeros(NUM_TRIALS)\n    logit_rec_macro = np.zeros(NUM_TRIALS)\n    logit_f1_macro = np.zeros(NUM_TRIALS)\n\n    nn_accu = np.zeros(NUM_TRIALS)\n    nn_pre_weighted = np.zeros(NUM_TRIALS)\n    nn_rec_weighted = np.zeros(NUM_TRIALS)\n    nn_f1_weighted = np.zeros(NUM_TRIALS)\n    nn_pre_micro = np.zeros(NUM_TRIALS)\n    nn_rec_micro = np.zeros(NUM_TRIALS)\n    nn_f1_micro = np.zeros(NUM_TRIALS)\n    nn_pre_macro = np.zeros(NUM_TRIALS)\n    nn_rec_macro = np.zeros(NUM_TRIALS)\n    nn_f1_macro = np.zeros(NUM_TRIALS)\n\n    svm_accu = np.zeros(NUM_TRIALS)\n    svm_pre_weighted = np.zeros(NUM_TRIALS)\n    svm_rec_weighted = np.zeros(NUM_TRIALS)\n    svm_f1_weighted = np.zeros(NUM_TRIALS)\n    svm_pre_micro = np.zeros(NUM_TRIALS)\n    svm_rec_micro = np.zeros(NUM_TRIALS)\n    svm_f1_micro = np.zeros(NUM_TRIALS)\n    svm_pre_macro = np.zeros(NUM_TRIALS)\n    svm_rec_macro = np.zeros(NUM_TRIALS)\n    svm_f1_macro = np.zeros(NUM_TRIALS)\n\n    for i in range(NUM_TRIALS):\n\n\n        #Splitting in training-test sets\n        X_train, X_test, y_train, y_test = train_test_split(X_res_scaled, table_results2,stratify=table_results2, test_size=0.20)\n\n        #counter = collections.Counter(y_test)\n        #print(counter)\n        #print(sum(counter.values()))\n\n        #sm = SMOTE(random_state=42,k_neighbors=1)\n        #X_res, y_res = sm.fit_resample(X_train,y_train)\n        X_res,y_res = X_train,y_train\n\n      \n        \n\n        #Model construction and training, only left the best paramaters, extend the param_xx with other parameters to do a grid search\n        \n        param_nn = {'learning_rate_init':[0.001],'alpha': [0.0005], 'hidden_layer_sizes': [(50,)], 'max_iter':[10000]}\n        nn = MLPClassifier()\n        cv_nn = GridSearchCV(nn,param_nn,cv=5)\n        cv_nn.fit(X_res,y_res)\n        print(\"Entrenado nn\\n\")\n\n        param_logit = {'solver':['lbfgs'],'multi_class':['multinomial'],'max_iter':[10000]}\n        logit = LogisticRegression()\n        cv_logit = GridSearchCV(logit,param_logit,cv=5)\n        cv_logit.fit(X_res,y_res)\n        print(\"entrenado logit\\n\")\n\n        param_svm = {'C': [1], 'gamma': ['auto'], 'kernel': ['rbf']}\n        svm = SVC()\n        cv_svm = GridSearchCV(svm,param_svm,cv=5)\n        cv_svm.fit(X_res,y_res)"
+      },
+      {
+        "reference": {
+          "artifact": "artifacts/step-005.file.txt",
+          "line_start": 4,
+          "line_end": 7
+        },
+        "metadata": {
+          "sha256": "274c38a7c8bf900a9462ebf02e6809e0283d98c884a5e5195c1462bbcaf20205",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador.py",
+          "source_line_start": 261
+        },
+        "excerpt": "    print(\"the macro f1 score for the classifiers are\\n\")\n    print(\"neural network: \", f1score_nn3)\n    print(\"SVM: \", f1score_svm3)\n    print(\"logistic regression: \", f1score_logit3)"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T175334896471Z-capsule-4180912-run-B2",
+    "task_id": "capsule-4180912",
+    "repeat": 2,
+    "question": "Report the macro f1 score for the random classifier.",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.file.txt",
+          "line_start": 43,
+          "line_end": 139
+        },
+        "metadata": {
+          "sha256": "57a4467f7c0ae4a1472540b6c2888116a0ac5cef682eba0837573694a5825269",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador_dt.py",
+          "source_line_start": 1
+        },
+        "excerpt": "    NUM_TRIALS = 10\n\n    table = pd.read_csv('/data/diabeticos2.csv')\n    table_results = table['Tipo']\n    del table['Tipo']\n    del table['G120']\n    del table['I120']\n    #del table['I0']\n    #del table['G0']\n    #del table['Edad']\n\n    #Convert to numpy array for sklearn\n    table2 = table.to_numpy()\n    table_results2 = table_results.to_numpy()\n    \n    #X_res_scaled = scale(table2)\n    X_res_scaled = table2\n\n\n    dt_accu = np.zeros(NUM_TRIALS)\n    dt_pre_weighted = np.zeros(NUM_TRIALS)\n    dt_rec_weighted = np.zeros(NUM_TRIALS)\n    dt_f1_weighted = np.zeros(NUM_TRIALS)\n    dt_pre_micro = np.zeros(NUM_TRIALS)\n    dt_rec_micro = np.zeros(NUM_TRIALS)\n    dt_f1_micro = np.zeros(NUM_TRIALS)\n    dt_pre_macro = np.zeros(NUM_TRIALS)\n    dt_rec_macro = np.zeros(NUM_TRIALS)\n    dt_f1_macro = np.zeros(NUM_TRIALS)\n\n\n    rf_accu = np.zeros(NUM_TRIALS)\n    rf_pre_weighted = np.zeros(NUM_TRIALS)\n    rf_rec_weighted = np.zeros(NUM_TRIALS)\n    rf_f1_weighted = np.zeros(NUM_TRIALS)\n    rf_pre_micro = np.zeros(NUM_TRIALS)\n    rf_rec_micro = np.zeros(NUM_TRIALS)\n    rf_f1_micro = np.zeros(NUM_TRIALS)\n    rf_pre_macro = np.zeros(NUM_TRIALS)\n    rf_rec_macro = np.zeros(NUM_TRIALS)\n    rf_f1_macro = np.zeros(NUM_TRIALS)\n\n\n    for i in range(NUM_TRIALS):\n\n        #Splitting in training-test sets\n        X_train, X_test, y_train, y_test = train_test_split(X_res_scaled, table_results2,stratify=table_results2, test_size=0.20)\n\n        #counter = collections.Counter(y_test)\n        #print(counter)\n        #print(sum(counter.values()))\n\n        #sm = SMOTE(random_state=42,k_neighbors=3)\n        #X_res, y_res = sm.fit_resample(X_train,y_train)\n        X_res, y_res = X_train,y_train\n        #print(y_test.shape)\n\n        #Model construction and training, only left the best paramaters, extend the param_xx with other parameters to do a grid search\n        \n        param_dt = {'criterion': [\"gini\"]}\n        dt = DecisionTreeClassifier()\n        cv_dt = GridSearchCV(dt,param_dt,cv=5)\n        cv_dt.fit(X_res,y_res)\n\n        param_random = {'n_estimators':[20],'criterion': ['gini']}\n        random = RandomForestClassifier()\n        cv_random = GridSearchCV(random,param_random,cv=5)\n        cv_random.fit(X_res,y_res)\n\n\n        #print(\"terminado los entrenamientos\\n\")\n\n        predicted_dt = cv_dt.predict(X_test)\n        conf_matrix_dt = mt.confusion_matrix(y_test,predicted_dt)\n        dt_accu[i] = mt.accuracy_score(y_test,predicted_dt)\n        dt_pre_weighted[i] = mt.precision_score(y_test,predicted_dt,average='weighted')\n        dt_rec_weighted[i] = mt.recall_score(y_test,predicted_dt,average='weighted')\n        dt_pre_micro[i] = mt.precision_score(y_test,predicted_dt,average='micro')\n        dt_rec_micro[i] = mt.recall_score(y_test,predicted_dt,average='micro')\n        dt_pre_macro[i] = mt.precision_score(y_test,predicted_dt,average='macro')\n        dt_rec_macro[i] = mt.recall_score(y_test,predicted_dt,average='macro')\n        dt_f1_weighted[i] = mt.f1_score(y_test,predicted_dt,average='weighted')\n        dt_f1_micro[i] = mt.f1_score(y_test,predicted_dt,average='micro')\n        dt_f1_macro[i] = mt.f1_score(y_test,predicted_dt,average='macro')\n\n        predicted_random = cv_random.predict(X_test)\n        conf_matrix_random = mt.confusion_matrix(y_test,predicted_random)\n        rf_accu[i] = mt.accuracy_score(y_test,predicted_random)\n        rf_pre_weighted[i]= mt.precision_score(y_test,predicted_random,average='weighted')\n        rf_rec_weighted[i] = mt.recall_score(y_test,predicted_random,average='weighted')\n        rf_pre_micro[i] = mt.precision_score(y_test,predicted_random,average='micro')\n        rf_rec_micro[i] = mt.recall_score(y_test,predicted_random,average='micro')\n        rf_pre_macro[i] =  mt.precision_score(y_test,predicted_random,average='macro')\n        rf_rec_macro[i] = mt.recall_score(y_test,predicted_random,average='macro')\n        rf_f1_weighted[i] = mt.f1_score(y_test,predicted_random,average='weighted')\n        rf_f1_micro[i] = mt.f1_score(y_test,predicted_random,average='micro')\n        rf_f1_macro[i] =  mt.f1_score(y_test,predicted_random,average='macro')"
+      },
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.file.txt",
+          "line_start": 212,
+          "line_end": 215
+        },
+        "metadata": {
+          "sha256": "57a4467f7c0ae4a1472540b6c2888116a0ac5cef682eba0837573694a5825269",
+          "kind": "file_snapshot",
+          "source": "/code/clasificador_dt.py",
+          "source_line_start": 1
+        },
+        "excerpt": "    print(\"the macro f1 score for the classifiers are\\n\")\n   \n    print(\"DT: \", f1score_dt3)\n    print(\"random: \", f1score_random3)"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T181920236436Z-capsule-1175539-run-B2",
+    "task_id": "capsule-1175539",
+    "repeat": 2,
+    "question": "fig Report the name of the patient group with the greater median concentricity.",
+    "value": "SCZ",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stdout.txt",
+          "line_start": 423,
+          "line_end": 436
+        },
+        "metadata": {
+          "sha256": "c5058386a97afb18bdec4dec94090d5bf7c72d2198508a5c77b75eedcda0e35b",
+          "kind": "command_stdout",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": "[1] \"concentricity\"\n\nCall:\nglm(formula = x ~ d$dx + d$Hvq_Activityscore)\n\nDeviance Residuals: \n    Min       1Q   Median       3Q      Max  \n-0.3500  -0.1001  -0.0337   0.1097   0.4339  \n\nCoefficients:\n                    Estimate Std. Error t value            Pr(>|t|)    \n(Intercept)           0.9468     0.0681   13.91 <0.0000000000000002 ***\nd$dxSCZ               0.1058     0.0413    2.56               0.012 *  \nd$Hvq_Activityscore  -0.0222     0.0224   -0.99               0.323    "
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T182047040841Z-capsule-0921079-run-B2",
+    "task_id": "capsule-0921079",
+    "repeat": 2,
+    "question": "fig Report a Python list of three elements with the three Type-1 error rates (alpha values) measured in the estimate-comparison test and the sign-comparison test. Sort the list in descending order.",
+    "value": [
+      0.1,
+      0.05,
+      0.01
+    ],
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "cbc6611cf0f2a8182a81013c29e318164b7ca5dba60471d3173c80c8f4fd7494",
+          "source": "/results/Figure_2.pdf",
+          "source_sha256": "56f16027e0c6ea4d40015b4c6137d7f3a3bf65015d46190e87a0b5df806a1411",
+          "page": 1,
+          "dimensions": [
+            576,
+            288
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T182314273767Z-capsule-1624349-run-B2",
+    "task_id": "capsule-1624349",
+    "repeat": 2,
+    "question": "Report the best accuracy of the hybrid filter wrapper strategy.",
+    "value": 0.9506166187739464,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-007.file.txt",
+          "line_start": 120,
+          "line_end": 121
+        },
+        "metadata": {
+          "sha256": "3a2ffd5419f8feb4b5ffa5e60784c440d42ddab1010ec108784655e16288553b",
+          "kind": "file_snapshot",
+          "source": "/results/reproscout-notebook/outputs.txt",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "3a2ffd5419f8feb4b5ffa5e60784c440d42ddab1010ec108784655e16288553b"
+        },
+        "excerpt": "CELL 22 OUTPUT 0\n9 0.9506166187739464"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T182314273767Z-capsule-1624349-run-B2",
+    "task_id": "capsule-1624349",
+    "repeat": 2,
+    "question": "fig Report the name of the feature with the highest I-Gain.",
+    "value": "RAWRED-MEAN",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-007.file.txt",
+          "line_start": 62,
+          "line_end": 64
+        },
+        "metadata": {
+          "sha256": "3a2ffd5419f8feb4b5ffa5e60784c440d42ddab1010ec108784655e16288553b",
+          "kind": "file_snapshot",
+          "source": "/results/reproscout-notebook/outputs.txt",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "3a2ffd5419f8feb4b5ffa5e60784c440d42ddab1010ec108784655e16288553b"
+        },
+        "excerpt": "                      Mutual Info.  Chi Square\nFeature                                       \nRAWRED-MEAN               1.221213  290.963800"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T182606504182Z-capsule-9054015-run-B2",
+    "task_id": "capsule-9054015",
+    "repeat": 2,
+    "question": "fig Report the percentage sensitivity for cancers A and B that has the highest number of cancers detected per 1,000 women for a 1.0% prevalance of cancer B.",
+    "value": 90,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-009.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "3de14d2ffbe7ed285b4b7c74c85e4dbeb749f3fda5db4ec52409a5e3044799b5",
+          "source": "/results/hypothetical_cd_2021-05-15.png",
+          "source_sha256": "a7a04247ef23a1e332e9e27f49c2af5f57dae80619db76d83e8bde8fc798bc3b",
+          "page": 1,
+          "dimensions": [
+            1024,
+            1024
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T182606504182Z-capsule-9054015-run-B2",
+    "task_id": "capsule-9054015",
+    "repeat": 2,
+    "question": "Report the 5-year probability of diagnosis for breast tissue origin and age 50.",
+    "value": 1.24,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-006.file.txt",
+          "line_start": 2,
+          "line_end": 2
+        },
+        "metadata": {
+          "sha256": "005ac402a7c219ac57241fa7b739eed034066ce5b3a71cce77c03fe371d6d154",
+          "kind": "file_snapshot",
+          "source": "/results/table1_2021-05-15.csv",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "ff29ba0617876f19ba5721137109aa196ccad6618ea4cdee2371e24e5138b718"
+        },
+        "excerpt": "Breast,50, 1.24, 0.32"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183048908578Z-capsule-7716865-run-B2",
+    "task_id": "capsule-7716865",
+    "repeat": 2,
+    "question": "fig From Table 1, report the sensitivity for 80% power and recalculated mean (regulation).",
+    "value": 1.31,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-007.stdout.txt",
+          "line_start": 257,
+          "line_end": 263
+        },
+        "metadata": {
+          "sha256": "061e59d5668e6cad98e9669511c7267d17c75a686dfae6f1d796468fa7b74db2",
+          "kind": "command_stdout",
+          "step": 7,
+          "execution_id": 3,
+          "verified_execution": true
+        },
+        "excerpt": "   <td style=\"text-align:left;padding-left: 2em;\" indentlevel=\"1\"> Mean (regulation) </td>\n   <td style=\"text-align:center;\"> 29.22 </td>\n   <td style=\"text-align:center;\"> 0.08 </td>\n   <td style=\"text-align:center;\"> 0.25 </td>\n   <td style=\"text-align:center;\"> 0.47 </td>\n   <td style=\"text-align:center;\"> 1.31 </td>\n   <td style=\"text-align:center;\"> 1.68 </td>"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183322151263Z-capsule-0504157-run-B2",
+    "task_id": "capsule-0504157",
+    "repeat": 2,
+    "question": "fig From figure 1, report the CS presentation time with the greatest mean EC effect (ignore units).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 66,
+          "line_end": 69
+        },
+        "metadata": {
+          "sha256": "bb481b822927a74b869512b69b01e0efa3f05177f1ae457780ac2a31e51ef20b",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "Quitting from lines 398-408 (manuscript_croco4_5.Rmd) \nError in open.connection(x, \"rb\") : Could not resolve host: github.com\nCalls: <Anonymous> ... withVisible -> eval -> eval -> read_html -> read_html.default\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183532073583Z-capsule-8807709-run-B2",
+    "task_id": "capsule-8807709",
+    "repeat": 2,
+    "question": "fig For the third subplot in the visualization of the experiments, report the color of the line with the greatest number of nodes at epoch 15.",
+    "value": "blue",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "11212971043b6179922ab7d6c9c6c35687b456357a32e378f8391ddd43c30ff5",
+          "source": "/results/visualisation.png",
+          "source_sha256": "e505f751eadff9e1f0bf69061549f7fe58f050cdc9ca65c2500f1508c15d55d2",
+          "page": 1,
+          "dimensions": [
+            1024,
+            768
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183532073583Z-capsule-8807709-run-B2",
+    "task_id": "capsule-8807709",
+    "repeat": 2,
+    "question": "fig Report the name of the first subplot in the visualization of the experiments.",
+    "value": "ill",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "11212971043b6179922ab7d6c9c6c35687b456357a32e378f8391ddd43c30ff5",
+          "source": "/results/visualisation.png",
+          "source_sha256": "e505f751eadff9e1f0bf69061549f7fe58f050cdc9ca65c2500f1508c15d55d2",
+          "page": 1,
+          "dimensions": [
+            1024,
+            768
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183641919016Z-capsule-2804717-run-B2",
+    "task_id": "capsule-2804717",
+    "repeat": 2,
+    "question": "fig Report the x-axis label of Figure 2 (a).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 3,
+          "line_end": 10
+        },
+        "metadata": {
+          "sha256": "6031581a6bac8bf72d30984113f142b0f1d870ee1a33380f51aba9f3bb321c6b",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "+ Rscript -e 'rmarkdown::render(input = '\\''ResultReproducibilityNotebook.Rmd'\\'', output_dir = '\\''../results'\\'', clean = TRUE)'\nKilled\nError in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\nCalls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\nIn addition: Warning message:\nIn system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n  running command ''/usr/bin/pandoc' --version' had status 137\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T183641919016Z-capsule-2804717-run-B2",
+    "task_id": "capsule-2804717",
+    "repeat": 2,
+    "question": "fig From the Network Density plot (Figure 4), report the label for the red line (ignore spaces).",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.stderr.txt",
+          "line_start": 3,
+          "line_end": 10
+        },
+        "metadata": {
+          "sha256": "6031581a6bac8bf72d30984113f142b0f1d870ee1a33380f51aba9f3bb321c6b",
+          "kind": "command_stderr",
+          "step": 4,
+          "execution_id": 1,
+          "verified_execution": false
+        },
+        "excerpt": "+ Rscript -e 'rmarkdown::render(input = '\\''ResultReproducibilityNotebook.Rmd'\\'', output_dir = '\\''../results'\\'', clean = TRUE)'\nKilled\nError in strsplit(info, \"\\n\")[[1]] : subscript out of bounds\nCalls: <Anonymous> ... pandoc_available -> find_pandoc -> lapply -> FUN -> get_pandoc_version\nIn addition: Warning message:\nIn system(paste(shQuote(path), \"--version\"), intern = TRUE) :\n  running command ''/usr/bin/pandoc' --version' had status 137\nExecution halted"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T184810979417Z-capsule-3849634-run-B2",
+    "task_id": "capsule-3849634",
+    "repeat": 2,
+    "question": "fig Report N psychosis for Wium-Anderson et al, 2014 for the analysis adjusted for only age, sex, and BMI and CRP measured in adulthood/old age.",
+    "value": 131,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "7aa659032d7c9e920ef2e78856024ccea3e409f4fb397ceabb767afbf2fd5561",
+          "source": "/results/OR_AgeSexBmi_perSD_2026-11-18.png",
+          "source_sha256": "b787c585af385b970ac624adad64b4a7a7bedc4525a06034da2eff8b998923ae",
+          "page": 1,
+          "dimensions": [
+            1024,
+            485
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T184945879036Z-capsule-1724988-run-B2",
+    "task_id": "capsule-1724988",
+    "repeat": 2,
+    "question": "fig Report the task name with the higher median walking speed (m/s).",
+    "value": "Walk",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stdout.txt",
+          "line_start": 29,
+          "line_end": 33
+        },
+        "metadata": {
+          "sha256": "d3cdaa462deecaee594704d3927c8168ecbbde70ec6e3a5a7bceae5f7d55013e",
+          "kind": "command_stdout",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": "# A tibble: 2 x 5\n  task   variable     n  mean    sd\n  <fct>  <chr>    <dbl> <dbl> <dbl>\n1 Walk   speed       59 1.18  0.151\n2 Search speed       58 0.487 0.088"
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T184945879036Z-capsule-1724988-run-B2",
+    "task_id": "capsule-1724988",
+    "repeat": 2,
+    "question": "fig Report the task name with the higher median straightness ratio.",
+    "value": "Search",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-003.stdout.txt",
+          "line_start": 180,
+          "line_end": 185
+        },
+        "metadata": {
+          "sha256": "d3cdaa462deecaee594704d3927c8168ecbbde70ec6e3a5a7bceae5f7d55013e",
+          "kind": "command_stdout",
+          "step": 3,
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": "[1] \"Walking Straightness\"\n# A tibble: 2 x 5\n  task   variable     n  mean    sd\n  <fct>  <chr>    <dbl> <dbl> <dbl>\n1 Walk   speed       28  1.37 0.043\n2 Search speed       28  3.02 1.01 "
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T185245193314Z-capsule-9052293-run-B2",
+    "task_id": "capsule-9052293",
+    "repeat": 2,
+    "question": "Report the closeness coefficient for location L1.",
+    "value": 0.844703753651819,
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-004.file.txt",
+          "line_start": 2,
+          "line_end": 2
+        },
+        "metadata": {
+          "sha256": "93338452de7f175bd476d3e32c2997237e958815bbc7d07491b4ffee6b9f23df",
+          "kind": "file_snapshot",
+          "source": "/results/output_TCNS_ANP_TOPSIS.txt",
+          "source_line_start": 1,
+          "execution_id": 1,
+          "verified_execution": true,
+          "source_sha256": "4e315b69b45c270d9234929f543025ced95c2acf5f8f35000dbfb930128204b8"
+        },
+        "excerpt": "L1 0.844703753651819 4.0 "
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T185736213115Z-capsule-4671827-run-B2",
+    "task_id": "capsule-4671827",
+    "repeat": 2,
+    "question": "fig Report the name of the mapping with the higher execution time at 44 elements.",
+    "value": "Semantic-based",
+    "correct": true,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-009.png"
+        },
+        "metadata": {
+          "kind": "image",
+          "sha256": "1fe36229f0c36e0be38c2dba84076ae40f54ed342b5e4e657448a6700dbebf8f",
+          "source": "/results/mapper-time-v2.eps",
+          "source_sha256": "f9e4c4800d695ecdea70bbea2b5ea6e47dcf23a6ba7d2b24b178db81cb2053ae",
+          "page": 1,
+          "dimensions": [
+            576,
+            432
+          ],
+          "execution_id": 1,
+          "verified_execution": true
+        },
+        "excerpt": null
+      }
+    ]
+  },
+  {
+    "run_id": "20261118T190037740789Z-capsule-3262218-run-B2",
+    "task_id": "capsule-3262218",
+    "repeat": 2,
+    "question": "fig Report the number of methods counter-arguments provided to defend the original study in light of the contradictory replication results.",
+    "value": null,
+    "correct": false,
+    "evidence": [
+      {
+        "reference": {
+          "artifact": "artifacts/step-007.stderr.txt",
+          "line_start": 60,
+          "line_end": 63
+        },
+        "metadata": {
+          "sha256": "a5a00b0d000f9ac6cbe34294b8db3e8cb72e2675e7522fa744f8783662073357",
+          "kind": "command_stderr",
+          "step": 7,
+          "execution_id": 3,
+          "verified_execution": false
+        },
+        "excerpt": "Error in render_appendix(\"appendix.Rmd\") : \n  render_appendix() can only be used within an R Markdown document; please include the function call in a code chunk.\nCalls: source -> withVisible -> eval -> eval -> render_appendix\nExecution halted"
+      }
+    ]
+  }
+]

@@ -1,0 +1,102 @@
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(dplyr)
+library(effsize)
+
+cat("\014") 
+
+d <- read.csv('/data/export.csv', header = TRUE)
+
+###################
+####CREATE PLOT####
+###################
+
+###create long dataset from wide
+d_long <- melt(d, id.vars = c("id","dx"), 
+               measure.vars = c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV"), 
+               variable.name = "measure", value.name = "value")
+##tity up dataset               
+d_long<-d_long %>% mutate(measure = str_replace(measure, "septalthhickness", "Septal thickness")) %>% 
+  mutate(measure = str_replace(measure, "concentricity", "Concentricity"))
+
+
+## create dummy variable for scales of graphs
+dummy = data.frame(ics=NA, dx=NA, measure=rep(c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","Concentricity","Septal thickness","PWV"), each=2), 
+                   value=c(40,120,0,60,20,80,30,140,40,190,20,110,20,90,50,90,30,80,0,2,5,15,0,12))
+
+##graphical settings for graph plotting
+raincloud_theme = theme(
+  text = element_text(size = 10),
+  #axis.title.x = element_text(size = 16),
+  axis.text.x = element_blank(),
+  axis.ticks.x = element_blank(),
+  axis.title.x=element_blank(),
+  axis.title.y = element_blank(),#element_text(size = 16),
+  #axis.text = element_text(size = 14),
+  #axis.text.x = element_text(angle = 45, vjust = 0.5),
+  legend.title=element_blank(),#element_text(size=16),
+  legend.text=element_text(size=16),
+  legend.position = "bottom",
+  plot.title = element_text(lineheight=.8, face="bold", size = 16),
+  panel.border = element_blank(),
+  #panel.grid.minor = element_blank(),
+  #panel.grid.major = element_blank(),
+  axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
+  axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
+  
+pdf("../results/figure-2-3-4.pdf")
+(g <- ggplot(data = d_long, mapping = aes(y = value, x=dx, fill = dx)) +
+  geom_blank(data=dummy, aes(x=ics,y=value, fill = dx)) +
+  facet_wrap(measure~., scales = "free_y", nrow=2 )+
+  #geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .8) +
+  geom_point(aes(y = value, x = dx, color = dx), position = position_jitter(width = .15), size = 1, alpha = 0.8) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.5,notch = F) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_bw() +
+  #  ylim(NA, 150) +  
+  raincloud_theme)
+dev.off()
+
+
+
+###################
+####STATISTICAL ANALYSES####
+###################
+
+
+    options(digits = 3, scipen=999)
+#### anova of cardiac factors over diagnosis ### 
+cat("\n\nCalculate Anova of cardiac factors over diagnosis - p values not adjusted for multiple testing\n")
+lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+       function(x) summary(aov(x ~ d$dx)))
+                                   
+### calculate effect sizes: ##
+cat("\n\nCalculate effect sizes of cardiac factors over diagnosis\n")
+lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+       function(x) cohen.d(x, d$dx))
+       
+
+### Compute adjusted models: ##
+cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for physical activity score - p values not adjusted for multiple testing\n")
+res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+        function(x) glm(x ~ d$dx  + d$Hvq_Activityscore ))
+vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+for (i in 1:12){print (vars[i])
+  print(summary(res[[i]]))
+}
+cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for smoking levels - p values not adjusted for multiple testing\n")
+res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+        function(x) glm(x ~ d$dx  + d$cigarettes_day ))
+vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+for (i in 1:12){print (vars[i])
+  print(summary(res[[i]]))
+}
+cat("\n\nCalculate effect of diagnosis over cardiac factors - adjusted for scanner effect - p values not adjusted for multiple testing\n")
+res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+        function(x) glm(x ~ d$dx  + d$scanner ))
+vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+for (i in 1:12){print (vars[i])
+  print(summary(res[[i]]))
+}

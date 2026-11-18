@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse); library(WebPower)\noutput <- function(d){for (i in 1:nrow(d)){if (d$test[i]=='regression'){d$small[i]<-wp.regression(n=d$n[i],p1=1,f2=0.1^2,power=NULL,alpha=0.05)$power;d$medium[i]<-wp.regression(n=d$n[i],p1=1,f2=0.25^2,power=NULL,alpha=0.05)$power;d$large[i]<-wp.regression(n=d$n[i],p1=1,f2=0.4^2,power=NULL,alpha=0.05)$power;f2<-wp.regression(n=d$n[i],p1=1,f2=NULL,power=.80,alpha=0.05)$f2;d$p80[i]<-sqrt(f2)*2;f2<-wp.regression(n=d$n[i],p1=1,f2=NULL,power=.95,alpha=0.05)$f2;d$p95[i]<-sqrt(f2)*2}};d}\ndMRIreg <- output(read.csv('/data/fMRInf_regulation.csv'))\ndMRIbeh <- output(read.csv('/data/fMRInf_behaviour.csv'))\ntMRIreg <- dMRIreg %>% filter(pilot=='N') %>% summarize(across(c(n,small,medium,large,p80,p95), mean))\ntMRIbeh <- dMRIbeh %>% filter(pilot=='N') %>% summarize(across(c(n,small,medium,large,p80,p95), mean))\ntMRIout <- rbind(tMRIreg, tMRIreg, tMRIbeh, tMRIbeh)\nprint(tMRIreg)\nRS",
+  "exit_code": 0,
+  "seconds": 7.1379374579992145,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

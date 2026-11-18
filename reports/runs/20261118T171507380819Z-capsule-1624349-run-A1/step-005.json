@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom traitlets.config import Config\nfrom pathlib import Path\n\nnb = nbformat.read('FS-Filters.ipynb', as_version=4)\nc = Config()\nc.ExecutePreprocessor.timeout = None\nc.ExecutePreprocessor.allow_errors = True\nc.ExecutePreprocessor.kernel_name = 'python3'\n\u10d4\u10de = ExecutePreprocessor(config=c)\nnb, resources = \u10d4\u10de.preprocess(nb, {'metadata': {'path': '/code'}})\n# save executed notebook for inspection\nnbformat.write(nb, '/results/FS-Filters-executed.ipynb')\nprint('saved executed notebook')\n# print text outputs from relevant cells\nfor idx in [2,3,7,8,13,17,19,22]:\n    cell=nb.cells[idx]\n    print('\\nCELL',idx)\n    for out in cell.get('outputs',[]):\n        if out.output_type=='stream':\n            print('STREAM:', ''.join(out.get('text','')))\n        elif out.output_type=='execute_result':\n            print('EXEC:', out['data'].get('text/plain',''))\n        elif out.output_type=='error':\n            print('ERROR:', out['ename'], out['evalue'])\nPY",
+  "exit_code": 0,
+  "seconds": 34.664245625026524,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}

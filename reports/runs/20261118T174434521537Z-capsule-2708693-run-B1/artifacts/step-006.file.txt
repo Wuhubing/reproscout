@@ -1,0 +1,260 @@
+df$author[df$author =="PraniÄ‡ et al."] <- "Pranić et al."
+
+
+# Remove columns that contain coder comments. I already summarized these comments into 3 new columns $outcomeComments, $otherComments, $anyComments
+df <- df %>% select(-c(initialComments, discPro1comments, discPro2comments, discProComments, disc1comments, disc2comments, discComments, discProOtherComments, discOtherComments, descriptiveComments ,inferentialComments, finalComments))
+
+# store full dataset for later use
+df_full <- df
+
+# make a df with only the resolved coding
+df <- df %>% filter(coder != "RC", coder != "RTT", coder != "OvdA", coder != "SW")
+df$coder <- df$coder %>% as.factor()
+
+# Remove specific articles for the reasons outlined here:
+# 1. we collapsed two articles reviewing different aspects of the same sample of studies into one row.
+# 2. article was too poorly reported to extract data.
+# 3. compared registrations to conference abstracts and was mostly insufficient for our protocol
+# 4. only reports discrepancies in results (rather than outcome measures), which are irrelevant to preregistration
+# 5. didn't report anything relevant to our coding boxes
+# 6. duplicate article
+# 7. duplicate article
+# 8. only had 1 study check for discrepancies and this doesn't enter well into the meta-analysis
+articlesToRemove <- c("Differences in Reporting of Analyses in Internal Company Documents Versus Published Trial Reports: Comparisons in Industry-Sponsored Trials in Off-Label Uses of Gabapentin [collapse with Vedula 2009, same data]", 
+                      "Prospective registration, bias risk and outcome-reporting bias in randomised clinical trials of traditional Chinese medicine: an empirical methodological study",
+                      "ClinicalTrials.gov registration can supplement information in abstracts for systematic reviews: a comparison study",
+                      "Reporting of Results in ClinicalTrials.gov and High-Impact Journals",
+                      "Evidence b(i)ased medicine selective reporting from studies sponsored by pharmaceutical industry: review of studies in new drug applications",
+                      "Reporting Discrepancies Between the ClinicalTrials.gov Results Database and Peer-Reviewed Publications [duplicate]",
+                      "Consistency in the Analysis and Reporting of Primary End Points in Oncology Randomized Controlled Trials From Registration to Publication: A Systematic Review",
+                      "Transparency of outcome reporting and trial registration of randomized controlled trials in top psychosomatic and behavioral health journals: A systematic review")
+
+df <- df %>% filter(!(article %in% articlesToRemove))
+                      
+# calculate number of excluded articles (including articles that were originally coded to be excluded + the 8 listed above). Remove them from the dataframe
+excludedArticles <- sum(!is.na(df$excluded)) + length(articlesToRemove)
+df <- df %>% filter(is.na(excluded))
+# remove the variable $excluded
+df <- df %>% select(-excluded)
+
+# recode whether each article reports outcome discrepancies. "pro" indicates that outcome discrepancies were reported for studies that were unambiguously prospectively registered. "unclear" indicates that outcome discrepancies were reported for studies that were NOT unambiguously prospectively registered. "both" indicates that the article reported discrepancies separately for prospectively and retrospectively registered studies.
+df$discPro <- ifelse(df$discPro == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered" & df$disc == "Yes", "both", 
+                  ifelse(df$discPro == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered" & df$disc == "No", "pro",
+                         ifelse(df$discPro == "Yes, but they present results in such a way that we CANNOT SEPARATE out the results for only the studies that were PROSPECTIVELY registered", "unclear", "no")
+                  )
+)
+
+# recode whether each article reports NON-outcome discrepancies. (This is the same code as above but for non-outcome discrepancies).
+df$discProOther <- ifelse(df$discProOther == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered" & df$discOther == "Yes", "both", 
+                  ifelse((df$discProOther == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered" & df$discOther == "No"), "pro",
+                         ifelse(df$discProOther == "Yes, but they present results in such a way that we CANNOT SEPARATE out the results for only the studies that were PROSPECTIVELY registered", "unclear", "no")
+                  )
+)
+
+# remove the columns that are made redundant due to the previous two sections of code.
+df <- df %>% select(-c(disc, discOther, discProOtherDenom, discOtherDenom))
+# rename the "pro" columns. I only assigned the new columns to "pro" so they would keep their position before the related numeric data in the dataframe.
+df <- rename(df, discOutcome = discPro)
+df <- rename(df, discOther = discProOther)
+
+# simplify the coding for $source
+df$source <- gsub("Journal\\(s\\)", "journal", df$source)
+df$source <- gsub("Registry\\(ies\\)", "reg", df$source)
+df$source <- gsub("Search engine\\(s\\) \\(e.g., PubMed, EMBASE\\)", "searchEngine", df$source)
+
+# divide our potential exploratory analysis column ($explore) into four binary columns.
+df$expTotalDisc <- ifelse(grepl("total number", df$explore), 1, 0)
+df$expFund <- ifelse(grepl("FUNDING", df$explore), 1, 0)
+df$expStatSig <- ifelse(grepl("STATISTICAL SIGNIFICANCE", df$explore), 1, 0)
+df$expTime <- ifelse(grepl("TIME OF REGISTRATION", df$explore), 1, 0)
+df <- df %>% select(-explore)
+```
+
+```{r format_data}
+# turn certain columns into factors and others to numerics to facilitate later analyses
+df$comparator <- df$comparator %>% as.factor()
+df$version <- df$version %>% as.factor()
+df$disclosed <- df$disclosed %>% as.factor()
+df$discipline <- df$discipline %>% as.factor()
+df$yearFirst <- df$yearFirst %>% as.numeric()
+df$yearLast <- df$yearLast %>% as.numeric()
+df$observational <- df$observational %>% as.factor()
+df$pubYear <- df$pubYear %>% as.numeric()
+
+# make blocks of numerical data into class numerics, for...
+# registration timing
+for (i in grep("regPro", colnames(df)):grep("regUnclearIf", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# outcome discrepancies
+for (i in grep("discProDenom", colnames(df)):grep("discTime", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# non-outcome discrepancies
+for (i in grep("discProOtherElig", colnames(df))[1]:grep("discOtherResultsDenom", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# exploratory analyses
+for (i in grep("industryDisc", colnames(df))[1]:grep("retroNonDiscSec", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# The code above throws the warning: "NAs introduced by coercion". This is no problem. It occurs because some values are 'x' rather than numbers. The 'x' values are present if our original coding labeled that an article had information on this exploratory item, but when reviewing the articles in more detail, we found that it did not have this information. The warning tells us that instances of "x" have been converted to NA.
+
+# count articles that explicitly state they excluded studies with disclosed discrepancies by searching for the phrase "excludedDisclosed" 
+excludedDisclosedDiscrepancies = sum(grepl("excludedDisclosed", df$disclosedNum))
+# convert disclosedNum/Denom to numeric
+df$disclosedNum <- df$disclosedNum %>% as.numeric()
+df$disclosedDenom <- df$disclosedDenom %>% as.numeric()
+
+df <- df %>% mutate(denom = ifelse(is.na(discDenom), discProDenom, discDenom))
+# note some NAs will persist because a few studies don't check for outcome discrepancies. I don't need to combine the denom columns for the few studies that have both prospective and unclear, because we did this already during data collection/cleaning.
+
+# output a 'clean' dataset. 
+write.csv(df, "/data/dataClean.csv")
+```
+
+```{r perform_meta_analyses}
+# This chunk runs 40 meta-analyses [2 (pro & unclear) x 20 (10 outcome measures & 10 non-outcome measures)]. metaDisc() is a function I wrote specifically for this purpose. We reuse it when conducting meta-analyses on the combined pro and unclear coding later.
+
+temp <- metaDisc(df)
+estim <- temp[[1]]
+metaList <- temp[[2]]
+
+```
+
+```{r merge_timings}
+# This chunk combines the discrepancy results for prospective and studies with unclear registration timing. It performs the same function as the code chunk 'meta-analyses', except adds 'All' after many of the variables to identify that prospective and unclear studies are all being meta-analyzes together.
+
+# move the prospective discrepancies to the unclear columns. But only do so for articles where only discrepancies for prospectively registered studies are given, not where the discrepancies are also given for 'unclear'.
+
+# Note, I don't need to do this for studies with 'both' because the 'unclear' column already contains the sum of the prospective plus retrospective studies.
+dfAll <- df
+for (i in 1: nrow(df)){
+  if(dfAll$discOutcome[i]=="pro") {
+      dfAll[i, grep("discDenom", colnames(df)):grep("discTime", colnames(df))] = dfAll[i, grep("discProDenom", colnames(df)):grep("discProTime", colnames(df))]
+  }
+  if(dfAll$discOther[i]=="pro") {
+      dfAll[i, grep("discOtherElig", colnames(df))[1]:grep("discOtherResultsDenom", colnames(df))] = dfAll[i, grep("discProOtherElig", colnames(df))[1]:grep("discProOtherResultsDenom", colnames(df))]
+  }
+}
+
+temp <- metaDisc(dfAll)
+estimAll <- temp[[1]]
+metaListAll <- temp[[2]]
+```
+
+```{r make_tables}
+# create 3 output tables
+# 1 for the 'ALL' outcome discrepancies
+# 2 for the 'ALL' NON-outcome discrepancies
+# 3 for the prospective and unclear, outcome and non-outcome discrepancies (for Supplementary Material D)
+
+# bind only the variables from df (now in estim) that are relevant to the meta-analyses
+# 'tab' is short-form for table
+tab <- estim[grep("discProAny", rownames(estim)):grep("discProTime", rownames(estim)),1:7] %>%
+  rbind(estim[grep("discProOtherElig", rownames(estim))[1]:grep("discProOtherResults", rownames(estim))[1],1:7])
+
+tab[,8:14] <- (estim[grep("discAny", rownames(estim)):grep("discTime", rownames(estim)),1:7] %>%
+  rbind(estim[grep("discOtherElig", rownames(estim))[1]:grep("discOtherResults", rownames(estim))[1],1:7]))
+
+tab[15:21] <- (estimAll[grep("discAny", rownames(estimAll)):grep("discTime", rownames(estimAll)),1:7] %>%
+  rbind(estimAll[grep("discOtherElig", rownames(estimAll))[1]:grep("discOtherResults", rownames(estimAll))[1],1:7]))
+
+# remove the 'denom' rows from tab. These are interspersed after each non-outcome discrepancy numerator
+denom_index <- grep("Denom", rownames(tab))
+tab <- tab[-denom_index,]
+
+# create the content for the 3 meta-analysis tables that will appear in the manuscript (including confidence intervals, prediction intervals, and number of articles and studies in each meta-analysis)
+tabOut <- data.frame(matrix(ncol = 9, nrow = nrow(tab)))
+tabOut[,1] <- makeCI(tab[,1:7])
+tabOut[,2] <- makePI(tab[,1:7])
+tabOut[,3] <- tab$k
+tabOut[,4] <- tab$n
+
+tabOut[,5] <- makeCI(tab[,8:14])
+tabOut[,6] <- makePI(tab[,8:14])
+tabOut[,7] <- tab$k.1
+tabOut[,8] <- tab$n.1
+
+tabOut[,9] <- makeCI(tab[,15:21])
+tabOut[,10] <- makePI(tab[,15:21])
+tabOut[,11] <- tab$k.2
+tabOut[,12] <- tab$n.2
+
+# remove formatting from makeCI() and make(PI) for rows with NA
+tabOut[tabOut == "NA-NA%"] <- NA
+
+
+# rename rows for clarity
+discs <- c("Any outcome discrepancy",
+           "Any primary outcome discrepancy",
+           "Any secondary outcome discrepancy",
+           "Primary outcome demoted to secondary outcome",
+           "Primary outcome omitted",
+           "Primary outcome added",
+           "Secondary outcome promoted to primary outcome",
+           "Secondary outcome omitted",
+           "Secondary outcome added",
+           "Timing of outcome measurement changed",
+           "Eligibility criteria", 
+           "Sample size",
+           "Randomization",
+           "Blinding",
+           "Intervention",
+           "Study duration",
+           "Analysis",
+           "Subgroup analysis",
+           "Funding",
+           "Results")
+rownames(tabOut) <- discs
+
+# rename columns for clarity
+colnames(tabOut) <- c("95% CI (prospective registration)",
+                      "95% PI (prospective registration)",
+                      "k (prospective registration)",
+                      "n (prospective registration)",
+                      "95% CI (unclear registration timing)",
+                      "95% PI (unclear registration timing)",
+                      "k (unclear registration timing)",
+                      "n (unclear registration timing)",
+                      "95% CI (all)",
+                      "95% PI (all)",
+                      "k (all)",
+                      "n (all)"
+                      )
+ 
+# make main outcome discrepancy Table for manuscript (from 'ALL')
+tabOutMain1 <- tabOut[1:10,9:12]
+colnames(tabOutMain1) <- c("Discrepant studies (95% CI)",
+                           "Discrepant studies (95% PI)",
+                           "k",
+                           "n"
+                           )
+# make main non-outcome discrepancy table for manuscript (form 'ALL')
+tabOutMain2 <- tabOut[11:20,9:12]
+colnames(tabOutMain2) <- c("Discrepant studies (95% CI)",
+                           "Discrepant studies (95% PI)",
+                           "k",
+                           "n"
+                           )
+
+# make Supplemetary Table C for manuscript (seperate results for prospective and unclear)
+tabOutSupp <- tabOut[,1:8]
+
+# rename columns because the table will have grouped headers for each 3 columns.
+colnames(tabOutSupp) <- c("95% CI",
+                      "95% PI",
+                      "k",
+                      "n",
+                      "95% CI",
+                      "95% PI",
+                      "k",
+                      "n"
+                      )
+
+```
+
+```{r make_forest_plots}
+# create figure for primary outcome discrepancies for 'ALL' articles
+png("forest1.png", width = 800, height = 1150)
+meta::forest(metaListAll[[grep("disc1", colnames(df))[1]]],

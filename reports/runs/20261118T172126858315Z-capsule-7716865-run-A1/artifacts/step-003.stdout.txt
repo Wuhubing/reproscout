@@ -1,0 +1,81 @@
+Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)"--- tail manuscript ---
+Given the sample sizes used in the reviewed studies, even if neurofeedback drove “large” clinical or behavioural effects (d = 0.8), less than half of studies should have statistically significant results at p < .05. And yet, Tursic et al. found that 10/11 (`r percent(10/11)`) of the fMRI-nf studies that were not pilot studies reported clinical improvements while another review found that 24/35 (`r percent(24/35)`) of fMRI-nf studies reported behavioural improvements compared to a control group  [@Thibault2018a]^[ The numbers 10/11 (`r percent(10/11)`) come from data in Table 2 of Tursic et al. for the 11 non-pilot studies included in their power calculations for clinical measures. Their review also presents the numbers: “Out of 78% of studies reporting results, 60% (29/48) reported significant improvement of symptoms”. However, the review only calculates power for `r nrow(dMRIbeh)` studies and `r sum(dMRIbeh$pilot == "Y")` of these are “pilot, feasibility, or proof-of-pinciple studies...and should therefore also not be performing inferential statistical tests”. The number 24/35 (`r percent(24/35)`) comes from @Thibault2018a Fig 6c, 24 “Yes” and 11 “No”.].  Kohl et al. found that all studies reported improvement in at least one behavioural measure. This excess significance in the fMRI-nf and fNIRS-nf literature may stem from a combination of an absence of corrections for multiple comparisons, data dependent analytical decisions, selective reporting, publication bias, false positives, statistical tests against baseline rather than against a control group, and other sources of bias.
+
+Can we be sure current sample sizes are insufficient? It depends on the question^[Our commentary does not comment on the use of neurofeedback for purposes other than regulating brain activity with the aim to impact clinical conditions or behaviour. For example, neurofeedback can be used as a research tool instead of a potential treatment.]. On the one hand, if the goal is to show that individuals can control their brain imaging data or improve their behaviour compared to baseline—where within-sample designs are appropriate and effect sizes may be large—then the upper end of current sample sizes would be sufficient. For example, neurofeedback has driven very large behavioural effects compared to baseline (~d = 1.5) when using EEG-nf to treat ADHD [@arnold2021; @Schonenberg2017a] or fMRI-nf to treat depression [@Mehler2018; @Young2017a]. However, these effect sizes are generally much smaller or absent when comparing the experimental group to an active control group [@trambaiolli2021].
+
+On the other hand, if the goal is to demonstrate that a target neurofeedback protocol outperforms a reasonable control condition or matches the performance of an accepted treatment, then current sample sizes remain inadequate. Continuing to run poorly powered studies fills the literature with noise and wastes resources [@Button2013]. Genetics research provides a stark example of this issue. With the advent of inexpensive genome-wide testing (and the associated ability to increase sample sizes by orders of magnitude) the literature on candidate genes was found to be largely noise [@border2019; @flint2013].
+
+How should we move forward? Increasing sample size is an obvious, albeit practically challenging, solution. Without an influx of resources, we would need multi-site collaborations (e.g., as done recently for EEG-nf: Arnold et al., 2021). To detect an effect size equivalent to the median effect size for the 20 most common pharmaceuticals would require `r nLeucht %>% round(0)` participants. An effect size equivalent to antidepressants would require `r nAntiDep %>% round(0)` participants. These sample sizes can be prohibitive, even for multi-site collaborations. Increasing the effect size presents another option. Neurofeedback publications sometimes identify “responders” and “non-responders” post hoc. If these groups could be identified a priori, and neurofeedback selectively applied to responders, the group effect would increase. However, repeated efforts to apply this approach in personalized medicine remain largely unsuccessful [@senn2018].
+
+Unfortunately, there’s no easy solution. In many cases, resources are simply too scarce to answer a research question. We are better off to resist the temptation to forge ahead with uninformative sample sizes, even when incentive structures may encourage us to do so (Higginson & Munafò, 2016). In the words of Doug @altman1994: “*We need less research, better research, and research done for the right reasons*”.
+
+\newpage
+
+# Tables and Figures
+
+
+```{r, tMRIOut, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tMRI, caption = "Recalculated values for the fMRI-nf review (Tursic et al., 2020). ", booktabs = T, linesep = "", align = "c") %>% 
+  kable_styling(latex_options = "striped") %>%
+  kable_styling(latex_options = "hold_position") %>%
+    add_footnote(c("The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for clinical measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample sizes in the review differ slightly from ours, possibly due to a calculation error. We used the data provided in the review's supplementary material for these calculations."
+                  ), notation = "none", threeparttable = T) %>% 
+      add_header_above(c(" " = 2,
+                         "Power" = 3,
+                         "Sensitivity (in Cohen’s d)" = 2 
+                          )
+      ) %>%
+row_spec(c(4,8), hline_after = T) %>%
+  pack_rows("Recalculated", 1, 4) %>%
+  pack_rows("Original", 5, 8) %>%
+  pack_rows("Overestimation factor (original/recalculated)", 9, 12)
+```
+
+
+```{r, tNIRSOut, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tNIRS, caption = "Recalculated values for the fNIRS-nf review (Kohl et al., 2020).", booktabs = T, linesep = "", align = "c") %>% 
+  kable_styling(latex_options = "striped") %>%
+  #kable_styling(font_size = 8) %>%
+    add_footnote(c("The first section of the table presents the values we calculated. The second section presents the values published in the original review. The third section presents an overestimation factor calculated by dividing the original values by the recalculated values for power and by dividing the recalculated values by the original values for sensitivity. Power and sensitivity calculations for the ability to regulate the neurofeedback signal are presented seperately from those for behavioural measures. The overestimation factor was calculated before rounding values to two decimal place. Thus, recalculating the overestimation factor with the numbers in the table will produce slightly different values. The mean and median sample size in the review differ slightly from ours---whereas we calculated these valuse based on the sample size used in the statistical tests, Kohl et al. calculated them based on the total number of participants. We removed one study from our calculations because it only ran binomial tests within each participant but did not test for group effects. One study used biserial correlation, for which we calculated power as for a Pearson’s correlation. One study used an ANCOVA, for which we calculated power using a 2x2 repeated measures (mixed) ANOVA."
+                  ), notation = "none", threeparttable = T) %>% 
+      add_header_above(c(" " = 2,
+                         "Power" = 3,
+                         "Sensitivity (in Cohen’s d)" = 2 
+                          )
+      ) %>%
+row_spec(c(4,8), hline_after = T) %>%
+  pack_rows("Recalculated", 1, 4) %>%
+  pack_rows("Original", 5, 8) %>%
+  pack_rows("Overestimation factor (original/recalculated)", 9, 12)
+
+```
+
+![Depiction of the default and Cohen's recommended options for conducting power calculations for repeated-measures (mixed) ANOVAs in GPower.](/code/figure1_GPower.PNG)
+
+\newpage
+
+# Data availability statement
+
+All data and materials related to this study are publicly available on the Stanford Digital Repository (https://doi.org/10.25740/bn925rp5443).
+
+# Code availability statement
+
+To facilitate reproducibility this manuscript was written by interleaving regular prose and analysis code using R Markdown. The relevant files are available on the Stanford Digital Repository (https://doi.org/10.25740/bn925rp5443) and in a Code Ocean container (https://doi.org/10.24433/CO.7282505.v1) which re-creates the software environment in which the original analyses were performed. This container allows the manuscript to be reproduced from the data and code with a single button press.
+
+# Contributions
+Robert Thibault conceived the idea for this commentary and led the analyses and writing. Hugo Pedder provided statistical support, reviewed the code, and contributed to the commentary through discussions.
+
+# Funding
+Robert Thibault is supported by a general support grant awarded to METRICS from the Laura and John Arnold Foundation and a postdoctoral fellowship from the Fonds de recherche du Québec – Santé. Hugo Pedder was funded by the NIHR Biomedical Research Centre at University Hospitals Bristol and Weston NHS Foundation Trust and the University of Bristol. The views expressed are those of the authors and not necessarily those of the NIHR or the Department of Health and Social Care. The funders had no role in the data analysis, decision to publish, or preparation of the manuscript.
+
+# Competing interests
+Robert Thibault has received payments for consulting for neurofeedback start-up companies. Hugo Pedder declares no competing interests.
+
+# Acknowledgements
+We thank the authors of the two reviews for making their data publicly available for reanalysis. We thank Marcus Munafò for discussions on this topic and John Ioannidis for feedback on a draft of this commentary. 
+
+\newpage
+# References
+
+::: {#refs}
+:::

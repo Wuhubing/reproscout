@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python3 - <<'PY'\nimport pandas as pd\nfor f in ['/data/less3more3.csv','/data/per-sd.csv','/data/multi-level.csv']:\n    df=pd.read_csv(f)\n    print('\\nFILE',f)\n    cols=[c for c in df.columns if 'Auth' in c or 'author' in c.lower() or 'year' in c.lower()]\n    print('possible cols',cols)\n    m=df[df.astype(str).apply(lambda row: row.str.contains('Wium', case=False, na=False).any(), axis=1)]\n    print(m[[c for c in df.columns if c in ['Authoryear','Author','Year','N','N-outcome','N_nohi','N_outcomes_nohi','age_psychiatric_outcome','age']]].to_string(index=False))\nPY",
+  "exit_code": 1,
+  "seconds": 0.2094539999961853,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}

@@ -1,90 +1,119 @@
-# Lesson revision: findings and limits
+# V6: what constraints fix, and what they do not
 
-B scored higher than A in this rerun: A 20/30 versus B 26/30. The preceding v4 run scored A 25/30
-and old B 21/30. Within v5, 1 pairs favored A, 7 favored
-B, 19 passed in both, and 3 passed in neither.
-These are thirty repeated observations on fifteen previously exposed tasks.
+A scored 24/30 and constrained B 20/30 in sixty frozen scientific cells. B changes
+execution capabilities and output validation, so this is not a pure lesson-text
+ablation. V5's B 26/30 included scientific reimplementations. A higher raw score is
+not proof of faithful reproduction, and more abstention is not improved accuracy.
 
-## Diagnosed problems and intervention
+## Separate evaluations
 
-The [four adverse-pair study](lesson-pair-analysis-v4.md) distinguishes serialization
-failure from scientific error, wrong output selection, and failure to submit within
-budget. The original lessons did not address those checks and were not consistently
-followed. Tool traces cannot prove which individual old lesson caused a behavior.
-Revision 2 adds a final numeric-type check, targeted question-to-output matching,
-submission budgeting, and conditional handling of rendering and data blockers.
-It prohibits editing scientific copies as well as original files. No task answers
-or capsule-specific repairs appear in the revised prompt.
+| Measure | A | B |
+|---|---:|---:|
+| Answer solved | 24/30 | 20/30 |
+| Strictly typed submissions | 26/30 | 29/30 |
+| Accepted type violations | 2 | 0 |
+| Missing reports | 2 | 1 |
+| Runs containing nulls | 0 | 8 |
+| Solved + verified original execution | 0/30 | 20/30 |
+| Call-cap failures | 2 | 1 |
 
-## Development evidence
+A execution statuses: `{'unverified': 30}`. B statuses:
+`{'verified_original_execution': 22, 'unverified': 7, 'violated': 1}`. The automatic audit has asymmetric observability:
+A's unrestricted shell cannot establish provenance merely by leaving original
+hashes intact. Its unverified count is not a measured failure rate. The joint count
+is a conservative instrumented intersection, not a universal fidelity ranking.
 
-A fresh three-arm study on five official training tasks produced fifteen scientific
-outcomes and rejected candidate 1 for editing a scientific copy. Candidate 2 was
-then checked on all five tasks, giving twenty development outcomes. Candidate B: 3/5; legacy B: 4/5;
-A: 3/5. The declared gate checks completion, report submission,
-numeric value types, native counts, original hashes, and manual code-copy fidelity.
-The initial raw-success floor passed: False.
-The acceptance comparator was amended before candidate-2 execution to exclude
-legacy successes involving scientific modifications; the legacy qualified count
-was 3/5. This is an explicit development-stage
-amendment, not the original preregistered raw-score floor. See the
-[confirmation protocol](lesson-confirmation-protocol.md).
-A passing amended gate establishes bounded observed operation, not statistical improvement.
-All attempts and any adverse training results remain available.
+## Mechanism and limits
 
-## Formal resource and failure breakdown
+B has no arbitrary code-writing or shell capability. Every dispatched author file
+must match its frozen inventory and all original inputs are hashed before execution.
+Controller wrappers execute whole original notebooks or extract all R Markdown
+chunks using knitr; they do not accept model-authored scientific fragments. This
+is analytical-block execution when rendering fails, not proof of full-document
+rendering or equivalent knitting semantics under every author chunk option.
 
-| Condition | Solved | Generations | Estimated cost | Sample minutes | Outcome categories |
-|---|---:|---:|---:|---:|---|
-| A | 20/30 | 370 | $0.77698 | 64.16 | {'model_call_cap': 4, 'answer_solved': 20, 'completed_without_passing_score': 6} |
-| B | 26/30 | 294 | $0.72383 | 66.23 | {'completed_without_passing_score': 4, 'answer_solved': 26} |
+The submission validator rejects wrong numeric types rather than coercing them.
+Non-null citations must come from successful execution stdout or newly generated
+outputs. Output provenance does not prove the selected figure, population, metric,
+units or interpretation is correct. Original programs can also be scientifically
+wrong. Read the [execution audit](../reports/controlled-execution-audit-v6.json),
+[semantic review](../reports/semantic-review-v6.json) and answer scores separately.
+The semantic review is assistant-assisted artifact inspection, not independent
+human agreement or a complete scientific audit.
 
-These group metrics cover selected scientific outcomes; the cross-version report
-also counts infrastructure attempts. All scientific failures are final. No selective
-rerun, scorer relaxation, or mid-experiment lesson adjustment was used.
+## Why A declined previously
 
-## What can be claimed
+[All seven changed A pairs](baseline-decline-v5.md) explain the v4 25/30 to v5 20/30
+movement: six regressions, one gain, nineteen successes in both and four failures
+in both. Several regressions already had adequate output but selected the wrong
+quantity or never submitted. Others rewrote scientific calculations. The same A
+prompt/tools/configuration were used; sampling, execution choices and time remain
+confounders. B lessons were never supplied to A. The v6 parity report verifies that
+the baseline's model-facing prompt and tool schemas still match v5 exactly.
 
-The exact score gap and trajectories are observations under the frozen settings.
-Cross-version changes also reflect new model samples and time; a changed A baseline
-is an especially useful warning against attributing all change to the lessons.
-The revision used insights from exposed test traces, so it cannot be described as
-pure training-only lesson discovery. No fresh held-out or significance claim applies.
+## Development and exposure
 
-Original-file hashes do not detect modified new copies or prove that the evidence
-semantically supports an answer. The v4 A manuscript-copy edit is a concrete
-counterexample. Read [source exceptions](../reports/source-integrity-v5.json) and
-[supplemental trajectory review](../reports/trajectory-review-v5.json) alongside
-answer scores, never as a replacement for the historical scoring rule.
+The gate was specified before ten new training outcomes: all B reports, types,
+provenance and original hashes; at least two verified B successes; software and
+runtime boundary checks. B achieved three. A scored four, but its additional
+notebook success replaced a loader in memory. One infrastructure setup failure and
+an initial synthetic plotting-probe failure remain retained. The fixture was fixed
+without changing the scientific candidate. No acceptance threshold changed.
 
-Targeted review already found that new B on capsule-9054015 repetition 1
-scored correctly but reimplemented the q1 formula instead of querying the author
-function. New B on capsule-2708693 repetition 1 used direct arithmetic after a
-rendering failure and did not reproduce the full manuscript. These observations
-show that the prompt does not guarantee compliance; see the four-pair follow-up.
-New B on capsule-0504157 repetition 2 likewise passes with the string `"1000"`,
-while rebuilding an aggregation that omits author preprocessing. It violates both
-the JSON-number reminder and the unchanged-computation requirement despite passing
-the scorer. New A on capsule-9054015 repetition 2 uses a modified inline function
-copy. These limitations apply to both conditions and cannot be reduced to hashes.
+All fifteen formal tasks were exposed before this revision. No fresh held-out,
+significance, or unrestricted benchmark claim applies. All failures remain final.
+A future study should use an unexposed cohort and independent semantic annotations;
+neither is claimed here.
 
-A subsequent, separately frozen study could test a typed submission schema and
-execution paths that extract unchanged author blocks with recorded source spans.
-Those controls would change the intervention and require new development validation
-and a genuinely unexposed test cohort. They were not added during this experiment.
+[Focused B follow-up](controlled-followup-v6.md) · [Protocol](fidelity-protocol-v6.md) · [Development](fidelity-development-v6.md) ·
+[Full comparison](controller-comparison.md) · [Results](results.md)
 
-[Four-version comparison](controller-comparison.md) ·
-[All sixty outcomes](results.md) · [Four-pair follow-up](adverse-pair-followup-v5.md) · [Development gate](../reports/development-v5-validation.json) ·
-[Revision protocol](lesson-revision-protocol.md)
+## Separate artifact interpretation review
 
-## Remaining adverse pair in v5
+The additional review inspected each accepted B question citation and all thirty A
+visible command sequences. It is assistant-assisted, not independent human
+agreement or a complete audit of scientific validity. It does not change scores.
 
-Only capsule-4671827 repetition 1 favors A: A submits `Semantic-based`, while
-B submits `Combination`. The question asks about **44 elements**. B's cited
-image (step 009) instead compares Greedy and Combination over **2–12 elements**.
-This is a remaining wrong-figure selection, not a numeric serialization issue.
-It shows that a question-to-output reminder did not guarantee correct matching.
-The image was visually reviewed; scores remain unchanged.
+| B question-level evidence status | Count |
+|---|---:|
+| abstained | 11 |
+| supported_within_visible_evidence | 27 |
+| unsupported_or_contradicted | 4 |
+| no_submission | 2 |
 
-[New B evidence](../reports/runs/20261118T085405675915Z-capsule-4671827-run-B1/report.html) ·
-[New A evidence](../reports/runs/20261118T085245071914Z-capsule-4671827-run-A1/report.html)
+Another B example, `capsule-1175539` repeat 2, scores correctly with SCZ but cites an adjusted regression coefficient instead of group medians. This is marked unsupported even though the primary scorer accepts the answer.
+
+These question counts have a different denominator from the thirty run-level
+successes. Supported means the visible cited artifact and inspected context support
+the submitted value; it does not certify all scientific assumptions. A table citation
+for a visual question can support content without proving compliance with the
+requested visual method. Null and missing answers do not count as supported.
+
+A concrete counterexample is B `capsule-7716865` repeat 1: original R chunks
+successfully generate the requested table, but B selects 0.77 from the Original
+section rather than 1.31 from Recalculated. Type and provenance checks both pass;
+semantic support fails. This failure remains unchanged. B `capsule-1624349` repeat 1
+uses the generated information-gain table for a figure question; the feature name is
+supported, but visual-method compliance is not certified.
+
+B `capsule-3262218` repeat 2 exposes a wrapper limitation: all original chunks produce the requested count, then `render_appendix()` fails because extracted execution lacks the active R Markdown context. The controller rejects the count from that failed execution and accepts null. Thus original-file dispatch is not equivalent to complete knitting semantics, and the stricter success rule can discard partial valid output. B `capsule-2708693` repeat 2 successfully executes all chunks but reaches the call cap without a report; its automatic unverified status reflects the missing validated submission, not absence of successful execution.
+
+Conversely, B `capsule-4671827` repeat 1 selects the correct generated
+Semantic-based/Label-based plot; A cites a different Greedy/Combination source cell.
+On `capsule-2708693` repeat 1, original-chunk table headers resolve k=21 versus n=620.
+These are inspected trajectory mechanisms, not causal effect estimates.
+
+The original-input audit is **59 unchanged, 1 changed**, not 60 unchanged. B `capsule-3262218` repeat 2 calls the original preprocessing script, which regenerates six inventoried processed RDS files; the automatic `violated` status is retained. No model-authored scientific command is dispatched, but original-code execution itself can modify inputs. All 506 host freeze hashes remain unchanged; that is a different check from in-container input integrity.
+
+Failed host/API operations are distinct from author-code dependencies inside the
+frozen isolated container. The manuscript's request to github.com, pandoc failures
+and scientific execution timeouts remain blocked/failed scientific outcomes. They
+are neither successful reproductions nor silently retried infrastructure cells.
+
+The manual A review observes explicit additional/reimplemented scientific calculations in 14/30 trajectories. This is a narrow observation count, not a measured overall fidelity failure rate: source-only inference, authored placeholder outputs and incomplete executions are additional distinct concerns. The automatic A status remains unverified.
+
+V5-to-v6 A transitions: `{'both_failure': 4, 'both_success': 18, 'regression': 2, 'gain': 6}`. See [all paired A transitions](baseline-transition-v6.md). The earlier six-regression/one-gain v4-to-v5 analysis is retained separately. Neither transition analysis attributes A movement to lessons that A did not receive.
+
+[Question-level review and A observations](../reports/semantic-review-v6.json) · [Execution boundary audit](../reports/controlled-execution-audit-v6.json)
+
+[What A and B mean, and why B scores lower](ab-interpretation-v6.md)

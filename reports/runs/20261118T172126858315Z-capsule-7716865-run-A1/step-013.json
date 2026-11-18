@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'EOF'\nlibrary(WebPower)\nd <- read.csv('/data/fMRInf_regulation.csv')\nda <- subset(d, test=='anova')\ncat('rows', nrow(da), '\\n')\noutput <- function(d){for(i in 1:nrow(d)){d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=0.1, nscor=1, alpha=0.05, power=NULL, type=d$type[i])$power; d$medium[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=0.25, nscor=1, alpha=0.05, power=NULL, type=d$type[i])$power; d$large[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=0.4, nscor=1, alpha=0.05, power=NULL, type=d$type[i])$power; d$p80[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=NULL, nscor=1, alpha=0.05, power=.80, type=d$type[i])$f*2; d$p95[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=NULL, nscor=1, alpha=0.05, power=.95, type=d$type[i])$f*2}; d}\nda<-output(da)\nprint(head(da[,c('Publication','n','small','medium','large','p80','p95')],3))\ncat('mean n', mean(da$n), 'median n', median(da$n), '\\n')\ncat('mean p80', mean(da$p80), 'median p80', median(da$p80), '\\n')\ncat('mean p95', mean(da$p95), 'median p95', median(da$p95), '\\n')\nEOF",
+  "exit_code": 0,
+  "seconds": 4.05540862493217,
+  "stdout": "artifacts/step-013.stdout.txt",
+  "stderr": "artifacts/step-013.stderr.txt"
+}

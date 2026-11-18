@@ -1,0 +1,94 @@
+Traceback (most recent call last):
+  File "<string>", line 7, in <module>
+  File "/opt/conda/lib/python3.10/site-packages/nbconvert/preprocessors/execute.py", line 100, in preprocess
+    self.preprocess_cell(cell, resources, index)
+  File "/opt/conda/lib/python3.10/site-packages/nbconvert/preprocessors/execute.py", line 121, in preprocess_cell
+    cell = self.execute_cell(cell, index, store_history=True)
+  File "/opt/conda/lib/python3.10/site-packages/jupyter_core/utils/__init__.py", line 166, in wrapped
+    return loop.run_until_complete(inner)
+  File "/opt/conda/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/opt/conda/lib/python3.10/site-packages/nbclient/client.py", line 1058, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/conda/lib/python3.10/site-packages/nbclient/client.py", line 914, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+../results/# defining our function
+x = np.array([5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+
+y1 = np.array([0.078062,0.076026,0.075664,0.079944,0.081290,0.084642,0.084685,0.083360,0.083599,0.080270,0.082780,0.088503,0.088184,0.085245,0.087246,0.090465])
+y2 = np.array([0.072062,0.072606,.070603,0.076757,0.077084,0.081657,0.087393,0.113737,0.127997,0.183593,0.293211,0.540051,1.082000,2.115242,4.344464,9.092083])
+y3 = np.array([0.107088,0.106380,0.107988,0.108667,0.105005,0.105199,0.107815,0.106744,0.110184,0.109660,0.115234,0.116232,0.118817,0.119779,0.118837,0.118090])
+
+# defining our error
+y1_error = np.array([0.004553,0.004568,0.004410,0.004966,0.005678,0.005138,0.005149,0.005398,0.005210,0.005339,0.005459,0.005307,0.005330,0.004882,0.005243,0.005721])
+y2_error = np.array([0.005102,0.004338,0.004573,0.005105,0.005199,0.005415,0.003855,0.004506,0.004983,0.005408,0.005496,0.006492,0.071203,0.012699,0.024842,0.049801])
+y3_error = np.array([0.006144,0.005026,0.005387,0.004856,0.004968,0.004705,0.004777,0.004615,0.004965,0.005343,0.005264,0.006194,0.004890,0.004750,0.005250,0.005010])
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.plot(x, y2,label=" EXHAUSTIVE SEARCH", marker ='o', color="g", markerfacecolor="None", markersize=8, mew=2)
+ax.plot(x, y1,label=" SET-COVER", marker ='^', color="b", markerfacecolor="None", markersize=8, mew=2)
+ax.plot(x, y3,label=" LINEAR PROGRAMMING", marker ='s', color="r", markerfacecolor="None", markersize=8, mew=2)
+
+
+axins = inset_axes(ax, 3,3 , loc=2,bbox_to_anchor=(0.1, 0.80),bbox_transform=ax.transAxes)
+
+axins.plot(x, y2,label=" EXHAUSTIVE SEARCH", marker ='o', color="g", markerfacecolor="None", markersize=8, mew=2)
+axins.plot(x, y1,label=" SET-COVER", marker ='^', color="b", markerfacecolor="None", markersize=8, mew=2)
+axins.plot(x, y3,label=" LINEAR PROGRAMMING", marker ='s', color="r", markerfacecolor="None", markersize=8, mew=2)
+
+axins.set_xlim(4.5,14.5)
+axins.set_ylim(0.05,0.2)
+
+
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+ax.errorbar(x, y1, yerr = y1_error, color="b", capsize=2, capthick=1,)
+ax.errorbar(x, y2, yerr = y2_error, color="g", capsize=2, capthick=1,)
+ax.errorbar(x, y3, yerr = y3_error, color="r", capsize=2, capthick=1,)
+
+axins.errorbar(x, y1, yerr = y1_error, color="b", capsize=2, capthick=1,)
+axins.errorbar(x, y2, yerr = y2_error, color="g", capsize=2, capthick=1,)
+axins.errorbar(x, y3, yerr = y3_error, color="r", capsize=2, capthick=1,)
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("NSFs",fontsize=18, **csfont)
+ax.set_ylabel("Time (seconds)",fontsize=18, **csfont)
+ax.set_title("Policy Provisioning",fontsize=18, **csfont)
+
+
+plt.xticks(visible=True)
+plt.yticks(visible=True)
+mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.5")
+
+
+major_ticks = np.arange(5, 21, 1)
+minor_ticks = np.arange(5, 15, 1)
+
+ax.set_xticks(major_ticks)
+axins.set_xticks(minor_ticks)
+
+ax.grid()
+axins.grid()
+
+plt.savefig('../results/provisioning.eps', format='eps')
+------------------
+
+
+[0;36m  Cell [0;32mIn[12], line 1[0;36m[0m
+[0;31m    ../results/# defining our function[0m
+[0m    ^[0m
+[0;31mSyntaxError[0m[0;31m:[0m invalid syntax
+
+

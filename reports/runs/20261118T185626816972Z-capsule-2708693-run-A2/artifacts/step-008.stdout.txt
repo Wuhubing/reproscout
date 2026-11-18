@@ -1,0 +1,268 @@
+             comb.fixed = FALSE,
+             plotwidth = "11cm",
+             xlim = c(0,1),
+             fontsize = 12
+             )
+dev.off()
+
+```
+
+```{r articles_per_coder}
+# calculate the number of included articles each coder coded.
+RTT <- sum(grepl("RTT", df$coder))
+RC <- sum(grepl("RC", df$coder))
+SW <- sum(grepl("SW", df$coder))
+OvdA <- sum(grepl("OvdA", df$coder))
+```
+
+```{r make_article_characteristics_table}
+# make dataframe with discipline data. We will use this for the characteristics table (Table 1) via kable
+# this code is a bit round-about, but it works.
+
+set_table <- function(df, var_name){
+  df_group <- df %>% 
+    group_by({{var_name}}) %>%
+    summarize(k_articles = n(), n_studies = sum(denom, na.rm = T)) %>%
+    arrange(desc(k_articles), desc(n_studies)) %>% 
+    rename(var1 = {{var_name}})
+  return(df_group)
+}
+
+# 1. disciplines
+disciplineFrame <- set_table(df, discipline)
+# rename items so the table is cleaner
+disciplineFrame$var1 <- c("medicine",
+                "dentistry",
+                "psychology",
+                "economics",
+                "physical therapy")
+
+# 2. Registry assessed
+comparatorFrame <- set_table(df, comparator)
+comparatorFrame$var1<- c("registry",
+                "ethics application",
+                "other protocol",
+                "marketing application",
+                "grant application")
+
+# 3. Source from which the studies were identified
+# Calculate using grepl() rather than set_table() because some artices used multiple sources...On second thought, I'm just gonna present this with each category
+sourceFrame <- set_table(df, source)
+sourceFrame$var1 <- c("journals",
+                "registries",
+                "search engines",
+                "ethics boards",
+                "funders",
+                "registries and search engines",
+                "regulators",
+                "research group",
+                "registries and journals"
+                )
+
+# 4. Observational
+observationalFrame <- set_table(df, observational)
+observationalFrame$var1 <- c("solely observational",
+                "observational and study authors were contacted",
+                "observational and interventional"
+                )
+
+# 5. registration version compared to
+versionFrame <- set_table(df, version)
+# move 'not reported' row to the bottom of the dataframe
+versionFrame <- versionFrame %>% slice(-1) %>% bind_rows(versionFrame[1,])
+  
+versionFrame$var1 <- c("original",
+                "most recent",
+                "other version/unclear",
+                "not reported"
+                )
+
+# 6. disclosures
+disclosedFrame <- set_table(df, disclosed)
+# move 'not reported' row to the bottom of the dataframe
+disclosedFrame <- disclosedFrame %>% slice(-1) %>% bind_rows(disclosedFrame[1,])
+
+disclosedFrame$var1 <- c("one or more",
+                         "none",
+                         "article excluded publications with disclosed discrepancies",
+                         "not reported"
+                )
+
+# create dataframe that combines the dataframes above that will be used to produce Table 1
+charFrame <- bind_rows(disciplineFrame,
+                       comparatorFrame,
+                       sourceFrame,
+                       observationalFrame,
+                       versionFrame,
+                       disclosedFrame)
+# name columns to appear in table
+colnames(charFrame) <- c("Article characteristic", paste("k = ", nrow(df)), paste("n = ", sum(df$denom, na.rm = T)))
+
+# This code provides the numbers that insert table sections in the right spot for Table 1
+g1 <- nrow(disciplineFrame)
+g2 <- g1 + nrow(comparatorFrame)
+g3 <- g2 + nrow(sourceFrame)
+g4 <- g3 + nrow(observationalFrame)
+g5 <- g4 + nrow(versionFrame)
+g6 <- g5 + nrow(disclosedFrame)
+```
+
+```{r years}
+# calculate data on the year range that the *studies* were published (not when the *articles* were published). 
+
+# Filter to only include the articles which report the year the *studies* were *published* (rather than registered)
+yearPub <- dfAll %>% filter(yearItem=="pub")
+
+# using dfAll because I will run a correlation with the results from the two main figures later.
+# calculate median and IQR for the oldest studies that were included in each article ('firstYear')
+
+# some years are coded as '0'. This was done when there appeared to be no limit on the earliest year. Remove rows coded as '0' before calculating the median and IQR. 
+yearFirst <- yearPub %>% filter(yearFirst > 0)
+yearFirstMedian <- median(yearFirst$yearFirst)
+yearFirstQ1 <- round(quantile(yearFirst$yearFirst)[2],0)
+yearFirstQ3 <- round(quantile(yearFirst$yearFirst)[4],0)
+# median and IQR for last year
+yearLast <- yearPub %>% filter(yearLast > 0)
+yearLastMedian <- median(yearLast$yearLast)
+yearLastQ1 <- round(quantile(yearLast$yearLast)[2],0)
+yearLastQ3 <- round(quantile(yearLast$yearLast)[4],0)
+# 2 extracts the 25% quartile, and 4 extracts the 75% quartile value.
+
+```
+
+```{r perform_meta_regressions}
+# run meta-regressions on the articles characteristics for the two main analyses
+
+# set the reference categories for the meta-regressions
+dfAll$discipline <- relevel(dfAll$discipline, ref = "Medicine (MEDI)") 
+dfAll$source<- relevel(as.factor(dfAll$source), ref = "journal") 
+dfAll$disclosed <- relevel(as.factor(dfAll$disclosed), ref = "Yes, and SOME or ALL of the discrepancies were disclosed") 
+dfAll$comparator <- relevel(as.factor(dfAll$comparator), ref = "reg") 
+dfAll$version <- relevel(as.factor(dfAll$version), ref = "Original version") 
+
+# make dfs that only contain non-NA rows for the two main analyses. This is necessary to run the meta-regressions
+df1 <- filter(dfAll, !is.na(disc1))
+df2 <- filter(dfAll, !is.na(disc2))
+
+# remove levels with no data
+df1$source <- droplevels(df1$source)
+df1$comparator <- droplevels(df1$comparator)
+df2$source <- droplevels(df2$source)
+df2$comparator <- droplevels(df2$comparator)
+df2$discipline <- droplevels(df2$discipline)
+
+# extract the two main meta-analyses from larger list of meta-analyses
+meta1 <- metaListAll[grep("disc1", colnames(df))[[1]]][[1]]
+meta2 <- metaListAll[grep("disc2", colnames(df))[[1]]][[1]]
+
+# 1. perform a meta-regression to test whether the publication year of an article impacts the proportion of discrepancies
+modPubYear1 <- metareg(meta1, ~df1$pubYear)
+modPubYear2 <- metareg(meta2, ~df2$pubYear)
+
+# 2. metaregression for discipline.
+modDiscipline1 <- metareg(meta1, ~df1$discipline)
+modDiscipline2 <- metareg(meta2, ~df2$discipline)
+
+# 2a. redo metaregression with discipline dichotimized
+dfDiscipline1 <- df1
+dfDiscipline1 <- mutate(dfDiscipline1, discipline = ifelse(discipline != "Medicine (MEDI)", "other", "Medicine (MEDI)"))
+modDiscipline1binary <- metareg(meta1, ~dfDiscipline1$discipline)
+
+dfDiscipline2 <- df2
+dfDiscipline2 <- mutate(dfDiscipline2, discipline = ifelse(discipline != "Medicine (MEDI)", "other", "Medicine (MEDI)"))
+modDiscipline2binary <- metareg(meta2, ~dfDiscipline2$discipline)
+
+# 3. metaregression for source. 
+modSource1 <- metareg(meta1, ~droplevels(df1$source))
+# relevel ref class to most common for secondary outcome discrepancies
+df2$source<- relevel(as.factor(df2$source), ref = "reg") 
+modSource2 <- metareg(meta2, ~df2$source)
+
+# 4. version of the registry compared to
+modVersion1 <- metareg(meta1, ~df1$version)
+modVersion2 <- metareg(meta2, ~df2$version)
+
+# 5. check on disclosed
+modDisclosed1 <- metareg(meta1, ~df1$disclosed)
+modDisclosed2 <- metareg(meta2, ~df2$disclosed)
+
+# 6. check on comparator
+modComparator1 <- metareg(meta1, ~droplevels(df1$comparator))
+modComparator2 <- metareg(meta2, ~droplevels(df2$comparator))
+
+# redo metaregression with comparator dichotimized
+df1Comparator <- df1
+df1Comparator <- mutate(df1Comparator, comparator = ifelse(comparator != "reg", "other", "reg"))
+modComparator1binary <- metareg(meta1, ~df1Comparator$comparator)
+
+# perform metaregression that includes all predictors at one time (but without any interactions)
+predictor_vars <- c("df1$pubYear",
+                    "df1$discipline",
+                    "df1$source",
+                    "df1$version",
+                    "df1$disclosed",
+                    "df1$comparator"
+                    )
+formula_str <- paste("~", paste(predictor_vars, collapse = " + "))
+
+modAll1 <-metareg(meta1, formula = formula_str)
+# this throws a redundant error. This is only because the 3 ethics values are the same in source and comparator. So only this category is not reanalyzed a second time.
+
+```
+
+```{r meta_analysis_discrepancy_disclosures}
+dfMeta <- df %>% filter(!is.na(df[,grep("disclosedNum", colnames(df))]))
+      meta <- meta::metaprop(dfMeta$disclosedNum, dfMeta$disclosedDenom,
+                          method="GLMM", 
+                          method.tau="ML", 
+                          method.tau.ci="J", 
+                          comb.random=TRUE, 
+                          prediction=TRUE,
+                          level.predict=0.95,
+---
+
+This meta-analysis also had high heterogeneity (*I*^2^ = `r round(meta2$I2, 2)*100`%) which could not be explained by meta-regression of the version of the registry analyzed (p = `r round(modVersion2$QMp, 2)`) or the year of article publication (p = `r round(modPubYear2$QMp, 2)`). Meta-regression of the sources searched to identify studies explained some heterogeneity, in that searches stemming from journals, compared to registries, had a greater proportion of publications with at least one secondary outcome discrepancy (p = `r round(modSource2$QMp, 2)`; OR 95% CI: `r round(exp(modSource2$ci.lb[2]), 2)`-`r round(exp(modSource2$ci.ub[2]), 2)`). Meta-regressions on discipline (p = `r round(modDiscipline2$QMp, 2)`), whether discrepancies were disclosed (p = `r round(modDisclosed2$QMp, 2)`), and whether the publications were compared to registry entries versus other protocol formats (p = `r round(modComparator2$QMp, 2)`) had very low statistical power because almost all articles had the same characteristic. All meta-regression model summaries are included in Supplementary Material E.
+
+Descriptively, omitting secondary outcomes and adding secondary outcomes appears to occur more frequently than omitting primary outcomes, adding primary outcomes, or demoting primary outcomes, which in turn appear to occur more frequently than promoting a secondary outcome (see Table 2).
+
+```{r outputTable1, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tabOutMain1, caption = "Table 2. Meta-analytic estimates for the proportion of studies that contain various types of outcome discrepancies", booktabs = T, linesep = "") %>% 
+      column_spec(1, width = "9cm") %>%
+        column_spec(2:3, width = "2cm") %>%
+          column_spec(4:5, width = "1cm") %>%
+            kable_styling(latex_options = c("striped", "hold_position")) %>%
+    add_footnote("We only coded 'any outcome discrepancy' for articles that checked for both primary and secondary outcome discrepancies in the studies they assessed. Forest plots for all meta-analyses in this table are in Supplementary Material F.", notation = "none", threeparttable = T)
+```
+
+## Parameters potentially related to outcome discrepancies
+
+A subset of articles contained information on parameters potentially related to the proportion of outcome discrepancies. These include the disclosure of discrepancies, presence of a 'statistically significant' result, funding source, and timing of registration (Table 3).
+
+```{r, outputAddTable, include = TRUE, echo = FALSE, results = "asis"}
+  knitr::kable(addFrame, caption = "Table 3. Additional analyses regarding discrepancies", booktabs = T, linesep = "\\addlinespace") %>%
+    kable_styling(latex_options = "striped") %>%
+       column_spec(1, width = "10cm") %>%
+        column_spec(2:3, width = "1.5cm") %>%
+          column_spec(4:5, width = "1cm") %>%
+    add_footnote("This analysis uses the same data as the likelihood ratio analysis before it. Forest plots for all meta-analyses in this table are in Supplementary Material G.", notation = "symbol", threeparttable = T)
+```
+
+## Non-outcome discrepancies
+
+The meta-analyses for the non-outcome discrepancies had high heterogeneity, and wide confidence intervals and prediction intervals (Table 4). Articles varied in the criteria they used to identify non-outcome discrepancies and there were fewer articles than for outcome discrepancies. Prediction intervals can be particularly imprecise when few articles are included in a meta-analysis [@inthout2016]. Whereas our coding procedure divided outcome discrepancies into 10 sub-categories, it did not employ the same level of granularity for non-outcome discrepancies. Supplementary Material H contains additional information on non-outcome discrepancies.
+
+```{r outputTable2, include = TRUE, echo = FALSE, results = "asis"}
+knitr::kable(tabOutMain2, caption = "Table 4. Meta-analytic estimates for the proportion of studies that contain various types of non-outcome discrepancies", booktabs = T, linesep = "") %>% 
+  kable_styling(latex_options = c("striped", "hold_position")) %>%          
+  column_spec(4:5, width = "1cm") %>%
+  add_footnote("Values less than 0.5% and greater than 99.5% are rounded to one significant digit from 0 or 100. Forest plots for all meta-analyses in this table are in Supplementary Material I. These results are best interpreted alongside the information provided in Supplementary Material H. ", notation = "none", threeparttable = T)
+```
+
+## Gaps in the literature
+
+We identified several gaps in the literature on discrepancies. There exists little research on: (1) the prevalence of discrepancies in fields other than clinical research, (2) the prevalence of discrepancies in a representative sample across clinical disciplines, (3) the level of specificity in registrations, and (4) interventions to reduce undisclosed discrepancies (see Supplementary Material J for additional information about these gaps). We also identified several themes from surveying the conclusions of the articles we reviewed. These include the need for awareness surrounding discrepancies, the need for mandates, enforcement, and/or new initiatives to address discrepancies, and the benefit of registering additional information such as analysis plans (Supplementary Table J1 contains additional details).
+
+# Discussion
+
+We found that outcome measures in registrations and study protocols often differ from published outcome measures, that these discrepancies are rarely disclosed, that the prevalence of discrepancies varies substantially across the articles we reviewed, and that this heterogeneity is not easily assigned to specific article characteristics. 
+

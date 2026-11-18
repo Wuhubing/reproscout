@@ -1,0 +1,444 @@
+  |                                                                              |                                                                      |   0%  |                                                                              |.                                                                     |   2%  |                                                                              |...                                                                   |   4%  |                                                                              |....                                                                  |   6%  |                                                                              |......                                                                |   8%  |                                                                              |.......                                                               |  10%  |                                                                              |........                                                              |  12%  |                                                                              |..........                                                            |  14%  |                                                                              |...........                                                           |  16%  |                                                                              |.............                                                         |  18%  |                                                                              |..............                                                        |  20%  |                                                                              |...............                                                       |  22%  |                                                                              |.................                                                     |  24%  |                                                                              |..................                                                    |  26%  |                                                                              |....................                                                  |  28%  |                                                                              |.....................                                                 |  30%  |                                                                              |......................                                                |  32%  |                                                                              |........................                                              |  34%  |                                                                              |.........................                                             |  36%  |                                                                              |...........................                                           |  38%  |                                                                              |............................                                          |  40%  |                                                                              |.............................                                         |  42%  |                                                                              |...............................                                       |  44%  |                                                                              |................................                                      |  46%  |                                                                              |..................................                                    |  48%  |                                                                              |...................................                                   |  50%  |                                                                              |....................................                                  |  52%  |                                                                              |......................................                                |  54%  |                                                                              |.......................................                               |  56%  |                                                                              |.........................................                             |  58%  |                                                                              |..........................................                            |  60%  |                                                                              |...........................................                           |  62%  |                                                                              |.............................................                         |  64%  |                                                                              |..............................................                        |  66%  |                                                                              |................................................                      |  68%  |                                                                              |.................................................                     |  70%  |                                                                              |..................................................                    |  72%  |                                                                              |....................................................                  |  74%  |                                                                              |.....................................................                 |  76%  |                                                                              |.......................................................               |  78%  |                                                                              |........................................................              |  80%  |                                                                              |.........................................................             |  82%  |                                                                              |...........................................................           |  84%  |                                                                              |............................................................          |  86%  |                                                                              |..............................................................        |  88%  |                                                                              |...............................................................       |  90%  |                                                                              |................................................................      |  92%  |                                                                              |..................................................................    |  94%  |                                                                              |...................................................................   |  96%  |                                                                              |..................................................................... |  98%  |                                                                              |......................................................................| 100%
+[1] "/results/reproscout-author.R"
+
+> library(knitr)
+
+> library(papaja)
+
+> library(tidyverse)
+
+> library(here)
+
+> library(ggpubr)
+
+> library(kableExtra)
+
+> source("preprocessing.R")
+
+> load(here("../data", "processed", "d_citations.rds"))
+
+> load(here("../data", "processed", "d_reference.rds"))
+
+> load(here("../data", "processed", "d_contentAnalysis.rds"))
+
+> load(here("../data", "processed", "d_coauthors.rds"))
+
+> source("functions.R")
+
+> caseNames <- c("baumeister", "sripada", "strack", 
++     "carter", "caruso")
+
+> replicationYears <- c(2016, 2016, 2016, 2014, 2014)
+
+> teal <- "#00798c"
+
+> blue <- "dodgerblue4"
+
+> red <- "#CC6677"
+
+> yellow <- "#DDCC77"
+
+> lightgrey <- "grey75"
+
+> darkgrey <- "grey35"
+
+> beige <- "#D55E00"
+
+> p1 <- c(lightgrey, darkgrey, red, yellow, teal)
+
+> p2 <- c(lightgrey, beige, blue)
+
+> d_summary <- data.frame()
+
+> for (i in seq(1, 5)) {
++     d <- standardizeCitations(thisCase = caseNames[i], citationData = d_citations %>% 
++         filter(case == caseNames[i .... [TRUNCATED] 
+
+> tibble(`Progressive responses` = c("*Belief correction*\nA decrease in the number of favourable citations may reflect a decline in belief in the cre ..." ... [TRUNCATED] 
+<table>
+<caption>Progressive or regressive responses to strongly contradictory replication results and their expected impact on citation patterns for original studies.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Progressive responses </th>
+   <th style="text-align:left;"> Regressive responses </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 8.5cm; "> *Belief correction*
+A decrease in the number of favourable citations may reflect a decline in belief in the credibility of the original finding (a belief correction pattern). This may be accompanied by a relative increase in the number of unfavourable citations (an active belief correction pattern) or relatively fewer/no unfavourable citations (a passive belief correction pattern). </td>
+   <td style="text-align:left;width: 8.5cm; "> *Belief perpetuation*
+A maintenance of, or increase in, the number of favourable citations may reflect that a maintenance of or increase in belief in the credibility of the original finding (a belief perpetuation pattern). This may be accompanied by a relative increase in unfavourable citations (a challenged belief perpetuation pattern) or relatively fewer/no unfavourable citations (an unchallenged belief perpetuation pattern). </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 8.5cm; "> *Citation balance*
+Articles that cite the original study may also cite the contradictory replication, reflecting that relevant evidence has been considered (a balanced citation pattern). </td>
+   <td style="text-align:left;width: 8.5cm; "> *Citation bias*
+Articles that cite the original study may neglect to also cite the contradictory replication, reflecting that relevant evidence has been neglected, either through lack of awareness or deliberate omission (a citation bias pattern). </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 8.5cm; "> *Explicit defence*
+Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer concrete counter-arguments that state why the credibility of the original finding has not been undermined (an explicit defence pattern). </td>
+   <td style="text-align:left;width: 8.5cm; "> *Absent defence*
+Articles that favourably cite the original study and unfavourably cite the contradictory replication may offer no concrete counter-arguments that state why the credibility of the original finding has not been undermined (an absent defence pattern). </td>
+  </tr>
+</tbody>
+</table>
+> tibble(`Original Study` = c("Baumeister et al. (May, 1998)", 
++     "Sripada et al. (April, 2014)", "Strack et al. (May, 1988)", 
++     "Caruso et a ..." ... [TRUNCATED] 
+<table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;border-bottom: 0;">
+<caption style="font-size: initial !important;">Sample sizes and effect sizes for replication studies and original studies. d = Cohen’s d; MD = mean difference; k = number of data collection sites; N = total number of participants; CI = confidence interval. Publication dates are earliest available (i.e., ‘online first’ where relevant).</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Original Study </th>
+   <th style="text-align:left;"> Replication study </th>
+   <th style="text-align:left;"> Effect </th>
+   <th style="text-align:left;"> Total citations to original* </th>
+   <th style="text-align:left;"> Original sample size </th>
+   <th style="text-align:left;"> Replication sample size </th>
+   <th style="text-align:left;"> Original effect size [95% CI] </th>
+   <th style="text-align:left;"> Replication effect size [95% CI] </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 1.8cm; "> Baumeister et al. (May, 1998) </td>
+   <td style="text-align:left;width: 1.8cm; "> Hagger et al. (July, 2016)** </td>
+   <td style="text-align:left;width: 1.5cm; "> Ego-depletion </td>
+   <td style="text-align:left;width: 1.5cm; "> 1974 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 1 N = 67 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 23 N = 2,141 </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 2.05 [1.31, 2.79] </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 0.04 [-0.07, 0.15] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 1.8cm; "> Sripada et al. (April, 2014) </td>
+   <td style="text-align:left;width: 1.8cm; "> Hagger et al. (July, 2016)** </td>
+   <td style="text-align:left;width: 1.5cm; "> Ego-depletion </td>
+   <td style="text-align:left;width: 1.5cm; "> 36 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 1 N = 26 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 23 N = 2,141 </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 0.68 [0.09, 1.27] </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 0.04 [-0.07, 0.15] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 1.8cm; "> Strack et al. (May, 1988) </td>
+   <td style="text-align:left;width: 1.8cm; "> Wagenmakers et al. (October, 2016) </td>
+   <td style="text-align:left;width: 1.5cm; "> Facial feedback </td>
+   <td style="text-align:left;width: 1.5cm; "> 708 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 1 N = 92 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 17 N = 2,124 </td>
+   <td style="text-align:left;width: 1.8cm; "> MD = 0.82 [-0.05, 1.69] </td>
+   <td style="text-align:left;width: 1.8cm; "> MD = 0.03 [-0.11, 0.16] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 1.8cm; "> Caruso et al. (July, 2012) </td>
+   <td style="text-align:left;width: 1.8cm; "> Klein et al. (January, 2014) </td>
+   <td style="text-align:left;width: 1.5cm; "> Money priming </td>
+   <td style="text-align:left;width: 1.5cm; "> 57 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 1 N = 30 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 36 N = 6,333 </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 0.8 [0.05. 1.54] </td>
+   <td style="text-align:left;width: 1.8cm; "> d = .01 [-.06, 0.09] </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 1.8cm; "> Carter et al. (July, 2011) </td>
+   <td style="text-align:left;width: 1.8cm; "> Klein et al. (January, 2014) </td>
+   <td style="text-align:left;width: 1.5cm; "> Flag priming </td>
+   <td style="text-align:left;width: 1.5cm; "> 54 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 1 N = 70 </td>
+   <td style="text-align:left;width: 1.5cm; "> k = 36 N = 4,896 </td>
+   <td style="text-align:left;width: 1.8cm; "> d = 0.50 [.01, .99] </td>
+   <td style="text-align:left;width: 1.8cm; "> d = .01 [-.07, 0.08] </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<sup>*</sup> Total citations to the original study between the publication date and 31st December, 2019. <sup>**</sup> For methodological reasons (see Hagger et al., 2016), the ego-depletion replication was aimed at a classic study in the field (Baumeister et al., 1998), but actually employed a modified computer-based version of the original paradigm (Sripada et al., 2014). We examined post-replication citation patterns for both studies.</td></tr></tfoot>
+</table>
+> classChange <- d_contentAnalysis %>% filter(excluded == 
++     F) %>% mutate(classificationChange = citationClassificationOriginal != 
++     citatio .... [TRUNCATED] 
+
+> excluded_n <- d_contentAnalysis %>% filter(excluded == 
++     T) %>% nrow()
+
+> excluded_reason <- d_contentAnalysis %>% filter(excluded == 
++     T) %>% count(exclusionReason)
+
+> noAccess_n <- excluded_reason %>% filter(exclusionReason == 
++     "noAccess") %>% pull(n)
+
+> refCiteOnly_n <- excluded_reason %>% filter(exclusionReason == 
++     "Cited in references but not in text") %>% pull(n)
+
+> noCite_n <- excluded_reason %>% filter(exclusionReason == 
++     "Does not cite target or replication") %>% pull(n)
+
+> notexcluded_n <- d_contentAnalysis %>% filter(excluded == 
++     F) %>% nrow()
+
+> d_contentAnalysis %>% filter(excluded == F) %>% count(articleType) %>% 
++     mutate(`Count (%)` = paste0(n, " (", round(n/sum(n), 2) * 
++         1 .... [TRUNCATED] 
+[1] "\n\n\n\\begin{table}[tbp]\n\n\\begin{center}\n\\begin{threeparttable}\n\n\\caption{Counts and percentages for article type classifications of articles included in qualitative analyses}\n\n\\begin{tabular}{ll}\n\\toprule\nArticle type & \\multicolumn{1}{c}{Count (\\%)}\\\\\n\\midrule\nData synthesis - meta-analysis & 11 (2)\\\\\nNo empirical data & 197 (33)\\\\\nEmpirical data - case study & 1 (0)\\\\\nEmpirical data - commentary including analysis & 4 (1)\\\\\nEmpirical data - field study & 40 (7)\\\\\nEmpirical data - laboratory study & 248 (41)\\\\\nEmpirical data - multiple study types are reported & 24 (4)\\\\\nEmpirical data - survey & 79 (13)\\\\\n\\bottomrule\n\\end{tabular}\n\n\\end{threeparttable}\n\\end{center}\n\n\\end{table}\n\n\n"
+attr(,"class")
+[1] "knit_asis"
+attr(,"knit_cacheable")
+[1] NA
+
+> ggarrange(ggarrange(citationCurve("strack", thisTitle = "Strack et al. (1988)", 
++     standardized = T, plotReference = T, areaPlot = "classificati ..." ... [TRUNCATED] 
+
+> maxDiff <- max(c(d_summary %>% filter(case == "carter" & 
++     pubYear == "2019") %>% pull(citesTarget) - d_summary %>% 
++     filter(case == "cart ..." ... [TRUNCATED] 
+
+> preRepFavRange <- d_summary %>% filter(case == "carter" & 
++     pubYear == "2013" | case == "caruso" & pubYear == "2013" | 
++     case %in% c("srip ..." ... [TRUNCATED] 
+
+> preRepUnfav_Strack <- d_summary %>% filter(case == 
++     "strack", pubYear == "2015") %>% pull(unfavourable_prop)
+
+> postRepUnfav_Strack <- d_summary %>% filter(case == 
++     "strack", pubYear == "post-replication") %>% pull(unfavourable_prop)
+
+> preRepFav_Strack <- d_summary %>% filter(case == "strack", 
++     pubYear == "2015") %>% pull(favourable_prop)
+
+> postRepFav_Strack <- d_summary %>% filter(case == 
++     "strack", pubYear == "post-replication") %>% pull(favourable_prop)
+
+> preRepFav_Bau <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2015") %>% pull(favourable_prop)
+
+> postRepFav_Bau <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "post-replication") %>% pull(favourable_prop)
+
+> unfavN_Bau2017 <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2017") %>% pull(unfavourable)
+
+> unfavProp_Bau2017 <- d_summary %>% filter(case == 
++     "baumeister", pubYear == "2017") %>% pull(unfavourable_prop)
+
+> unfavN_Bau2018 <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2018") %>% pull(unfavourable)
+
+> unfavProp_Bau2018 <- d_summary %>% filter(case == 
++     "baumeister", pubYear == "2018") %>% pull(unfavourable_prop)
+
+> unfavN_Bau2019 <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2019") %>% pull(unfavourable)
+
+> unfavProp_Bau2019 <- d_summary %>% filter(case == 
++     "baumeister", pubYear == "2019") %>% pull(unfavourable_prop)
+
+> citesRep_Bau2017 <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2017") %>% pull(citesRep_yes_prop)
+
+> citesRep_Bau2019 <- d_summary %>% filter(case == "baumeister", 
++     pubYear == "2019") %>% pull(citesRep_yes_prop)
+
+> citesRep_Strack2017 <- d_summary %>% filter(case == 
++     "strack", pubYear == "2017") %>% pull(citesRep_yes_prop)
+
+> citesRep_Strack2019 <- d_summary %>% filter(case == 
++     "strack", pubYear == "2019") %>% pull(citesRep_yes_prop)
+
+> citesRep_carter_caruso_max <- d_summary %>% filter(case %in% 
++     c("carter", "caruso")) %>% pull(citesRep_yes_prop) %>% max(na.rm = T)
+
+> citesRep_sripada <- d_summary %>% filter(case == "sripada") %>% 
++     pull(citesRep_yes_prop) %>% min(na.rm = T)
+
+> ggarrange(ggarrange(citationCurve("strack", thisTitle = "Strack et al. (1988)", 
++     areaPlot = "citesReplication", zoom = T), citationCurve("baum ..." ... [TRUNCATED] 
+
+> ca <- d_contentAnalysis %>% filter(citesReplication == 
++     T) %>% group_by(case, counterArguments, .drop = F) %>% summarise(n = n()) %>% 
++     m .... [TRUNCATED] 
+
+> ca_everycase <- d_contentAnalysis %>% filter(citesReplication == 
++     T) %>% group_by(counterArguments, .drop = F) %>% summarise(n = n()) %>% 
++   .... [TRUNCATED] 
+
+> ca <- rbind(ca, ca_everycase)
+
+> ca_fav <- d_contentAnalysis %>% filter(citesReplication == 
++     T) %>% filter(citationClassificationAgreed == "favourable") %>% 
++     group_by(ca .... [TRUNCATED] 
+
+> ca_fav_everycase <- d_contentAnalysis %>% filter(citesReplication == 
++     T) %>% filter(citationClassificationAgreed == "favourable") %>% 
++     g .... [TRUNCATED] 
+
+> ca_fav <- rbind(ca_fav, ca_fav_everycase)
+
+> caFreq <- left_join(ca, ca_fav) %>% pivot_wider(id_cols = case, 
++     names_from = counterArguments, values_from = c(all, fav)) %>% 
++     rename(N .... [TRUNCATED] 
+
+> counterArgCategories <- d_contentAnalysis %>% filter(citesReplication == 
++     T, counterArguments == T) %>% summarise(evidence = sum(as.logical(ev .... [TRUNCATED] 
+
+> caFreq %>% kable("latex", booktabs = T, caption = "Counts and percentages (in brackets) for whether articles that cited both the original study and  ..." ... [TRUNCATED] 
+\begin{table}
+
+\caption{Counts and percentages (in brackets) for whether articles that cited both the original study and replication study provided any explicit argumentation to defend the original study. Data are displayed for co-citing articles with any citation valence classification and the subset of co-citing articles with favourable citation valence classifications.}
+\centering
+\begin{tabular}[t]{lllll}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{2}{c}{All citation valences} & \multicolumn{2}{c}{Favourable citation valences} \\
+\cmidrule(l{3pt}r{3pt}){2-3} \cmidrule(l{3pt}r{3pt}){4-5}
+case & No & Yes & No  & Yes \\
+\midrule
+baumeister & 24 (0.56) & 19 (0.44) & 11 (0.46) & 13 (0.54)\\
+carter & 11 (0.79) & 3 (0.21) & 3 (0.75) & 1 (0.25)\\
+caruso & 8 (0.67) & 4 (0.33) & 1 (0.5) & 1 (0.5)\\
+sripada & 10 (0.53) & 9 (0.47) & 2 (0.4) & 3 (0.6)\\
+strack & 23 (0.59) & 16 (0.41) & 12 (0.48) & 13 (0.52)\\
+\addlinespace
+all cases & 76 (0.6) & 51 (0.4) & 29 (0.48) & 31 (0.52)\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+> counterArgCategories %>% apa_table(caption = "Categorisation of counter-arguments provided to defend the original study in light of the contradictor ..." ... [TRUNCATED] 
+[1] "\n\n\n\\begin{table}[tbp]\n\n\\begin{center}\n\\begin{threeparttable}\n\n\\caption{Categorisation of counter-arguments provided to defend the original study in light of the contradictory replication result. 57 discrete counter-arguments were identified in 50 articles (45 unique articles across cases).}\n\n\\begin{tabular}{lll}\n\\toprule\nevidence & \\multicolumn{1}{c}{methods} & \\multicolumn{1}{c}{expertise}\\\\\n\\midrule\n11 & 45 & 2\\\\\n\\bottomrule\n\\end{tabular}\n\n\\end{threeparttable}\n\\end{center}\n\n\\end{table}\n\n\n"
+attr(,"class")
+[1] "knit_asis"
+attr(,"knit_cacheable")
+[1] NA
+
+> d_args <- d_contentAnalysis %>% filter(counterArguments == 
++     T)
+
+> ca_journals <- left_join(d_args, d_citations, by = "UT") %>% 
++     distinct(doi, .keep_all = T) %>% count(SO) %>% arrange(desc(n)) %>% 
++     renam .... [TRUNCATED] 
+
+> ca_artTypes <- d_args %>% distinct(doi, .keep_all = T) %>% 
++     count(articleType)
+
+> ca_noData <- ca_artTypes %>% filter(articleType %in% 
++     c("No empirical data")) %>% pull(n)
+
+> ca_novData <- ca_artTypes %>% filter(articleType %in% 
++     c("Empirical data - field study", "Empirical data - laboratory study", 
++         "Empi ..." ... [TRUNCATED] 
+
+> ca_existData <- ca_artTypes %>% filter(articleType %in% 
++     c("Data synthesis - meta-analysis", "Empirical data - commentary including analysis") .... [TRUNCATED] 
+
+> org_auths_df <- data.frame(case = caseNames, authNames = c("Baumeister, Bratslavsky, Muraven, Tice", 
++     "Sripada, Kessler, Jonides", "Strack, Ma ..." ... [TRUNCATED] 
+
+> org_auths_list <- str_c(org_auths_df$authNames, collapse = ", ") %>% 
++     str_replace_all(",", "") %>% str_split(" ") %>% unlist()
+
+> ca_auth_list <- d_args %>% distinct(doi, .keep_all = T) %>% 
++     pull(authors) %>% str_c(collapse = "; ")
+
+> ca_auth_freq <- ca_auth_list %>% str_split(";") %>% 
++     table(dnn = "name") %>% as.data.frame() %>% arrange(desc(Freq)) %>% 
++     rowwise() %>%  .... [TRUNCATED] 
+
+> ca_auth_surnames <- ca_auth_freq$surname %>% str_c(collapse = " ")
+
+> org_auths_ca <- org_auths_list[str_detect(ca_auth_surnames, 
++     org_auths_list)]
+
+> d_coauthors <- d_coauthors %>% rowwise() %>% mutate(surnames = str_split(Authors, 
++     "; ")[[1]] %>% str_extract("[^,]+") %>% str_c(sep = "", col .... [TRUNCATED] 
+
+> co_auths_list <- d_coauthors$surnames %>% str_to_lower() %>% 
++     str_c(";", collapse = "") %>% str_split(";") %>% as.data.frame(col.names = "coau ..." ... [TRUNCATED] 
+
+> d_args <- d_args %>% distinct(doi, .keep_all = T) %>% 
++     rowwise() %>% mutate(surnames = str_split(authors, "; ")[[1]] %>% 
++     str_extract("[ ..." ... [TRUNCATED] 
+
+> d_args <- d_args %>% mutate(coauth_detected = case_when(authors == 
++     "Daley, Ken; Howell, Robert" ~ F, authors == "Englert, Chris; Zavery, Alaf ..." ... [TRUNCATED] 
+
+> co_auths_overlap <- d_args %>% count(coauth_detected) %>% 
++     filter(coauth_detected == T) %>% pull(n)
+
+> org_auths_overlap <- d_args %>% count(org_auth_detected) %>% 
++     filter(org_auth_detected == T) %>% pull(n)
+
+> overlapArtTypes <- d_args %>% filter(coauth_detected == 
++     T | org_auth_detected == T) %>% count(articleType)
+
+> d_kleinCites <- d_repCitations %>% filter(case == 
++     "klein")
+
+> d_wagenmakersCites <- d_repCitations %>% filter(case == 
++     "wagenmakers")
+
+> d_haggerCites <- d_repCitations %>% filter(case == 
++     "hagger")
+
+> d_baumeisterCites <- d_citations %>% filter(case == 
++     "baumeister")
+
+> d_sripadaCites <- d_citations %>% filter(case == "sripada")
+
+> d_carusoCites <- d_citations %>% filter(case == "caruso")
+
+> d_carterCites <- d_citations %>% filter(case == "carter")
+
+> d_strackCites <- d_citations %>% filter(case == "strack")
+
+> hagCites <- nrow(d_haggerCites)
+
+> wagenCites <- nrow(d_wagenmakersCites)
+
+> kleinCites <- nrow(d_kleinCites)
+
+> hagBauCocites <- sum(d_haggerCites$UT %in% d_baumeisterCites$UT)
+
+> hagSriCocites <- sum(d_haggerCites$UT %in% d_sripadaCites$UT)
+
+> wagenStrackCocites <- sum(d_wagenmakersCites$UT %in% 
++     d_strackCites$UT)
+
+> kleinCartCocites <- sum(d_kleinCites$UT %in% d_carterCites$UT)
+
+> kleinCaruCocites <- sum(d_kleinCites$UT %in% d_carusoCites$UT)
+
+> repCociteTable <- data.frame(Replication = c("Hagger et al. (2016)", 
++     "Klein et al. (2014)", "Wagenmakers et al. (2016)"), Citation = c(hagCit .... [TRUNCATED] 
+
+> repCociteTable %>% kable(col.names = c("Replication study", 
++     "Citation count", "Cocitations of original study"), caption = "Citations counts f ..." ... [TRUNCATED] 
+<table>
+<caption>Citations counts for replication studies and co-citation counts to relevant original studies.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Replication study </th>
+   <th style="text-align:right;"> Citation count </th>
+   <th style="text-align:left;"> Cocitations of original study </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Hagger et al. (2016) </td>
+   <td style="text-align:right;"> 258 </td>
+   <td style="text-align:left;"> 136 (Baumeister et al. 1998) 22 (Sripada et al. 2014) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Klein et al. (2014) </td>
+   <td style="text-align:right;"> 316 </td>
+   <td style="text-align:left;"> 15 (Carter et al. 2011) 12 (Caruso et al. 2012) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Wagenmakers et al. (2016) </td>
+   <td style="text-align:right;"> 80 </td>
+   <td style="text-align:left;"> 36 (Strack et al. 1988) </td>
+  </tr>
+</tbody>
+</table>
+
+> render_appendix("appendix.Rmd")

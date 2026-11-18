@@ -1,0 +1,260 @@
+---
+title: "Estimating the prevalence of discrepancies between study registrations and publications: A systematic review and meta-analyses"
+author: "| TARG Meta-Research Group & Collaborators\n| (a contributorship statement
+  is included before the references)\n| \n| Address correspondence to robert.thibault@stanford.edu\n"
+output:
+  pdf_document: default
+header-includes: 
+  - \usepackage[labelformat=empty]{caption}
+  - \usepackage{tcolorbox}
+editor_options:
+  chunk_output_type: inline
+bibliography: preregSR_references.bib
+nocite: | 
+  @boonacker2011, @braakhekke2017, @bradley2017, @bonnot2016, @anand2014, @aggarwal2019,
+  @al-marzouki2008, @azar2019, @gopal2015, @goldacre2019a, @gandhi2011, @hahn2002,
+  @fleming2015, @delgado2017, @hartung2014, @dwan2013, @ewart2009, @hernandez2005,
+  @hildenbrand2019, @howard2017, @huic2011, @jones2018, @jones2012, @jones2017a, @juric2020,
+  @maund2014, @norris2014, @mathieu2012, @mathieu2009, @nankervis2012, @mhaskar2012,
+  @calmejane2018, @chahal2012, @chan2004, @chan2008, @chen2019, @claesen2019, @chan2004a,
+  @dekkers2015, @delgado2017a, @tricco2016, @vera-badillo2013, @walker2014, @su2015,
+  @vedula2009, @vedula2013, @thomas2016, @stockmann2014, @ofosu2019, @pandis2015,
+  @pinto2013, @pranic2016, @raghav2015, @rankin2017, @redmond2013, @riehm2015, @khan2012,
+  @li2013, @ludwig2019, @koufatzidou2019, @korevaar2017, @killeen2014, @krsticevic2019,
+  @khaleel, @kasenda2014, @rising2008, @rongen2016, @rosati2016, @rosenthal2013, @ross2019,
+  @ruegger2017, @saquib2013, @wandalkar2017, @wayant2017, @white2019, @wiebe2017,
+  @wildt2011, @won2019, @you2012, @zhang2017, @chan2017, @soares2004, @smith2012,
+  @shepshelovich2017, @shepshelovich2018, @smith2013, @scott2015, @shinohara2015,
+  @sendyk2019, @hannink2013, @annalsofinternalmedicineeditors2016\n
+csl: apa.csl
+always_allow_html: yes
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = FALSE) # This option stops the code chunks from being output from the knit.
+```
+
+```{r load_packages}
+library(meta) # For meta-analyses and forest plots.
+library(irr) # For inter-rater agreement
+library(knitr) # For kable function.
+library(kableExtra) # For kable table styling.
+library(english) # To convert numbers to word equivalents via words(). 
+library(boot) # For inv.logit() function.
+library(tidyverse) # For cleaner code.
+```
+```{r function_metaDisc}
+# For running meta-analyses on proportions (most of the meta analyses in this review).
+
+metaDisc <- function(df){
+  # initialize a dataframe to hold all 40 meta-analytic estimates, CIs, PIs, and number of articles analyzed.
+  estim <- data.frame(matrix(ncol = 7, nrow = length(df)))
+  colnames(estim) <- c("b", "lower.random", "upper.random", "lower.predict", "upper.predict", "k", "n")
+  
+  # assign the colnames from df to the rownames for estim so that the results line up in the next section of code
+  rownames(estim) <- colnames(df)
+  
+  # initialize lists of lists to hold the results of the 40 meta-analyses
+  metaList<-list()
+  
+  # calculate the meta-analytic estimates, CIs, PIs, and number of articles analyzed for outcomes from prospectively registered studies
+  for (i in grep("discProAny", colnames(df)):grep("discProTime", colnames(df))){
+    if (sum(!is.na(df[,i] > 0 ))){
+      # create temporary dataframe with the NAs removed. This is necessary to align the article author and year with the correct article after running each meta-analysis
+      dfMeta <- df %>% filter(!is.na(df[,i]))
+      meta <- meta::metaprop(dfMeta[,i], dfMeta$discProDenom,
+                          # method for conducting the meta-analytic model (a multi-level regression)
+                          method="GLMM",
+                          # method to calculate tau
+                          method.tau="ML",
+                          # method to calculate the confidence interval for tau^2 (which we don't report)
+                          method.tau.ci="J", 
+                          comb.random=TRUE, 
+                          prediction=TRUE,
+                          level.predict=0.95,
+                          # helpful for meta-analyses of few articles (modifies Student's T-distribution)
+                          hakn=TRUE
+      )
+      # create the study labels for the forest plots
+      meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+      
+    metaList[[i]] <- meta #store a list of the meta variable for all 40 meta-analyses to make forest plots later
+    # All meta-analytic estimates, CIs, and PIs, need to have inv.logit() run on them to reverse the logit() function that is used in the metaprop() function. 
+    estim[i,] <- c(inv.logit(meta$TE.random), 
+                   inv.logit(meta$lower.random), 
+                   inv.logit(meta$upper.random),
+                   inv.logit(meta$lower.predict),
+                   inv.logit(meta$upper.predict),
+                   meta$k,
+                   sum(meta$data[,2]))
+        }
+  }
+  
+  # same as above for outcomes from studies with unclear timing of registration.
+  for (i in grep("discAny", colnames(df)):grep("discTime", colnames(df))){
+    if (sum(!is.na(df[,i] > 0 ))){
+      
+      # create temporary dataframe with the NAs removed
+      dfMeta <- df %>% filter(!is.na(df[,i]))
+      meta <- meta::metaprop(dfMeta[,i], dfMeta$discDenom,
+                             method="GLMM", 
+                             method.tau="ML", 
+                             method.tau.ci="J", 
+                             comb.random=TRUE, 
+                             prediction=TRUE,
+                             level.predict=0.95,
+                             hakn=TRUE
+      )
+      meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+      
+      metaList[[i]] <- meta # store a list of the meta variable for all 40 meta-analyses to make forest plots later
+      estim[i,] <- c(inv.logit(meta$TE.random), 
+                     inv.logit(meta$lower.random), 
+                     inv.logit(meta$upper.random),
+                     inv.logit(meta$lower.predict),
+                     inv.logit(meta$upper.predict),
+                     meta$k,
+                     sum(meta$data[,2]))
+    }
+  }
+      
+
+  # same as above for non-outcome discrepancies for both prospectively and unclear timing of registration articles
+  # Increment by 2 because we have a denominator for each non-outcome discrepancy in the column after the numerator. This is also the reason this block of code needs to be separate from the outcome discrepancies, which all share a denominator.
+  for (i in seq(from = grep("discProOtherElig", colnames(df))[1], to = grep("discOtherResults", colnames(df))[1], by = 2)) {
+    if (sum(!is.na(df[,i] > 0 ))){
+      # create temporary dataframe with the NAs removed
+      dfMeta <- df %>% filter(!is.na(df[,i]))
+      meta <- meta::metaprop(dfMeta[,i], dfMeta[,i+1],
+                             method="GLMM", 
+                             method.tau="ML", 
+                             method.tau.ci="J", 
+                             comb.random=TRUE, 
+                             prediction=TRUE,
+                             level.predict=0.95,
+                             hakn=TRUE
+      )
+      meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+      
+      metaList[[i]] <- meta # store a list of the meta variable for all 40 meta-analyses to make forest plots later
+      estim[i,] <- c(inv.logit(meta$TE.random), 
+                     inv.logit(meta$lower.random), 
+                     inv.logit(meta$upper.random),
+                     inv.logit(meta$lower.predict),
+                     inv.logit(meta$upper.predict),
+                     meta$k,
+                     sum(meta$data[,2]))
+    }
+  }
+      
+
+  return(list(estim, metaList))
+}
+
+```
+
+```{r function_metaRR}
+# For running meta-analyses on Risk Ratios (i.e., likelihood ratios). For the exploratory analyses.
+
+metaRR <- function(Ee, Ne, Ec, Nc, df){
+  
+  
+  meta <- meta::metabin(Ee, Ne, Ec, Nc,
+                       # Risk ratio analysis will not take the parameters below that I used in the other analyses. Instead, they default to method = "MH" and method.tau = "DL"
+                       # method="GLMM", 
+                       # method.tau="ML", 
+                       # method.tau.ci="J", 
+                        comb.random=TRUE, 
+                        prediction=TRUE,
+                        level.predict=0.95,
+                        hakn=TRUE,
+                        sm = "RR"
+  )
+  
+    meta$studlab <- paste(df$author, df$pubYear)
+    
+    CI <- paste0(round(exp(meta$lower.random),2), "-", round(exp(meta$upper.random),2))  
+    
+    #sprintf() is necessary to keep trailing zeros on a PI that = 1.00
+    PI <- paste0(round(exp(meta$lower.predict),2), "-", sprintf("%.2f", round(exp(meta$upper.predict),3)))
+               
+                 
+  return(list(meta, CI, PI))
+}
+```
+
+```{r function_makeCI}
+# To format the confidence intervals in the tables.
+makeCI <- function(data){
+
+  data <- round(data, 2)
+  CI <- paste0(data$lower.random*100, "-", data$upper.random*100, "%")
+  return(CI)
+  
+  }
+```
+
+```{r function_makePI}
+# To format the prediction intervals in the tables.
+makePI <- function(data){
+  
+  data[,1:5] <- data[,1:5]*100
+  
+  for (i in 1:nrow(data)){
+    data[i,4] <- ifelse(data[i,4] < 0.5, signif(data[i,4],1), round(data[i,4],0))
+    data[i,5] <- ifelse(data[i,5] > 99.5, signif(data[i,5] - 100, 1) + 100, round(data[i,5],0))
+  }
+  
+  PI <- paste0(data$lower.predict, "-", data$upper.predict, "%")
+  return(PI)
+  
+  }
+```
+
+
+```{r clean_screening_data}
+# Import the screening data. Calculate the number of articles in each category. Calculate inter-rater reliability
+screen <- read.csv("/data/preregSR_dataScreen.csv", header = TRUE)
+
+# Calculate Cohen's kappa for whether articles were marked (1) relevant to systematic or not, and (2) relevant to the scoping review or not. I am doing this as two kappa values for binary variables.
+screen <- screen %>%  mutate(RCsr = ifelse((RC == "BOTH" | RC == "SR"), 1, 0))
+screen <- screen %>%  mutate(RTsr = ifelse((RT == "BOTH" | RT == "SR"), 1, 0))
+kSR <- kappa2(cbind(screen$RCsr, screen$RTsr))$value %>% round(2)
+# the results for kSR matched these results when I input this data into an online calculator https://idostatistics.com/cohen-kappa-free-calculator/#risultati
+
+# Same calculation for the Scoping review (not reported in the present manuscript)
+screen <- screen %>% mutate(RCscope = ifelse((RC == "BOTH" | RC == "SCOPE"), 1, 0))
+screen <- screen %>% mutate(RTscope = ifelse((RT == "BOTH" | RT == "SCOPE"), 1, 0))
+kScope <- kappa2(cbind(screen$RCscope, screen$RTscope))$value %>% round(2)
+
+# The code below creates a dataframe for all 4283 articles that we screened. It assigns 0 to all articles except the 464 we screened in more depth. We do this to calculate inter-rater agreement across all 4283 articles.
+
+# initialize empty dataframe and fill it with zeroes
+firstPass <- data.frame(matrix(ncol = ncol(screen), nrow = 4283-nrow(screen)))
+firstPass[,] <- 0
+colnames(firstPass) <- colnames(screen)
+
+# bind the firstPass df of zeros and the screening results for the 464 articles we screened in depth
+screenAll <- rbind(screen, firstPass)
+
+# calculate inter-rater agreement across all 4238 articles
+kSRAll <- kappa2(cbind(screenAll$RCsr, screenAll$RTsr))$value %>% round(2)
+kScopeAll <- kappa2(cbind(screenAll$RCscope, screenAll$RTscope))$value %>% round(2)
+```
+
+```{r clean_data}
+# import and clean the dataset, including variable recoding
+
+# import raw dataset and convert all blanks and "n"s to NAs
+raw <- read.csv("/data/preregSR_dataRaw.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = c("n", ""))
+
+# remove top three non-data rows, and the spacer rows between articles
+df <- raw[4:nrow(raw),] %>%
+  filter(!is.na(coder))
+
+# Correct special characters in author's names that were imported poorly.
+df$author[df$author =="HernÃ¡ndez et al."] <- "Hernández et al."
+df$author[df$author =="HuiÄ‡ et al."] <- "Huić et al."
+df$author[df$author =="JuriÄ‡ et al."] <- "Jurić et al."
+df$author[df$author =="CalmÃ©jane et al."] <- "Calméjane et al."
+df$author[df$author =="PraniÄ‡ et al."] <- "Pranić et al."

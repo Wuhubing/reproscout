@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript -e 'load(\"/data/ratingData5\"); ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == \"p\", \"positive\", \"negative\"); ratingData5$USval <- as.factor(ratingData5$USval); ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean); library(tidyr); ratingData5AggrW <- spread(ratingData5Aggr, key = \"USval\", value = \"likingRating\"); ratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative; ratingData5AggrW$pTime <- ifelse(as.character(ratingData5AggrW$correspondingTime) == \"153\", \"30 ms\", \"1000 ms\"); print(aggregate(EC ~ pTime, ratingData5AggrW, mean)); print(tapply(ratingData5AggrW$EC, ratingData5AggrW$pTime, mean));'",
+  "exit_code": 0,
+  "seconds": 1.1955887499498203,
+  "stdout": "artifacts/step-015.stdout.txt",
+  "stderr": "artifacts/step-015.stderr.txt"
+}

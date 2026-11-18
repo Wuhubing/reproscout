@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, json\nnb=nbformat.read('/code/FS-Filters.ipynb', as_version=4)\n# execute? better load executed html? Let's inspect executed notebook from memory not saved. Re-run execution and capture outputs.\nfrom nbclient import NotebookClient\nnb=NotebookClient(nb, timeout=None, kernel_name='python3', allow_errors=True).execute()\nfor i,c in enumerate(nb.cells):\n    if c.cell_type=='code' and c.outputs:\n        print('\\nCELL',i)\n        for out in c.outputs:\n            if out.output_type=='stream':\n                print(out.text)\n            elif out.output_type=='execute_result':\n                print(out['data'].get('text/plain',''))\n            elif out.output_type=='error':\n                print('ERROR',out.ename,out.evalue)\nPY",
+  "exit_code": 0,
+  "seconds": 32.7211529170163,
+  "stdout": "artifacts/step-007.stdout.txt",
+  "stderr": "artifacts/step-007.stderr.txt"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nload('/data/DemoData5')\nload('/data/TrialData5')\nload('/data/visData5')\n# exclusions from script\nExclList5 <- c(4,5,7,13,30,66,160,116)\nratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))\nratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == 'p', 'positive', 'negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5AggrW <- reshape(ratingData5Aggr, idvar=c('ParticipantNumber','correspondingTime'), timevar='USval', direction='wide')\nratingData5AggrW$EC <- ratingData5AggrW$likingRating.positive - ratingData5AggrW$likingRating.negative\nratingData5AggrW$pTime <- ifelse(as.character(ratingData5AggrW$correspondingTime) == '153', '30 ms', '1000 ms')\nprint(aggregate(EC ~ pTime, ratingData5AggrW, mean))\nprint(with(ratingData5AggrW, tapply(EC, pTime, mean)))\nRS",
+  "exit_code": 0,
+  "seconds": 0.5348114999942482,
+  "stdout": "artifacts/step-010.stdout.txt",
+  "stderr": "artifacts/step-010.stderr.txt"
+}

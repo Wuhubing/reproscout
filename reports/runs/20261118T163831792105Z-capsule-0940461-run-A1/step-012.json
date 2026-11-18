@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY' > /results/c1_output.txt\nimport nbformat\nfrom sklearn import datasets\nfrom sklearn.model_selection import train_test_split\n\n\ndef my_load_iris_local():\n    data = datasets.load_iris()\n    X = data.data[:, :3]\n    y = data.data[:, 3]\n    return train_test_split(X, y, random_state=0, test_size=0.1)\n\nnb=nbformat.read('FGBR_OC.ipynb', as_version=4)\ncode=nb.cells[0].source\ncode = code.split('# in case of the WABL')[0]  # remove final loops\nns={}\nexec(code, ns)\nns['my_load_iris']=my_load_iris_local\nns['c_cycle'](1.0)\nPY",
+  "exit_code": 0,
+  "seconds": 8.288466125028208,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

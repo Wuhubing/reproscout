@@ -1,0 +1,69 @@
+library(mFLICA)
+
+leader<-mFLICA::TS[1,1:100,] #index2
+follower<-mFLICA::TS[2,1:100,] #index1
+obj<-dtw(x=follower,y=leader,k=TRUE)
+
+
+ref <- leader[,1] #window(aami3a, start = 0, end = 2)
+query <- follower[,1] #window(aami3a, start = 2.7, end = 5)
+plot(dtw(query, ref, k = TRUE), type = "two", off = 1, match.lty = 2, match.indices = 100, xlab= "Time",  ylab= "Follower: x-axis positions")
+mtext("Leader: x-axis positions", side = 4)
+legend("left", c("follower", "leader"),
+       col = c("black", "red"), lty = c(1, 2))
+
+lcm <- obj$localCostMatrix
+image(x = 1:nrow(lcm), y = 1:ncol(lcm), lcm, ylab = "Leader Time", xlab = "Follower Time")
+#text(row(lcm), col(lcm), label = lcm)
+lines(obj$index1, obj$index2)
+lines(1:100,col="blue")
+
+obj$index1 - obj$index2
+mean( obj$index1 - obj$index2) # out: 8.238462
+mean(sign( obj$index1 - obj$index2) ) # out: 0.9846154
+mFLICA::followingRelation(Y=follower,X=leader,lagWindow=0.1)$follVal
+
+library("mFLICA")
+mat1<-followingNetwork(TS=TS[,1:60,],sigma=0.5)$adjWeightedMat
+mat2<-followingNetwork(TS=TS[,61:120,],sigma=0.5)$adjWeightedMat
+getADJNetDen(mat1)
+getADJNetDen(mat2)
+
+library("lattice")
+rownames(mat1) <- paste(  c(1:30) , sep=" ")
+colnames(mat1) <- paste(  c(1:30) , sep=" ")
+rownames(mat2) <- paste(  c(1:30) , sep=" ")
+colnames(mat2) <- paste(  c(1:30) , sep=" ")
+
+levelplot(mat1,xlab="Follower IDs", ylab="Leader IDs",
+         # col.regions=heat.colors(100),
+          main = "Time interval [1,60]"
+          )
+levelplot(mat2,xlab="Follower IDs", ylab="Leader IDs",
+         # col.regions=heat.colors(100),
+          main = "Time interval [61,120]"
+          )
+
+library(mFLICA)
+obj1<-getDynamicFollNet(TS=mFLICA::TS[,1:800,],timeWindow=60,timeShift = 6,sigma=0.5)
+obj1$dyNetWeightedMat[19,1,150]
+obj1$dyNetWeightedDensityVec[150]
+
+ plotMultipleTimeSeries(TS=obj1$dyNetWeightedDensityVec, strTitle="Network Density")
+
+library(mFLICA)
+mat1 <-followingNetwork(TS=TS[,25:45,], sigma =0.95)$adjBinMat
+out<-getFactions(adjMat=mat1)
+out$leaders
+
+L1<-out$leaders[1] # leader ID1
+out$factionMembers[[1]]
+out$factionSizeRatio[L1]
+L2<-out$leaders[2] # leader ID11
+out$factionMembers[[2]]
+out$factionSizeRatio[L2]
+
+library(mFLICA)
+obj1<-mFLICA(TS=mFLICA::TS[,1:800,],timeWindow=60,timeShift = 6,sigma=0.5)
+
+plotMultipleTimeSeries(TS=obj1$factionSizeRatioTimeSeries, strTitle="Faction Size Ratios")

@@ -1,0 +1,120 @@
+                           y=CD,
+                           alpha=sensitivity),
+                       size=0.6)
+    gg <- gg+scale_x_continuous('\nPrevalence of cancer B',
+                                labels=percent_format(accuracy=0.1),
+                                breaks=seq(0, 0.02, by=0.005))
+    gg <- gg+scale_y_continuous('Cancers detected per 1,000 women\n',
+                                limits=c(0, 35),
+                                breaks=seq(0, 35, by=5),
+                                expand=c(0, 0))
+    gg <- gg+guides(alpha=guide_legend(title='Sensitivity for\ncancers A and B',
+                                       keywidth=unit(1, 'cm'),
+                                       title.theme=element_text(size=12),
+                                       label.theme=element_text(size=12, angle=0)))
+    print(gg)
+    if(saveit){
+        filename <- paste('hypothetical_cd', datestamp, sep='_')
+        filename <- paste(filename, ext, sep='.')
+        ggsave(file.path(resupath, filename),
+               plot=gg,
+               width=6,
+               height=6)
+    }
+}
+
+##################################################
+# Visualize outcomes in empirical analysis
+##################################################
+empirical_age_plot <- function(dset, figureno, ext='png', sensitivity=FALSE, saveit=FALSE){
+    if(any(grepl('_low$', names(dset)))){
+        dset <- dset %>% mutate(EUC.CD=EUC/CD,
+                                EUC.LS_low=EUC/LS_low,
+                                EUC.LS_mid=EUC/LS_mid,
+                                EUC.LS_high=EUC/LS_high)
+        dset <- dset %>% select(-EUC, -CD, -LS_low, -LS_mid, -LS_high)
+        dset <- dset %>% pivot_longer(cols=c(EUC.CD, EUC.LS_low, EUC.LS_mid, EUC.LS_high),
+                                      names_to='outcome',
+                                      values_to='value')
+        dset <- dset %>% separate(outcome, c('outcome', 'assumption'), sep='_', fill='right')
+        dset <- dset %>% mutate(assumption=ifelse(is.na(assumption), 'point', assumption),
+                                assumption=factor(assumption, levels=c('point', 'high', 'mid', 'low')))
+        dset <- dset %>% arrange(desc(outcome), assumption, value)
+    } else {
+        dset <- dset %>% mutate(EUC.CD=EUC/CD, EUC.LS=EUC/LS)
+        dset <- dset %>% select(-EUC, -CD, -LS)
+        dset <- dset %>% pivot_longer(cols=c(EUC.CD, EUC.LS),
+                                      names_to='outcome',
+                                      values_to='value')
+        dset <- dset %>% mutate(assumption='high')
+        dset <- dset %>% arrange(age, desc(outcome), value)
+    }
+    dset <- dset %>% mutate(age=sub('-[567]4', ' y', age),
+                            outcome=factor(outcome,
+                                           levels=c('EUC.CD', 'EUC.LS'),
+                                           labels=c('Exposed to\nunnecessary\nconfirmation tests\nper cancer detected',
+                                                    'Exposed to\nunnecessary\nconfirmation tests\nper life saved')),
+                            site=factor(site, levels=unique(site)))
+    if(sensitivity){
+        dset <- dset %>% filter(outcome == 'Exposed to\nunnecessary\nconfirmation tests\nper life saved')
+        height <- 4
+    } else {
+        height <- 6
+    }
+    ymax <- switch(as.character(figureno), '2'=80, '3'=50, 'S2'=100, 'S3'=30, 'S4'=40)
+    gg_theme(legend.position='none',
+             axis.text.x=element_text(size=10, angle=90, vjust=0.5, hjust=1),
+             axis.ticks.x=element_blank(),
+             panel.spacing.y=unit(0.04, 'npc'),
+             strip.text.y=element_text(size=10, angle=0))
+    gg <- ggplot(data=dset)
+    gg <- gg+geom_bar(aes(x=site, y=value, fill=assumption),
+                      stat='identity',
+                      position='dodge')
+    gg <- gg+geom_hline(aes(yintercept=0), colour='black')
+    if(!sensitivity)
+        gg <- gg+geom_blank(data=dset %>% filter(outcome == 'Exposed to\nunnecessary\nconfirmation tests\nper cancer detected'), aes(y=2))
+    gg <- gg+geom_blank(data=dset %>% filter(outcome == 'Exposed to\nunnecessary\nconfirmation tests\nper life saved'), aes(y=ymax))
+    gg <- gg+facet_grid(outcome~age, scales='free_y')
+    gg <- gg+scale_x_discrete(name='')
+    if(!sensitivity)
+        gg <- gg+labs(tag=paste('Figure', figureno))
+    gg <- gg+scale_y_continuous(name='', expand=c(0, 0))
+    gg <- gg+scale_fill_manual(name='', values=c(point='gray40',
+                                                 high='gray40',
+                                                 mid='gray60',
+                                                 low='gray80'))
+    print(gg)
+    if(saveit){
+        filename <- str_glue('figure{figureno}_{datestamp}')
+        filename <- paste(filename, ext, sep='.')
+        ggsave(file.path(resupath, filename),
+               plot=gg,
+               width=8,
+               height=height)
+    }
+}
+
+##################################################
+# Format table for hypothetical two-cancer test
+##################################################
+format_hypothetical <- function(dset, saveit=FALSE){
+    dset <- dset %>% select(-scenario, -LS)
+    dset <- dset %>% filter(prevalence > 0, sensitivity %in% c(0.5, 0.8))
+    dset <- dset %>% arrange(sensitivity,
+                             localization,
+                             specificity,
+                             prevalence)
+    dset <- dset %>% mutate(sensitivity=sprintf('%2.0f', 100*sensitivity),
+                            specificity=sprintf('%2.0f', 100*specificity),
+                            localization=sprintf('%2.0f', 100*localization),
+                            prevalence=sprintf('%5.2f', 100*prevalence),
+                            EUC=sprintf('%4.1f', EUC),
+                            CD=sprintf('%3.1f', CD))
+    dset <- dset %>% rename('Sensitivity, %'='sensitivity',
+                            'Localization, %'='localization',
+                            'Specificity, %'='specificity',
+                            'Prevalence, %'='prevalence',
+                            'Exposed to unnecessary confirmation, n'='EUC',
+                            'Cancers detected, n'='CD')
+    if(saveit){

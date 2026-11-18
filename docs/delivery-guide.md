@@ -182,3 +182,34 @@ The comparison generator uses local raw Inspect logs for timing. The public pack
 already contains generated reports and does not need private inputs for inspection.
 Curated interpretation, manual trajectory annotations and narration are delivery
 artifacts; regenerate them only from the new evidence, without altering old results.
+
+## Review and replay v0.6.0
+
+Extract the release ZIP and open `reports/index.html`. Read the separate scoring,
+type, execution and provenance counts; then follow `docs/baseline-decline-v5.md`,
+`docs/fidelity-development-v6.md`, and `docs/controller-comparison.md`.
+`reports/controlled-execution-audit-v6.json` verifies every B command against the
+original-file dispatcher. `reports/semantic-review-v6.json` records a distinct,
+limited artifact interpretation review. No key is needed for saved evidence.
+
+A fresh execution requires separately prepared official inputs, private scoring
+references, the pinned images and an authorized API key. Verify the v6 freeze first:
+
+```bash
+caffeinate -i uv run python scripts/run_experiment.py experiments/prepared-v6 \
+  --key-file /absolute/path/to/your-key-file
+```
+
+Scientific cells cannot be rerun in the same experiment. Retained infrastructure
+attempts share the original budget and never fill a scientific cell. Do not modify
+frozen inputs or use later source to verify earlier release hashes.
+After complete execution, export and summarize:
+
+```bash
+uv run python scripts/export_delivery.py --experiment experiments/prepared-v6
+uv run python scripts/summarize_experiment.py experiments/prepared-v6
+uv run python scripts/summarize_fidelity.py
+```
+
+Manual interpretation and delivery narration must reflect the newly observed runs;
+they are not evidence automatically established by the scoring program.

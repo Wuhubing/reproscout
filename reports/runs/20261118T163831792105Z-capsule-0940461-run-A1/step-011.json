@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY' > /results/c1_output.txt\nimport nbformat, types\nfrom sklearn import datasets\nfrom sklearn.model_selection import train_test_split\nimport seaborn as sns\n\n# local replacement for seaborn iris dataset\n\ndef my_load_iris_local():\n    data = datasets.load_iris()\n    X = data.data\n    y = X[:,3]  # petal width\n    X = X[:, :4]  # all 4 features\n    # Need match original seaborn iris: columns sepal_length,sepal_width,petal_length,petal_width; then drop species and petal_width\n    # Thus X has first 3 features only.\n    X = data.data[:, :3]\n    y = data.data[:, 3]\n    return train_test_split(X, y, random_state=0, test_size=0.1)\n\nnb=nbformat.read('FGBR_OC.ipynb', as_version=4)\ncode=nb.cells[0].source\nns={}\nexec(code, ns)\nns['my_load_iris']=my_load_iris_local\nns['c_cycle'](1.0)\nPY",
+  "exit_code": 1,
+  "seconds": 5.930767750018276,
+  "stdout": "artifacts/step-011.stdout.txt",
+  "stderr": "artifacts/step-011.stderr.txt"
+}

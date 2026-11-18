@@ -1,0 +1,2131 @@
+1/98                                        
+2/98 [setup]                                
+3/98                                        
+4/98 [load_packages]                        
+5/98 [function_metaDisc]                    
+6/98                                        
+7/98 [function_metaRR]                      
+8/98                                        
+9/98 [function_makeCI]                      
+10/98                                        
+11/98 [function_makePI]                      
+12/98                                        
+13/98 [clean_screening_data]                 
+14/98                                        
+15/98 [clean_data]                           
+16/98                                        
+17/98 [format_data]                          
+18/98                                        
+19/98 [perform_meta_analyses]                
+20/98                                        
+21/98 [merge_timings]                        
+22/98                                        
+23/98 [make_tables]                          
+24/98                                        
+25/98 [make_forest_plots]                    
+26/98                                        
+27/98 [articles_per_coder]                   
+28/98                                        
+29/98 [make_article_characteristics_table]   
+30/98                                        
+31/98 [years]                                
+32/98                                        
+33/98 [perform_meta_regressions]             
+34/98                                        
+35/98 [meta_analysis_discrepancy_disclosures]
+36/98                                        
+37/98 [meta_analysis_favor_significance]     
+38/98                                        
+39/98 [meta_analysis_stat_significance]      
+40/98                                        
+41/98 [meta_analysis_stat_significance_2]    
+42/98                                        
+43/98 [meta_analysis_industry_funding]       
+44/98                                        
+45/98 [meta_analysis_registration_timing]    
+46/98                                        
+47/98 [exploratory_meta_analyses_table]      
+48/98                                        
+49/98 [gaps]                                 
+50/98                                        
+51/98 [outputCharTable]                      
+52/98                                        
+53/98 [outputTable1]                         
+54/98                                        
+55/98 [outputAddTable]                       
+56/98                                        
+57/98 [outputTable2]                         
+58/98                                        
+59/98 [outputSuppTable]                      
+60/98                                        
+61/98 [plotOutcomes_both_timings]            
+62/98                                        
+63/98 [unnamed-chunk-1]                      
+64/98                                        
+65/98 [unnamed-chunk-2]                      
+66/98                                        
+67/98 [unnamed-chunk-3]                      
+68/98                                        
+69/98 [unnamed-chunk-4]                      
+70/98                                        
+71/98 [unnamed-chunk-5]                      
+72/98                                        
+73/98 [unnamed-chunk-6]                      
+74/98                                        
+75/98 [unnamed-chunk-7]                      
+76/98                                        
+77/98 [unnamed-chunk-8]                      
+78/98                                        
+79/98 [unnamed-chunk-9]                      
+80/98                                        
+81/98 [unnamed-chunk-10]                     
+82/98                                        
+83/98 [unnamed-chunk-11]                     
+84/98                                        
+85/98 [unnamed-chunk-12]                     
+86/98                                        
+87/98 [unnamed-chunk-13]                     
+88/98                                        
+89/98 [unnamed-chunk-14]                     
+90/98                                        
+91/98 [unnamed-chunk-15]                     
+92/98                                        
+93/98 [plotOutcomes_table2]                  
+94/98                                        
+95/98 [plotOutcomes_table4]                  
+96/98                                        
+97/98 [gapsTable]                            
+98/98                                        
+[1] "/results/reproscout-author.R"
+
+> knitr::opts_chunk$set(include = FALSE)
+
+> library(meta)
+
+> library(irr)
+
+> library(knitr)
+
+> library(kableExtra)
+
+> library(english)
+
+> library(boot)
+
+> library(tidyverse)
+
+> metaDisc <- function(df) {
++     estim <- data.frame(matrix(ncol = 7, nrow = length(df)))
++     colnames(estim) <- c("b", "lower.random", "upper.ran ..." ... [TRUNCATED] 
+
+> metaRR <- function(Ee, Ne, Ec, Nc, df) {
++     meta <- meta::metabin(Ee, Ne, Ec, Nc, comb.random = TRUE, 
++         prediction = TRUE, level.predict .... [TRUNCATED] 
+
+> makeCI <- function(data) {
++     data <- round(data, 2)
++     CI <- paste0(data$lower.random * 100, "-", data$upper.random * 
++         100, "%")
++  .... [TRUNCATED] 
+
+> makePI <- function(data) {
++     data[, 1:5] <- data[, 1:5] * 100
++     for (i in 1:nrow(data)) {
++         data[i, 4] <- ifelse(data[i, 4] < 0.5, s .... [TRUNCATED] 
+
+> screen <- read.csv("/data/preregSR_dataScreen.csv", 
++     header = TRUE)
+
+> screen <- screen %>% mutate(RCsr = ifelse((RC == "BOTH" | 
++     RC == "SR"), 1, 0))
+
+> screen <- screen %>% mutate(RTsr = ifelse((RT == "BOTH" | 
++     RT == "SR"), 1, 0))
+
+> kSR <- kappa2(cbind(screen$RCsr, screen$RTsr))$value %>% 
++     round(2)
+
+> screen <- screen %>% mutate(RCscope = ifelse((RC == 
++     "BOTH" | RC == "SCOPE"), 1, 0))
+
+> screen <- screen %>% mutate(RTscope = ifelse((RT == 
++     "BOTH" | RT == "SCOPE"), 1, 0))
+
+> kScope <- kappa2(cbind(screen$RCscope, screen$RTscope))$value %>% 
++     round(2)
+
+> firstPass <- data.frame(matrix(ncol = ncol(screen), 
++     nrow = 4283 - nrow(screen)))
+
+> firstPass[, ] <- 0
+
+> colnames(firstPass) <- colnames(screen)
+
+> screenAll <- rbind(screen, firstPass)
+
+> kSRAll <- kappa2(cbind(screenAll$RCsr, screenAll$RTsr))$value %>% 
++     round(2)
+
+> kScopeAll <- kappa2(cbind(screenAll$RCscope, screenAll$RTscope))$value %>% 
++     round(2)
+
+> raw <- read.csv("/data/preregSR_dataRaw.csv", header = TRUE, 
++     stringsAsFactors = FALSE, na.strings = c("n", ""))
+
+> df <- raw[4:nrow(raw), ] %>% filter(!is.na(coder))
+
+> df$author[df$author == "HernÃ¡ndez et al."] <- "Hernández et al."
+
+> df$author[df$author == "HuiÄ‡ et al."] <- "Huić et al."
+
+> df$author[df$author == "JuriÄ‡ et al."] <- "Jurić et al."
+
+> df$author[df$author == "CalmÃ©jane et al."] <- "Calméjane et al."
+
+> df$author[df$author == "PraniÄ‡ et al."] <- "Pranić et al."
+
+> df <- df %>% select(-c(initialComments, discPro1comments, 
++     discPro2comments, discProComments, disc1comments, disc2comments, 
++     discComment .... [TRUNCATED] 
+
+> df_full <- df
+
+> df <- df %>% filter(coder != "RC", coder != "RTT", 
++     coder != "OvdA", coder != "SW")
+
+> df$coder <- df$coder %>% as.factor()
+
+> articlesToRemove <- c("Differences in Reporting of Analyses in Internal Company Documents Versus Published Trial Reports: Comparisons in Industry-Sp ..." ... [TRUNCATED] 
+
+> df <- df %>% filter(!(article %in% articlesToRemove))
+
+> excludedArticles <- sum(!is.na(df$excluded)) + length(articlesToRemove)
+
+> df <- df %>% filter(is.na(excluded))
+
+> df <- df %>% select(-excluded)
+
+> df$discPro <- ifelse(df$discPro == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered" & 
++     d .... [TRUNCATED] 
+
+> df$discProOther <- ifelse(df$discProOther == "Yes, and they present a set of results that includes only studies that were PROSPECTIVELY registered"  .... [TRUNCATED] 
+
+> df <- df %>% select(-c(disc, discOther, discProOtherDenom, 
++     discOtherDenom))
+
+> df <- rename(df, discOutcome = discPro)
+
+> df <- rename(df, discOther = discProOther)
+
+> df$source <- gsub("Journal\\(s\\)", "journal", df$source)
+
+> df$source <- gsub("Registry\\(ies\\)", "reg", df$source)
+
+> df$source <- gsub("Search engine\\(s\\) \\(e.g., PubMed, EMBASE\\)", 
++     "searchEngine", df$source)
+
+> df$expTotalDisc <- ifelse(grepl("total number", df$explore), 
++     1, 0)
+
+> df$expFund <- ifelse(grepl("FUNDING", df$explore), 
++     1, 0)
+
+> df$expStatSig <- ifelse(grepl("STATISTICAL SIGNIFICANCE", 
++     df$explore), 1, 0)
+
+> df$expTime <- ifelse(grepl("TIME OF REGISTRATION", 
++     df$explore), 1, 0)
+
+> df <- df %>% select(-explore)
+
+> df$comparator <- df$comparator %>% as.factor()
+
+> df$version <- df$version %>% as.factor()
+
+> df$disclosed <- df$disclosed %>% as.factor()
+
+> df$discipline <- df$discipline %>% as.factor()
+
+> df$yearFirst <- df$yearFirst %>% as.numeric()
+
+> df$yearLast <- df$yearLast %>% as.numeric()
+
+> df$observational <- df$observational %>% as.factor()
+
+> df$pubYear <- df$pubYear %>% as.numeric()
+
+> for (i in grep("regPro", colnames(df)):grep("regUnclearIf", 
++     colnames(df))) {
++     df[, i] <- df[, i] %>% as.numeric()
++ }
+
+> for (i in grep("discProDenom", colnames(df)):grep("discTime", 
++     colnames(df))) {
++     df[, i] <- df[, i] %>% as.numeric()
++ }
+
+> for (i in grep("discProOtherElig", colnames(df))[1]:grep("discOtherResultsDenom", 
++     colnames(df))) {
++     df[, i] <- df[, i] %>% as.numeric()
+ .... [TRUNCATED] 
+
+> for (i in grep("industryDisc", colnames(df))[1]:grep("retroNonDiscSec", 
++     colnames(df))) {
++     df[, i] <- df[, i] %>% as.numeric()
++ }
+
+> excludedDisclosedDiscrepancies = sum(grepl("excludedDisclosed", 
++     df$disclosedNum))
+
+> df$disclosedNum <- df$disclosedNum %>% as.numeric()
+
+> df$disclosedDenom <- df$disclosedDenom %>% as.numeric()
+
+> df <- df %>% mutate(denom = ifelse(is.na(discDenom), 
++     discProDenom, discDenom))
+
+> write.csv(df, "/data/dataClean.csv")
+
+> temp <- metaDisc(df)
+
+> estim <- temp[[1]]
+
+> metaList <- temp[[2]]
+
+> dfAll <- df
+
+> for (i in 1:nrow(df)) {
++     if (dfAll$discOutcome[i] == "pro") {
++         dfAll[i, grep("discDenom", colnames(df)):grep("discTime", 
++            .... [TRUNCATED] 
+
+> temp <- metaDisc(dfAll)
+
+> estimAll <- temp[[1]]
+
+> metaListAll <- temp[[2]]
+
+> tab <- estim[grep("discProAny", rownames(estim)):grep("discProTime", 
++     rownames(estim)), 1:7] %>% rbind(estim[grep("discProOtherElig", 
++     r .... [TRUNCATED] 
+
+> tab[, 8:14] <- (estim[grep("discAny", rownames(estim)):grep("discTime", 
++     rownames(estim)), 1:7] %>% rbind(estim[grep("discOtherElig", 
++     r .... [TRUNCATED] 
+
+> tab[15:21] <- (estimAll[grep("discAny", rownames(estimAll)):grep("discTime", 
++     rownames(estimAll)), 1:7] %>% rbind(estimAll[grep("discOtherElig ..." ... [TRUNCATED] 
+
+> denom_index <- grep("Denom", rownames(tab))
+
+> tab <- tab[-denom_index, ]
+
+> tabOut <- data.frame(matrix(ncol = 9, nrow = nrow(tab)))
+
+> tabOut[, 1] <- makeCI(tab[, 1:7])
+
+> tabOut[, 2] <- makePI(tab[, 1:7])
+
+> tabOut[, 3] <- tab$k
+
+> tabOut[, 4] <- tab$n
+
+> tabOut[, 5] <- makeCI(tab[, 8:14])
+
+> tabOut[, 6] <- makePI(tab[, 8:14])
+
+> tabOut[, 7] <- tab$k.1
+
+> tabOut[, 8] <- tab$n.1
+
+> tabOut[, 9] <- makeCI(tab[, 15:21])
+
+> tabOut[, 10] <- makePI(tab[, 15:21])
+
+> tabOut[, 11] <- tab$k.2
+
+> tabOut[, 12] <- tab$n.2
+
+> tabOut[tabOut == "NA-NA%"] <- NA
+
+> discs <- c("Any outcome discrepancy", "Any primary outcome discrepancy", 
++     "Any secondary outcome discrepancy", "Primary outcome demoted to sec ..." ... [TRUNCATED] 
+
+> rownames(tabOut) <- discs
+
+> colnames(tabOut) <- c("95% CI (prospective registration)", 
++     "95% PI (prospective registration)", "k (prospective registration)", 
++     "n (pr ..." ... [TRUNCATED] 
+
+> tabOutMain1 <- tabOut[1:10, 9:12]
+
+> colnames(tabOutMain1) <- c("Discrepant studies (95% CI)", 
++     "Discrepant studies (95% PI)", "k", "n")
+
+> tabOutMain2 <- tabOut[11:20, 9:12]
+
+> colnames(tabOutMain2) <- c("Discrepant studies (95% CI)", 
++     "Discrepant studies (95% PI)", "k", "n")
+
+> tabOutSupp <- tabOut[, 1:8]
+
+> colnames(tabOutSupp) <- c("95% CI", "95% PI", "k", 
++     "n", "95% CI", "95% PI", "k", "n")
+
+> png("forest1.png", width = 800, height = 1150)
+
+> meta::forest(metaListAll[[grep("disc1", colnames(df))[1]]], 
++     leftlabs = c("Article", "n Discrepant", "n Studies"), pooled.events = TRUE, 
++    .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> png("forest2.png", width = 800)
+
+> meta::forest(metaListAll[[grep("disc2", colnames(df))[1]]], 
++     leftlabs = c("Article", "n Discrepant", "n Studies"), pooled.events = TRUE, 
++    .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> RTT <- sum(grepl("RTT", df$coder))
+
+> RC <- sum(grepl("RC", df$coder))
+
+> SW <- sum(grepl("SW", df$coder))
+
+> OvdA <- sum(grepl("OvdA", df$coder))
+
+> set_table <- function(df, var_name) {
++     df_group <- df %>% group_by({
++         {
++             var_name
++         }
++     }) %>% summarize(k_ar .... [TRUNCATED] 
+
+> disciplineFrame <- set_table(df, discipline)
+
+> disciplineFrame$var1 <- c("medicine", "dentistry", 
++     "psychology", "economics", "physical therapy")
+
+> comparatorFrame <- set_table(df, comparator)
+
+> comparatorFrame$var1 <- c("registry", "ethics application", 
++     "other protocol", "marketing application", "grant application")
+
+> sourceFrame <- set_table(df, source)
+
+> sourceFrame$var1 <- c("journals", "registries", "search engines", 
++     "ethics boards", "funders", "registries and search engines", 
++     "regula ..." ... [TRUNCATED] 
+
+> observationalFrame <- set_table(df, observational)
+
+> observationalFrame$var1 <- c("solely observational", 
++     "observational and study authors were contacted", "observational and interventional")
+
+> versionFrame <- set_table(df, version)
+
+> versionFrame <- versionFrame %>% slice(-1) %>% bind_rows(versionFrame[1, 
++     ])
+
+> versionFrame$var1 <- c("original", "most recent", 
++     "other version/unclear", "not reported")
+
+> disclosedFrame <- set_table(df, disclosed)
+
+> disclosedFrame <- disclosedFrame %>% slice(-1) %>% 
++     bind_rows(disclosedFrame[1, ])
+
+> disclosedFrame$var1 <- c("one or more", "none", "article excluded publications with disclosed discrepancies", 
++     "not reported")
+
+> charFrame <- bind_rows(disciplineFrame, comparatorFrame, 
++     sourceFrame, observationalFrame, versionFrame, disclosedFrame)
+
+> colnames(charFrame) <- c("Article characteristic", 
++     paste("k = ", nrow(df)), paste("n = ", sum(df$denom, na.rm = T)))
+
+> g1 <- nrow(disciplineFrame)
+
+> g2 <- g1 + nrow(comparatorFrame)
+
+> g3 <- g2 + nrow(sourceFrame)
+
+> g4 <- g3 + nrow(observationalFrame)
+
+> g5 <- g4 + nrow(versionFrame)
+
+> g6 <- g5 + nrow(disclosedFrame)
+
+> yearPub <- dfAll %>% filter(yearItem == "pub")
+
+> yearFirst <- yearPub %>% filter(yearFirst > 0)
+
+> yearFirstMedian <- median(yearFirst$yearFirst)
+
+> yearFirstQ1 <- round(quantile(yearFirst$yearFirst)[2], 
++     0)
+
+> yearFirstQ3 <- round(quantile(yearFirst$yearFirst)[4], 
++     0)
+
+> yearLast <- yearPub %>% filter(yearLast > 0)
+
+> yearLastMedian <- median(yearLast$yearLast)
+
+> yearLastQ1 <- round(quantile(yearLast$yearLast)[2], 
++     0)
+
+> yearLastQ3 <- round(quantile(yearLast$yearLast)[4], 
++     0)
+
+> dfAll$discipline <- relevel(dfAll$discipline, ref = "Medicine (MEDI)")
+
+> dfAll$source <- relevel(as.factor(dfAll$source), ref = "journal")
+
+> dfAll$disclosed <- relevel(as.factor(dfAll$disclosed), 
++     ref = "Yes, and SOME or ALL of the discrepancies were disclosed")
+
+> dfAll$comparator <- relevel(as.factor(dfAll$comparator), 
++     ref = "reg")
+
+> dfAll$version <- relevel(as.factor(dfAll$version), 
++     ref = "Original version")
+
+> df1 <- filter(dfAll, !is.na(disc1))
+
+> df2 <- filter(dfAll, !is.na(disc2))
+
+> df1$source <- droplevels(df1$source)
+
+> df1$comparator <- droplevels(df1$comparator)
+
+> df2$source <- droplevels(df2$source)
+
+> df2$comparator <- droplevels(df2$comparator)
+
+> df2$discipline <- droplevels(df2$discipline)
+
+> meta1 <- metaListAll[grep("disc1", colnames(df))[[1]]][[1]]
+
+> meta2 <- metaListAll[grep("disc2", colnames(df))[[1]]][[1]]
+
+> modPubYear1 <- metareg(meta1, ~df1$pubYear)
+
+> modPubYear2 <- metareg(meta2, ~df2$pubYear)
+
+> modDiscipline1 <- metareg(meta1, ~df1$discipline)
+
+> modDiscipline2 <- metareg(meta2, ~df2$discipline)
+
+> dfDiscipline1 <- df1
+
+> dfDiscipline1 <- mutate(dfDiscipline1, discipline = ifelse(discipline != 
++     "Medicine (MEDI)", "other", "Medicine (MEDI)"))
+
+> modDiscipline1binary <- metareg(meta1, ~dfDiscipline1$discipline)
+
+> dfDiscipline2 <- df2
+
+> dfDiscipline2 <- mutate(dfDiscipline2, discipline = ifelse(discipline != 
++     "Medicine (MEDI)", "other", "Medicine (MEDI)"))
+
+> modDiscipline2binary <- metareg(meta2, ~dfDiscipline2$discipline)
+
+> modSource1 <- metareg(meta1, ~droplevels(df1$source))
+
+> df2$source <- relevel(as.factor(df2$source), ref = "reg")
+
+> modSource2 <- metareg(meta2, ~df2$source)
+
+> modVersion1 <- metareg(meta1, ~df1$version)
+
+> modVersion2 <- metareg(meta2, ~df2$version)
+
+> modDisclosed1 <- metareg(meta1, ~df1$disclosed)
+
+> modDisclosed2 <- metareg(meta2, ~df2$disclosed)
+
+> modComparator1 <- metareg(meta1, ~droplevels(df1$comparator))
+
+> modComparator2 <- metareg(meta2, ~droplevels(df2$comparator))
+
+> df1Comparator <- df1
+
+> df1Comparator <- mutate(df1Comparator, comparator = ifelse(comparator != 
++     "reg", "other", "reg"))
+
+> modComparator1binary <- metareg(meta1, ~df1Comparator$comparator)
+
+> predictor_vars <- c("df1$pubYear", "df1$discipline", 
++     "df1$source", "df1$version", "df1$disclosed", "df1$comparator")
+
+> formula_str <- paste("~", paste(predictor_vars, collapse = " + "))
+
+> modAll1 <- metareg(meta1, formula = formula_str)
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("disclosedNum", 
++     colnames(df))]))
+
+> meta <- meta::metaprop(dfMeta$disclosedNum, dfMeta$disclosedDenom, 
++     method = "GLMM", method.tau = "ML", method.tau.ci = "J", 
++     comb.rando .... [TRUNCATED] 
+
+> meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+
+> png("forestDisclosed.png", width = 800)
+
+> meta::forest(meta, leftlabs = c("Article", "n Disclosed", 
++     "n Studies"), pooled.events = TRUE, squaresize = 0, sortvar = TE, 
++     comb.fixed .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> CIdisclosed <- paste0(round(inv.logit(meta$lower.random), 
++     2) * 100, "-", round(inv.logit(meta$upper.random), 2) * 100, 
++     "%")
+
+> PIdisclosed <- paste0(signif(inv.logit(meta$lower.predict), 
++     1) * 100, "-", round(inv.logit(meta$upper.predict), 2) * 
++     100, "%")
+
+> ndisclosed <- sum(meta$n)
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("favorSig", 
++     colnames(df))]))
+
+> meta <- meta::metaprop(dfMeta$favorSig, dfMeta$favorSig + 
++     dfMeta$favorNonSig, method = "GLMM", method.tau = "ML", method.tau.ci = "J", 
++     .... [TRUNCATED] 
+
+> meta$studlab <- paste(dfMeta$author, dfMeta$pubYear)
+
+> png("forestExpFavorSig.png", width = 850)
+
+> meta::forest(meta, leftlabs = c("Article", "n favored significance", 
++     "n Studies"), pooled.events = TRUE, squaresize = 0, sortvar = TE, 
++     .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> CIexpFavorSig <- paste0(round(inv.logit(meta$lower.random), 
++     2) * 100, "-", round(inv.logit(meta$upper.random), 2) * 100, 
++     "%")
+
+> PIexpFavorSig <- paste0(signif(inv.logit(meta$lower.predict), 
++     2) * 100, "-", round(inv.logit(meta$upper.predict), 2) * 
++     100, "%")
+
+> nexpFavorSig <- sum(meta$n)
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("sigDisc", 
++     colnames(df))]))
+
+> temp <- metaRR(dfMeta$sigDisc, dfMeta$sigDisc + dfMeta$nonSigDisc, 
++     dfMeta$sigNonDisc, dfMeta$sigNonDisc + dfMeta$nonSigNonDisc, 
++     dfMeta .... [TRUNCATED] 
+
+> meta <- temp[[1]]
+
+> CIexpStatSig <- temp[[2]]
+
+> PIexpStatSig <- temp[[3]]
+
+> nexpStatSig <- sum(meta$n.e, meta$n.c)
+
+> png("forestExpStatSig.png", width = 850)
+
+> meta::forest(meta, leftlabs = c("Article", "significant", 
++     "total", "significant", "total"), lab.e = "Discrepant", lab.c = "Non-discrepant", 
+ .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("sigDisc", 
++     colnames(df))]))
+
+> temp <- metaRR(dfMeta$sigDisc, dfMeta$sigDisc + dfMeta$sigNonDisc, 
++     dfMeta$nonSigDisc, dfMeta$nonSigDisc + dfMeta$nonSigNonDisc, 
++     dfMeta .... [TRUNCATED] 
+
+> meta <- temp[[1]]
+
+> CIexpStatSig2 <- temp[[2]]
+
+> PIexpStatSig2 <- temp[[3]]
+
+> nexpStatSig2 <- sum(meta$n.e, meta$n.c)
+
+> png("forestExpStatSig2.png", width = 850)
+
+> meta::forest(meta, leftlabs = c("Article", "discrepant", 
++     "total", "discrepant", "total"), lab.e = "Significant", lab.c = "Non-significant", 
+ .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("industryDisc", 
++     colnames(df))]))
+
+> temp <- metaRR(dfMeta$industryDisc, dfMeta$industryDisc + 
++     dfMeta$industryNonDisc, dfMeta$nonIndustryDisc, dfMeta$nonIndustryDisc + 
++     dfM .... [TRUNCATED] 
+
+> meta <- temp[[1]]
+
+> CIexpIndustry <- temp[[2]]
+
+> PIexpIndustry <- temp[[3]]
+
+> nexpIndustry <- sum(meta$n.e, meta$n.c)
+
+> png("forestExpIndustry.png", width = 850)
+
+> meta::forest(meta, leftlabs = c("Article", "discrepant", 
++     "total", "discrepant", "total"), lab.e = "Industry", lab.c = "Non-industry", 
++      .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> dfMeta <- df %>% filter(!is.na(df[, grep("proDisc\\b", 
++     colnames(df))]))
+
+> temp <- metaRR(dfMeta$proDisc, dfMeta$proDisc + dfMeta$proNonDisc, 
++     dfMeta$retroDisc, dfMeta$retroDisc + dfMeta$retroNonDisc, 
++     dfMeta)
+
+> meta <- temp[[1]]
+
+> CIexpTime <- temp[[2]]
+
+> PIexpTime <- temp[[3]]
+
+> nexpTime <- sum(meta$n.e, meta$n.c)
+
+> png("forestExpTime.png", width = 850)
+
+> meta::forest(meta, leftlabs = c("Article", "discrepant", 
++     "total", "discrepant", "total"), lab.e = "Prospective", lab.c = "Retrospective", 
++  .... [TRUNCATED] 
+
+> dev.off()
+null device 
+          1 
+
+> addTable <- c("Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy", 
++     "Percentage of outcome disc ..." ... [TRUNCATED] 
+
+> addCIs <- c(CIdisclosed, CIexpFavorSig, CIexpStatSig, 
++     CIexpStatSig2, CIexpIndustry, CIexpTime)
+
+> addPIs <- c(PIdisclosed, PIexpFavorSig, PIexpStatSig, 
++     PIexpStatSig2, PIexpIndustry, PIexpTime)
+
+> addk <- c(sum(!is.na(df$disclosedNum)), sum(!is.na(df$favorSig)), 
++     sum(!is.na(df$sigDisc)), sum(!is.na(df$sigDisc)), sum(!is.na(df$industryDis .... [TRUNCATED] 
+
+> addn <- c(ndisclosed, nexpFavorSig, nexpStatSig, nexpStatSig2, 
++     nexpIndustry, nexpTime)
+
+> addFrame <- data.frame(addTable, addCIs, addPIs, addk, 
++     addn)
+
+> colnames(addFrame) <- c("Analysis", "95% CI", "95% PI", 
++     "k", "n")
+
+> gapsIssues <- c("Many studies are never registered", 
++     "Registrations are imprecise", "Consumers of research should be aware of outcome switchi ..." ... [TRUNCATED] 
+
+> gapsQuotes <- c("“The more concerning issue, however, is the lack of registration or provision of registration number for randomized controlled tria ..." ... [TRUNCATED] 
+
+> gaps <- data.frame(gapsIssues, gapsQuotes)
+
+> colnames(gaps) <- c("Theme", "Quotes")
+
+> knitr::kable(charFrame, caption = "Table 1. Article characteristics", 
++     booktabs = T, linesep = "\\addlinespace") %>% kable_styling() %>% 
++    .... [TRUNCATED] 
+<table class="table table" style="margin-left: auto; margin-right: auto; margin-left: auto; margin-right: auto;">
+<caption>Table 1. Article characteristics</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Article characteristic </th>
+   <th style="text-align:right;"> k =  89 </th>
+   <th style="text-align:right;"> n =  6929 </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr grouplength="5"><td colspan="3" style="border-bottom: 1px solid;"><strong>Discipline</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> medicine </td>
+   <td style="text-align:right;"> 81 </td>
+   <td style="text-align:right;"> 6452 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> dentistry </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 254 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> psychology </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 68 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> economics </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 93 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> physical therapy </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 62 </td>
+  </tr>
+  <tr grouplength="5"><td colspan="3" style="border-bottom: 1px solid;"><strong>Source of registration or protocol assessed for discrepancies</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> registry </td>
+   <td style="text-align:right;"> 73 </td>
+   <td style="text-align:right;"> 6107 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> ethics application </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 146 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> other protocol </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 466 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> marketing application </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 126 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> grant application </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 84 </td>
+  </tr>
+  <tr grouplength="9"><td colspan="3" style="border-bottom: 1px solid;"><strong>Sources searched to identify studies</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> journals </td>
+   <td style="text-align:right;"> 32 </td>
+   <td style="text-align:right;"> 3264 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> registries </td>
+   <td style="text-align:right;"> 23 </td>
+   <td style="text-align:right;"> 1547 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> search engines </td>
+   <td style="text-align:right;"> 16 </td>
+   <td style="text-align:right;"> 1527 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> ethics boards </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 146 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> funders </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 96 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> registries and search engines </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> regulators </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 126 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> research group </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 44 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> registries and journals </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 152 </td>
+  </tr>
+  <tr grouplength="3"><td colspan="3" style="border-bottom: 1px solid;"><strong>Type of study</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> solely observational </td>
+   <td style="text-align:right;"> 79 </td>
+   <td style="text-align:right;"> 6344 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> observational and study authors were contacted </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 518 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> observational and interventional </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 67 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="3" style="border-bottom: 1px solid;"><strong>Version of registry that publications were compared to</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> original </td>
+   <td style="text-align:right;"> 29 </td>
+   <td style="text-align:right;"> 2607 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> most recent </td>
+   <td style="text-align:right;"> 15 </td>
+   <td style="text-align:right;"> 1281 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> other version/unclear </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 670 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> not reported </td>
+   <td style="text-align:right;"> 35 </td>
+   <td style="text-align:right;"> 2371 </td>
+  </tr>
+  <tr grouplength="4"><td colspan="3" style="border-bottom: 1px solid;"><strong>Number of studies within each article that disclose discrepancies</strong></td></tr>
+<tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> one or more </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 1547 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> none </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 441 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> article excluded publications with disclosed discrepancies </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 326 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;padding-left: 2em;" indentlevel="1"> not reported </td>
+   <td style="text-align:right;"> 57 </td>
+   <td style="text-align:right;"> 4615 </td>
+  </tr>
+</tbody>
+</table>
+> knitr::kable(tabOutMain1, caption = "Table 2. Meta-analytic estimates for the proportion of studies that contain various types of outcome discrepanc ..." ... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Table 2. Meta-analytic estimates for the proportion of studies that contain various types of outcome discrepancies</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;"> Discrepant studies (95% CI) </th>
+   <th style="text-align:left;"> Discrepant studies (95% PI) </th>
+   <th style="text-align:right;"> k </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Any outcome discrepancy </td>
+   <td style="text-align:left;width: 2cm; "> 41-75% </td>
+   <td style="text-align:left;width: 2cm; "> 7-97% </td>
+   <td style="text-align:right;width: 1cm; "> 18 </td>
+   <td style="text-align:right;width: 1cm; "> 1113 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Any primary outcome discrepancy </td>
+   <td style="text-align:left;width: 2cm; "> 29-37% </td>
+   <td style="text-align:left;width: 2cm; "> 10-68% </td>
+   <td style="text-align:right;width: 1cm; "> 70 </td>
+   <td style="text-align:right;width: 1cm; "> 6314 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Any secondary outcome discrepancy </td>
+   <td style="text-align:left;width: 2cm; "> 50-75% </td>
+   <td style="text-align:left;width: 2cm; "> 13-95% </td>
+   <td style="text-align:right;width: 1cm; "> 22 </td>
+   <td style="text-align:right;width: 1cm; "> 1436 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Primary outcome demoted to secondary outcome </td>
+   <td style="text-align:left;width: 2cm; "> 6-10% </td>
+   <td style="text-align:left;width: 2cm; "> 2-31% </td>
+   <td style="text-align:right;width: 1cm; "> 51 </td>
+   <td style="text-align:right;width: 1cm; "> 4560 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Primary outcome omitted </td>
+   <td style="text-align:left;width: 2cm; "> 6-12% </td>
+   <td style="text-align:left;width: 2cm; "> 1-43% </td>
+   <td style="text-align:right;width: 1cm; "> 51 </td>
+   <td style="text-align:right;width: 1cm; "> 4338 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Primary outcome added </td>
+   <td style="text-align:left;width: 2cm; "> 7-11% </td>
+   <td style="text-align:left;width: 2cm; "> 2-34% </td>
+   <td style="text-align:right;width: 1cm; "> 54 </td>
+   <td style="text-align:right;width: 1cm; "> 4697 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Secondary outcome promoted to primary outcome </td>
+   <td style="text-align:left;width: 2cm; "> 4-6% </td>
+   <td style="text-align:left;width: 2cm; "> 1-19% </td>
+   <td style="text-align:right;width: 1cm; "> 46 </td>
+   <td style="text-align:right;width: 1cm; "> 4135 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Secondary outcome omitted </td>
+   <td style="text-align:left;width: 2cm; "> 16-35% </td>
+   <td style="text-align:left;width: 2cm; "> 4-72% </td>
+   <td style="text-align:right;width: 1cm; "> 18 </td>
+   <td style="text-align:right;width: 1cm; "> 1243 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Secondary outcome added </td>
+   <td style="text-align:left;width: 2cm; "> 19-43% </td>
+   <td style="text-align:left;width: 2cm; "> 3-83% </td>
+   <td style="text-align:right;width: 1cm; "> 20 </td>
+   <td style="text-align:right;width: 1cm; "> 1305 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 9cm; "> Timing of outcome measurement changed </td>
+   <td style="text-align:left;width: 2cm; "> 6-16% </td>
+   <td style="text-align:left;width: 2cm; "> 1-62% </td>
+   <td style="text-align:right;width: 1cm; "> 30 </td>
+   <td style="text-align:right;width: 1cm; "> 3472 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> We only coded 'any outcome discrepancy' for articles that checked for both primary and secondary outcome discrepancies in the studies they assessed. Forest plots for all meta-analyses in this table are in Supplementary Material F.</td>
+</tr>
+</tfoot>
+</table>
+> knitr::kable(addFrame, caption = "Table 3. Additional analyses regarding discrepancies", 
++     booktabs = T, linesep = "\\addlinespace") %>% kable_ .... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Table 3. Additional analyses regarding discrepancies</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Analysis </th>
+   <th style="text-align:left;"> 95% CI </th>
+   <th style="text-align:left;"> 95% PI </th>
+   <th style="text-align:right;"> k </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy </td>
+   <td style="text-align:left;width: 1.5cm; "> 4-19% </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.3-74% </td>
+   <td style="text-align:right;width: 1cm; "> 21 </td>
+   <td style="text-align:right;width: 1cm; "> 620 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> Percentage of outcome discrepancies that favored statistically significant results </td>
+   <td style="text-align:left;width: 1.5cm; "> 49-66% </td>
+   <td style="text-align:left;width: 1.5cm; "> 23-86% </td>
+   <td style="text-align:right;width: 1cm; "> 24 </td>
+   <td style="text-align:right;width: 1cm; "> 671 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> Likelihood ratio of a study with versus without an outcome discrepancy to contain statistically significant results </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.56-1.06 </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.42-1.43 </td>
+   <td style="text-align:right;width: 1cm; "> 7 </td>
+   <td style="text-align:right;width: 1cm; "> 405 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> *Likelihood ratio of a study with versus without a statistically significant results to contain an outcome discrepancy </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.64-0.99 </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.59-1.06 </td>
+   <td style="text-align:right;width: 1cm; "> 7 </td>
+   <td style="text-align:right;width: 1cm; "> 405 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> Likelihood ratio of a study with versus without industry funded to contain an outcome discrepancy </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.61-0.91 </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.44-1.27 </td>
+   <td style="text-align:right;width: 1cm; "> 22 </td>
+   <td style="text-align:right;width: 1cm; "> 2623 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 10cm; "> Likelihood ratio of a prospectively registered study versus retrospectively registered study to contain a primary outcome discrepancy </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.46-2.57 </td>
+   <td style="text-align:left;width: 1.5cm; "> 0.13-8.85 </td>
+   <td style="text-align:right;width: 1cm; "> 4 </td>
+   <td style="text-align:right;width: 1cm; "> 260 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style = 'padding: 0; border:0;' colspan='100%'><sup>*</sup> This analysis uses the same data as the likelihood ratio analysis before it. Forest plots for all meta-analyses in this table are in Supplementary Material G.</td>
+</tr>
+</tfoot>
+</table>
+> knitr::kable(tabOutMain2, caption = "Table 4. Meta-analytic estimates for the proportion of studies that contain various types of non-outcome discre ..." ... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Table 4. Meta-analytic estimates for the proportion of studies that contain various types of non-outcome discrepancies</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;"> Discrepant studies (95% CI) </th>
+   <th style="text-align:left;"> Discrepant studies (95% PI) </th>
+   <th style="text-align:right;"> k </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Eligibility criteria </td>
+   <td style="text-align:left;"> 25-57% </td>
+   <td style="text-align:left;"> 5-90% </td>
+   <td style="text-align:right;width: 1cm; "> 15 </td>
+   <td style="text-align:right;width: 1cm; "> 1153 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sample size </td>
+   <td style="text-align:left;"> 26-44% </td>
+   <td style="text-align:left;"> 8-78% </td>
+   <td style="text-align:right;width: 1cm; "> 25 </td>
+   <td style="text-align:right;width: 1cm; "> 1398 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Randomization </td>
+   <td style="text-align:left;"> 2-64% </td>
+   <td style="text-align:left;"> 0.06-98% </td>
+   <td style="text-align:right;width: 1cm; "> 5 </td>
+   <td style="text-align:right;width: 1cm; "> 176 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Blinding </td>
+   <td style="text-align:left;"> 5-42% </td>
+   <td style="text-align:left;"> 0.04-99% </td>
+   <td style="text-align:right;width: 1cm; "> 3 </td>
+   <td style="text-align:right;width: 1cm; "> 224 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Intervention </td>
+   <td style="text-align:left;"> 3-52% </td>
+   <td style="text-align:left;"> 0.1-97% </td>
+   <td style="text-align:right;width: 1cm; "> 7 </td>
+   <td style="text-align:right;width: 1cm; "> 550 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Study duration </td>
+   <td style="text-align:left;"> 3-89% </td>
+   <td style="text-align:left;"> 0.02-99.94% </td>
+   <td style="text-align:right;width: 1cm; "> 4 </td>
+   <td style="text-align:right;width: 1cm; "> 184 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Analysis </td>
+   <td style="text-align:left;"> 19-52% </td>
+   <td style="text-align:left;"> 4-86% </td>
+   <td style="text-align:right;width: 1cm; "> 12 </td>
+   <td style="text-align:right;width: 1cm; "> 404 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Subgroup analysis </td>
+   <td style="text-align:left;"> 35-93% </td>
+   <td style="text-align:left;"> 2-99.7% </td>
+   <td style="text-align:right;width: 1cm; "> 9 </td>
+   <td style="text-align:right;width: 1cm; "> 545 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Funding </td>
+   <td style="text-align:left;"> 7-84% </td>
+   <td style="text-align:left;"> 0.2-99.5% </td>
+   <td style="text-align:right;width: 1cm; "> 5 </td>
+   <td style="text-align:right;width: 1cm; "> 212 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Results </td>
+   <td style="text-align:left;"> 7-82% </td>
+   <td style="text-align:left;"> 0.2-99% </td>
+   <td style="text-align:right;width: 1cm; "> 6 </td>
+   <td style="text-align:right;width: 1cm; "> 262 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> Values less than 0.5% and greater than 99.5% are rounded to one significant digit from 0 or 100. Forest plots for all meta-analyses in this table are in Supplementary Material I. These results are best interpreted alongside the information provided in Supplementary Material H. </td>
+</tr>
+</tfoot>
+</table>
+> knitr::kable(tabOutSupp, caption = "Supplementary Table D1. Meta-analytic estimates for the proportion of studies that contain various types of outc ..." ... [TRUNCATED] 
+<table class="table table" style="margin-left: auto; margin-right: auto; margin-left: auto; margin-right: auto;">
+<caption>Supplementary Table D1. Meta-analytic estimates for the proportion of studies that contain various types of outcome discrepancies and non-outcome discrepancies. Articles are separated into those which unambiguously assessed only prospectively registered studies versus articles where the registration timing of the assessed studies was retrospective, unclear, or mixed. This table is essentially a combination of Table 2 and Table 4 from the manuscript, but grouped by timing of registration.</caption>
+ <thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1"></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Prospective registration</div></th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4"><div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">Unclear registration timing</div></th>
+</tr>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:left;"> 95% CI </th>
+   <th style="text-align:left;"> 95% PI </th>
+   <th style="text-align:right;"> k </th>
+   <th style="text-align:right;"> n </th>
+   <th style="text-align:left;"> 95% CI </th>
+   <th style="text-align:left;"> 95% PI </th>
+   <th style="text-align:right;"> k </th>
+   <th style="text-align:right;"> n </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Any outcome discrepancy </td>
+   <td style="text-align:left;"> 38-91% </td>
+   <td style="text-align:left;"> 5-99% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 279 </td>
+   <td style="text-align:left;"> 32-70% </td>
+   <td style="text-align:left;"> 6-95% </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:right;"> 850 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Any primary outcome discrepancy </td>
+   <td style="text-align:left;"> 25-38% </td>
+   <td style="text-align:left;"> 11-64% </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:right;"> 1767 </td>
+   <td style="text-align:left;"> 28-39% </td>
+   <td style="text-align:left;"> 9-72% </td>
+   <td style="text-align:right;"> 51 </td>
+   <td style="text-align:right;"> 4857 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Any secondary outcome discrepancy </td>
+   <td style="text-align:left;"> 46-87% </td>
+   <td style="text-align:left;"> 12-98% </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 506 </td>
+   <td style="text-align:left;"> 44-74% </td>
+   <td style="text-align:left;"> 11-95% </td>
+   <td style="text-align:right;"> 16 </td>
+   <td style="text-align:right;"> 1052 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Primary outcome demoted to secondary outcome </td>
+   <td style="text-align:left;"> 7-18% </td>
+   <td style="text-align:left;"> 2-44% </td>
+   <td style="text-align:right;"> 15 </td>
+   <td style="text-align:right;"> 1287 </td>
+   <td style="text-align:left;"> 5-9% </td>
+   <td style="text-align:left;"> 2-27% </td>
+   <td style="text-align:right;"> 36 </td>
+   <td style="text-align:right;"> 3273 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Primary outcome omitted </td>
+   <td style="text-align:left;"> 6-16% </td>
+   <td style="text-align:left;"> 1-56% </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 1600 </td>
+   <td style="text-align:left;"> 6-11% </td>
+   <td style="text-align:left;"> 1-36% </td>
+   <td style="text-align:right;"> 32 </td>
+   <td style="text-align:right;"> 2860 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Primary outcome added </td>
+   <td style="text-align:left;"> 7-14% </td>
+   <td style="text-align:left;"> 3-30% </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 1403 </td>
+   <td style="text-align:left;"> 6-12% </td>
+   <td style="text-align:left;"> 1-37% </td>
+   <td style="text-align:right;"> 36 </td>
+   <td style="text-align:right;"> 3294 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Secondary outcome promoted to primary outcome </td>
+   <td style="text-align:left;"> 3-9% </td>
+   <td style="text-align:left;"> 1-25% </td>
+   <td style="text-align:right;"> 14 </td>
+   <td style="text-align:right;"> 1250 </td>
+   <td style="text-align:left;"> 3-6% </td>
+   <td style="text-align:left;"> 1-18% </td>
+   <td style="text-align:right;"> 32 </td>
+   <td style="text-align:right;"> 2885 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Secondary outcome omitted </td>
+   <td style="text-align:left;"> 14-62% </td>
+   <td style="text-align:left;"> 2-93% </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 566 </td>
+   <td style="text-align:left;"> 14-31% </td>
+   <td style="text-align:left;"> 5-58% </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:right;"> 799 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Secondary outcome added </td>
+   <td style="text-align:left;"> 8-80% </td>
+   <td style="text-align:left;"> 0.3-99% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 413 </td>
+   <td style="text-align:left;"> 18-41% </td>
+   <td style="text-align:left;"> 5-73% </td>
+   <td style="text-align:right;"> 14 </td>
+   <td style="text-align:right;"> 892 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Timing of outcome measurement changed </td>
+   <td style="text-align:left;"> 3-18% </td>
+   <td style="text-align:left;"> 1-55% </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 864 </td>
+   <td style="text-align:left;"> 6-19% </td>
+   <td style="text-align:left;"> 1-68% </td>
+   <td style="text-align:right;"> 21 </td>
+   <td style="text-align:right;"> 2608 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Eligibility criteria </td>
+   <td style="text-align:left;"> 1-99% </td>
+   <td style="text-align:left;"> 23-67% </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 50 </td>
+   <td style="text-align:left;"> 23-59% </td>
+   <td style="text-align:left;"> 4-92% </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:right;"> 1103 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Sample size </td>
+   <td style="text-align:left;"> 40-59% </td>
+   <td style="text-align:left;"> 39-60% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 174 </td>
+   <td style="text-align:left;"> 22-43% </td>
+   <td style="text-align:left;"> 6-78% </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 1244 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Randomization </td>
+   <td style="text-align:left;"> 46-70% </td>
+   <td style="text-align:left;"> 46-70% </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 58 </td>
+   <td style="text-align:left;"> 1-56% </td>
+   <td style="text-align:left;"> 0.02-98% </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 118 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Blinding </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;"> 5-42% </td>
+   <td style="text-align:left;"> 0.04-99% </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 224 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Intervention </td>
+   <td style="text-align:left;"> 1-22% </td>
+   <td style="text-align:left;"> 1-22% </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 27 </td>
+   <td style="text-align:left;"> 3-63% </td>
+   <td style="text-align:left;"> 0.1-98% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 523 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Study duration </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:right;"> NA </td>
+   <td style="text-align:left;"> 3-89% </td>
+   <td style="text-align:left;"> 0.02-99.94% </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 184 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Analysis </td>
+   <td style="text-align:left;"> 24-71% </td>
+   <td style="text-align:left;"> 6-92% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 232 </td>
+   <td style="text-align:left;"> 7-46% </td>
+   <td style="text-align:left;"> 2-80% </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 172 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Subgroup analysis </td>
+   <td style="text-align:left;"> 7-99% </td>
+   <td style="text-align:left;"> 0.01-99.998% </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 215 </td>
+   <td style="text-align:left;"> 20-97% </td>
+   <td style="text-align:left;"> 1-99.93% </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 330 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Funding </td>
+   <td style="text-align:left;"> 7-67% </td>
+   <td style="text-align:left;"> 7-67% </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:left;"> 4-93% </td>
+   <td style="text-align:left;"> 0.01-99.98% </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 205 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 4cm; "> Results </td>
+   <td style="text-align:left;"> 4-20% </td>
+   <td style="text-align:left;"> 4-20% </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 54 </td>
+   <td style="text-align:left;"> 7-91% </td>
+   <td style="text-align:left;"> 0.1-99.8% </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 208 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style="padding: 0; border:0;" colspan="100%">
+<sup></sup> Values less than 0.5% and greater than 99.5% are rounded to one significant digit from 0 or 100. Prediction intervals cannot be calculated for meta-analyses with fewer than three studies.</td>
+</tr>
+</tfoot>
+</table>
+> count <- 1
+
+> for (i in grep("discProAny", colnames(df)):grep("discTime", 
++     colnames(df))) {
++     if (!is.null(metaList[[i]])) {
++         png(paste0("fores ..." ... [TRUNCATED] 
+
+> for (i in seq(from = grep("discProOtherElig", colnames(df))[1], 
++     to = grep("discOtherResults", colnames(df))[1], by = 2)) {
++     if (!is.null .... [TRUNCATED] 
+
+> modAll1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.3664
+tau (square root of estimated tau^2 value):             0.6053
+I^2 (residual heterogeneity / unaccounted variability): 86.00%
+H^2 (unaccounted variability / sampling variability):   7.14
+
+Tests for Residual Heterogeneity:
+Wld(df = 50) = 342.2743, p-val < .0001
+LRT(df = 50) = 458.3887, p-val < .0001
+
+Test of Moderators (coefficients 2:20):
+F(df1 = 19, df2 = 50) = 1.3420, p-val = 0.2007
+
+Model Results:
+
+                                                                estimate 
+intrcpt                                                         -42.8460 
+df1$pubYear                                                       0.0210 
+df1$disciplineDentistry (DENT)                                    0.1016 
+df1$disciplineEconomics, Econometrics and Finance (ECON)          0.4086 
+df1$disciplineHealth Professions (HEAL)                           1.4988 
+df1$disciplinePsychology (PSYC)                                   1.2335 
+df1$sourceOther: ethics committee                                 0.4129 
+df1$sourceOther: funder                                           2.4149 
+df1$sourcereg                                                    -0.3632 
+df1$sourcereg,journal                                             0.6233 
+df1$sourcereg,searchEngine                                       -0.8627 
+df1$sourcesearchEngine                                           -0.2628 
+df1$versionMost recent version                                   -0.5331 
+df1$versionNo                                                    -0.1020 
+df1$versionOther                                                 -0.2049 
+df1$disclosedexcludedDisclosedDiscrepancies                       0.3049 
+df1$disclosedNo                                                   0.0273 
+df1$disclosedYes, and NONE of the discrepancies were disclosed    0.2042 
+df1$comparatorgrant                                              -2.3269 
+df1$comparatorprotocol                                           -0.9981 
+                                                                     se 
+intrcpt                                                         62.0366 
+df1$pubYear                                                      0.0308 
+df1$disciplineDentistry (DENT)                                   0.4287 
+df1$disciplineEconomics, Econometrics and Finance (ECON)         0.7221 
+df1$disciplineHealth Professions (HEAL)                          0.7510 
+df1$disciplinePsychology (PSYC)                                  0.6494 
+df1$sourceOther: ethics committee                                0.5356 
+df1$sourceOther: funder                                          1.0151 
+df1$sourcereg                                                    0.2454 
+df1$sourcereg,journal                                            0.7028 
+df1$sourcereg,searchEngine                                       0.7230 
+df1$sourcesearchEngine                                           0.2496 
+df1$versionMost recent version                                   0.3005 
+df1$versionNo                                                    0.2152 
+df1$versionOther                                                 0.3291 
+df1$disclosedexcludedDisclosedDiscrepancies                      0.4616 
+df1$disclosedNo                                                  0.2301 
+df1$disclosedYes, and NONE of the discrepancies were disclosed   0.3577 
+df1$comparatorgrant                                              1.2765 
+df1$comparatorprotocol                                           0.4604 
+                                                                   tval  df 
+intrcpt                                                         -0.6907  50 
+df1$pubYear                                                      0.6828  50 
+df1$disciplineDentistry (DENT)                                   0.2370  50 
+df1$disciplineEconomics, Econometrics and Finance (ECON)         0.5659  50 
+df1$disciplineHealth Professions (HEAL)                          1.9957  50 
+df1$disciplinePsychology (PSYC)                                  1.8993  50 
+df1$sourceOther: ethics committee                                0.7709  50 
+df1$sourceOther: funder                                          2.3789  50 
+df1$sourcereg                                                   -1.4799  50 
+df1$sourcereg,journal                                            0.8869  50 
+df1$sourcereg,searchEngine                                      -1.1933  50 
+df1$sourcesearchEngine                                          -1.0527  50 
+df1$versionMost recent version                                  -1.7741  50 
+df1$versionNo                                                   -0.4740  50 
+df1$versionOther                                                -0.6224  50 
+df1$disclosedexcludedDisclosedDiscrepancies                      0.6604  50 
+df1$disclosedNo                                                  0.1188  50 
+df1$disclosedYes, and NONE of the discrepancies were disclosed   0.5709  50 
+df1$comparatorgrant                                             -1.8229  50 
+df1$comparatorprotocol                                          -2.1680  50 
+                                                                  pval 
+intrcpt                                                         0.4930 
+df1$pubYear                                                     0.4979 
+df1$disciplineDentistry (DENT)                                  0.8136 
+df1$disciplineEconomics, Econometrics and Finance (ECON)        0.5740 
+df1$disciplineHealth Professions (HEAL)                         0.0514 
+df1$disciplinePsychology (PSYC)                                 0.0633 
+df1$sourceOther: ethics committee                               0.4444 
+df1$sourceOther: funder                                         0.0212 
+df1$sourcereg                                                   0.1452 
+df1$sourcereg,journal                                           0.3794 
+df1$sourcereg,searchEngine                                      0.2384 
+df1$sourcesearchEngine                                          0.2975 
+df1$versionMost recent version                                  0.0821 
+df1$versionNo                                                   0.6376 
+df1$versionOther                                                0.5365 
+df1$disclosedexcludedDisclosedDiscrepancies                     0.5120 
+df1$disclosedNo                                                 0.9059 
+df1$disclosedYes, and NONE of the discrepancies were disclosed  0.5706 
+df1$comparatorgrant                                             0.0743 
+df1$comparatorprotocol                                          0.0349 
+                                                                    ci.lb 
+intrcpt                                                         -167.4502 
+df1$pubYear                                                       -0.0408 
+df1$disciplineDentistry (DENT)                                    -0.7595 
+df1$disciplineEconomics, Econometrics and Finance (ECON)          -1.0417 
+df1$disciplineHealth Professions (HEAL)                           -0.0096 
+df1$disciplinePsychology (PSYC)                                   -0.0710 
+df1$sourceOther: ethics committee                                 -0.6629 
+df1$sourceOther: funder                                            0.3760 
+df1$sourcereg                                                     -0.8561 
+df1$sourcereg,journal                                             -0.7882 
+df1$sourcereg,searchEngine                                        -2.3149 
+df1$sourcesearchEngine                                            -0.7641 
+df1$versionMost recent version                                    -1.1366 
+df1$versionNo                                                     -0.5343 
+df1$versionOther                                                  -0.8659 
+df1$disclosedexcludedDisclosedDiscrepancies                       -0.6224 
+df1$disclosedNo                                                   -0.4348 
+df1$disclosedYes, and NONE of the discrepancies were disclosed    -0.5142 
+df1$comparatorgrant                                               -4.8908 
+df1$comparatorprotocol                                            -1.9227 
+                                                                  ci.ub    
+intrcpt                                                         81.7581    
+df1$pubYear                                                      0.0829    
+df1$disciplineDentistry (DENT)                                   0.9626    
+df1$disciplineEconomics, Econometrics and Finance (ECON)         1.8589    
+df1$disciplineHealth Professions (HEAL)                          3.0072  . 
+df1$disciplinePsychology (PSYC)                                  2.5379  . 
+df1$sourceOther: ethics committee                                1.4888    
+df1$sourceOther: funder                                          4.4538  * 
+df1$sourcereg                                                    0.1297    
+df1$sourcereg,journal                                            2.0348    
+df1$sourcereg,searchEngine                                       0.5895    
+df1$sourcesearchEngine                                           0.2386    
+df1$versionMost recent version                                   0.0704  . 
+df1$versionNo                                                    0.3303    
+df1$versionOther                                                 0.4562    
+df1$disclosedexcludedDisclosedDiscrepancies                      1.2321    
+df1$disclosedNo                                                  0.4895    
+df1$disclosedYes, and NONE of the discrepancies were disclosed   0.9227    
+df1$comparatorgrant                                              0.2370  . 
+df1$comparatorprotocol                                          -0.0734  * 
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modDiscipline1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.4973
+tau (square root of estimated tau^2 value):             0.7052
+I^2 (residual heterogeneity / unaccounted variability): 89.80%
+H^2 (unaccounted variability / sampling variability):   9.80
+
+Tests for Residual Heterogeneity:
+Wld(df = 65) = 484.2655, p-val < .0001
+LRT(df = 65) = 619.5987, p-val < .0001
+
+Test of Moderators (coefficients 2:5):
+F(df1 = 4, df2 = 65) = 1.3093, p-val = 0.2759
+
+Model Results:
+
+                                                          estimate      se 
+intrcpt                                                    -0.7695  0.0982 
+df1$disciplineDentistry (DENT)                              0.1419  0.4466 
+df1$disciplineEconomics, Econometrics and Finance (ECON)    0.3052  0.7434 
+df1$disciplineHealth Professions (HEAL)                     0.9665  0.7569 
+df1$disciplinePsychology (PSYC)                             1.1512  0.6119 
+                                                             tval  df    pval 
+intrcpt                                                   -7.8374  65  <.0001 
+df1$disciplineDentistry (DENT)                             0.3178  65  0.7517 
+df1$disciplineEconomics, Econometrics and Finance (ECON)   0.4106  65  0.6827 
+df1$disciplineHealth Professions (HEAL)                    1.2768  65  0.2062 
+df1$disciplinePsychology (PSYC)                            1.8813  65  0.0644 
+                                                            ci.lb    ci.ub      
+intrcpt                                                   -0.9656  -0.5734  *** 
+df1$disciplineDentistry (DENT)                            -0.7501   1.0339      
+df1$disciplineEconomics, Econometrics and Finance (ECON)  -1.1795   1.7900      
+df1$disciplineHealth Professions (HEAL)                   -0.5452   2.4782      
+df1$disciplinePsychology (PSYC)                           -0.0709   2.3733    . 
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modComparator1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5031
+tau (square root of estimated tau^2 value):             0.7093
+I^2 (residual heterogeneity / unaccounted variability): 89.96%
+H^2 (unaccounted variability / sampling variability):   9.96
+
+Tests for Residual Heterogeneity:
+Wld(df = 66) = 439.1139, p-val < .0001
+LRT(df = 66) = 546.7582, p-val < .0001
+
+Test of Moderators (coefficients 2:4):
+F(df1 = 3, df2 = 66) = 0.8637, p-val = 0.4644
+
+Model Results:
+
+                                    estimate      se     tval  df    pval 
+intrcpt                              -0.6892  0.0989  -6.9690  66  <.0001 
+droplevels(df1$comparator)ethics      0.1085  0.4982   0.2177  66  0.8283 
+droplevels(df1$comparator)grant       0.2585  0.7757   0.3333  66  0.7400 
+droplevels(df1$comparator)protocol   -0.6395  0.4155  -1.5389  66  0.1286 
+                                      ci.lb    ci.ub      
+intrcpt                             -0.8866  -0.4917  *** 
+droplevels(df1$comparator)ethics    -0.8862   1.1031      
+droplevels(df1$comparator)grant     -1.2902   1.8072      
+droplevels(df1$comparator)protocol  -1.4691   0.1902      
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modSource1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5197
+tau (square root of estimated tau^2 value):             0.7209
+I^2 (residual heterogeneity / unaccounted variability): 89.95%
+H^2 (unaccounted variability / sampling variability):   9.95
+
+Tests for Residual Heterogeneity:
+Wld(df = 63) = 491.6691, p-val < .0001
+LRT(df = 63) = 629.6278, p-val < .0001
+
+Test of Moderators (coefficients 2:7):
+F(df1 = 6, df2 = 63) = 0.6989, p-val = 0.6515
+
+Model Results:
+
+                                               estimate      se     tval  df 
+intrcpt                                         -0.6406  0.1456  -4.3983  63 
+droplevels(df1$source)Other: ethics committee    0.0578  0.5158   0.1121  63 
+droplevels(df1$source)Other: funder              0.6779  0.6178   1.0973  63 
+droplevels(df1$source)reg                       -0.3005  0.2346  -1.2808  63 
+droplevels(df1$source)reg,journal                0.1826  0.7542   0.2421  63 
+droplevels(df1$source)reg,searchEngine          -0.6840  0.7832  -0.8734  63 
+droplevels(df1$source)searchEngine              -0.0312  0.2515  -0.1239  63 
+                                                 pval    ci.lb    ci.ub      
+intrcpt                                        <.0001  -0.9316  -0.3495  *** 
+droplevels(df1$source)Other: ethics committee  0.9111  -0.9729   1.0886      
+droplevels(df1$source)Other: funder            0.2767  -0.5566   1.9124      
+droplevels(df1$source)reg                      0.2050  -0.7693   0.1684      
+droplevels(df1$source)reg,journal              0.8095  -1.3245   1.6897      
+droplevels(df1$source)reg,searchEngine         0.3858  -2.2491   0.8810      
+droplevels(df1$source)searchEngine             0.9018  -0.5338   0.4715      
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modVersion1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5251
+tau (square root of estimated tau^2 value):             0.7247
+I^2 (residual heterogeneity / unaccounted variability): 90.05%
+H^2 (unaccounted variability / sampling variability):   10.05
+
+Tests for Residual Heterogeneity:
+Wld(df = 66) = 485.3920, p-val < .0001
+LRT(df = 66) = 612.4631, p-val < .0001
+
+Test of Moderators (coefficients 2:4):
+F(df1 = 3, df2 = 66) = 0.3719, p-val = 0.7735
+
+Model Results:
+
+                                estimate      se     tval  df    pval    ci.lb 
+intrcpt                          -0.6048  0.1599  -3.7832  66  0.0003  -0.9239 
+df1$versionMost recent version   -0.2477  0.2642  -0.9376  66  0.3519  -0.7752 
+df1$versionNo                    -0.1046  0.2299  -0.4551  66  0.6505  -0.5636 
+df1$versionOther                 -0.2433  0.3301  -0.7372  66  0.4636  -0.9023 
+                                  ci.ub      
+intrcpt                         -0.2856  *** 
+df1$versionMost recent version   0.2798      
+df1$versionNo                    0.3543      
+df1$versionOther                 0.4157      
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modDisclosed1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5403
+tau (square root of estimated tau^2 value):             0.7350
+I^2 (residual heterogeneity / unaccounted variability): 90.43%
+H^2 (unaccounted variability / sampling variability):   10.45
+
+Tests for Residual Heterogeneity:
+Wld(df = 66) = 494.1488, p-val < .0001
+LRT(df = 66) = 644.7748, p-val < .0001
+
+Test of Moderators (coefficients 2:4):
+F(df1 = 3, df2 = 66) = 0.0739, p-val = 0.9738
+
+Model Results:
+
+                                                                estimate 
+intrcpt                                                          -0.7709 
+df1$disclosedexcludedDisclosedDiscrepancies                       0.2332 
+df1$disclosedNo                                                   0.0600 
+df1$disclosedYes, and NONE of the discrepancies were disclosed    0.0611 
+                                                                    se     tval 
+intrcpt                                                         0.2012  -3.8314 
+df1$disclosedexcludedDisclosedDiscrepancies                     0.5094   0.4578 
+df1$disclosedNo                                                 0.2362   0.2541 
+df1$disclosedYes, and NONE of the discrepancies were disclosed  0.3419   0.1788 
+                                                                df    pval 
+intrcpt                                                         66  0.0003 
+df1$disclosedexcludedDisclosedDiscrepancies                     66  0.6486 
+df1$disclosedNo                                                 66  0.8002 
+df1$disclosedYes, and NONE of the discrepancies were disclosed  66  0.8587 
+                                                                  ci.lb 
+intrcpt                                                         -1.1725 
+df1$disclosedexcludedDisclosedDiscrepancies                     -0.7838 
+df1$disclosedNo                                                 -0.4115 
+df1$disclosedYes, and NONE of the discrepancies were disclosed  -0.6215 
+                                                                  ci.ub      
+intrcpt                                                         -0.3692  *** 
+df1$disclosedexcludedDisclosedDiscrepancies                      1.2502      
+df1$disclosedNo                                                  0.5315      
+df1$disclosedYes, and NONE of the discrepancies were disclosed   0.7437      
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modPubYear1
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5405
+tau (square root of estimated tau^2 value):             0.7352
+I^2 (residual heterogeneity / unaccounted variability): 90.44%
+H^2 (unaccounted variability / sampling variability):   10.46
+
+Tests for Residual Heterogeneity:
+Wld(df = 68) = 505.5885, p-val < .0001
+LRT(df = 68) = 647.2738, p-val < .0001
+
+Test of Moderators (coefficient 2):
+F(df1 = 1, df2 = 68) = 0.0438, p-val = 0.8348
+
+Model Results:
+
+             estimate       se     tval  df    pval      ci.lb    ci.ub    
+intrcpt      -11.8783  53.3266  -0.2227  68  0.8244  -118.2899  94.5332    
+df1$pubYear    0.0055   0.0265   0.2093  68  0.8348    -0.0473   0.0584    
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modDiscipline1binary
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5175
+tau (square root of estimated tau^2 value):             0.7194
+I^2 (residual heterogeneity / unaccounted variability): 90.11%
+H^2 (unaccounted variability / sampling variability):   10.11
+
+Tests for Residual Heterogeneity:
+Wld(df = 68) = 497.9543, p-val < .0001
+LRT(df = 68) = 634.4749, p-val < .0001
+
+Test of Moderators (coefficient 2):
+F(df1 = 1, df2 = 68) = 2.8890, p-val = 0.0938
+
+Model Results:
+
+                               estimate      se     tval  df    pval    ci.lb 
+intrcpt                         -0.7703  0.0999  -7.7124  68  <.0001  -0.9696 
+dfDiscipline1$disciplineother    0.5342  0.3143   1.6997  68  0.0938  -0.0929 
+                                 ci.ub      
+intrcpt                        -0.5710  *** 
+dfDiscipline1$disciplineother   1.1613    . 
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modComparator1binary
+
+Mixed-Effects Model (k = 70; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.5305
+tau (square root of estimated tau^2 value):             0.7284
+I^2 (residual heterogeneity / unaccounted variability): 90.37%
+H^2 (unaccounted variability / sampling variability):   10.38
+
+Tests for Residual Heterogeneity:
+Wld(df = 68) = 491.3839, p-val < .0001
+LRT(df = 68) = 609.5590, p-val < .0001
+
+Test of Moderators (coefficient 2):
+F(df1 = 1, df2 = 68) = 0.6521, p-val = 0.4222
+
+Model Results:
+
+                             estimate      se     tval  df    pval    ci.lb 
+intrcpt                       -0.9418  0.2945  -3.1978  68  0.0021  -1.5296 
+df1Comparator$comparatorreg    0.2516  0.3115   0.8076  68  0.4222  -0.3701 
+                               ci.ub     
+intrcpt                      -0.3541  ** 
+df1Comparator$comparatorreg   0.8733     
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modDiscipline2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     1.1358
+tau (square root of estimated tau^2 value):             1.0658
+I^2 (residual heterogeneity / unaccounted variability): 92.81%
+H^2 (unaccounted variability / sampling variability):   13.91
+
+Tests for Residual Heterogeneity:
+Wld(df = 19) = 152.4015, p-val < .0001
+LRT(df = 19) = 232.6890, p-val < .0001
+
+Test of Moderators (coefficients 2:3):
+F(df1 = 2, df2 = 19) = 1.3121, p-val = 0.2926
+
+Model Results:
+
+                                         estimate      se     tval  df    pval 
+intrcpt                                    0.5830  0.2642   2.2067  19  0.0398 
+df2$disciplineDentistry (DENT)            -0.9288  0.8150  -1.1396  19  0.2686 
+df2$disciplineHealth Professions (HEAL)    1.2320  1.1580   1.0639  19  0.3007 
+                                           ci.lb   ci.ub    
+intrcpt                                   0.0300  1.1359  * 
+df2$disciplineDentistry (DENT)           -2.6346  0.7771    
+df2$disciplineHealth Professions (HEAL)  -1.1917  3.6557    
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modComparator2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     1.1341
+tau (square root of estimated tau^2 value):             1.0650
+I^2 (residual heterogeneity / unaccounted variability): 93.39%
+H^2 (unaccounted variability / sampling variability):   15.12
+
+Tests for Residual Heterogeneity:
+Wld(df = 20) = 188.4912, p-val < .0001
+LRT(df = 20) = 268.8685, p-val < .0001
+
+Test of Moderators (coefficient 2):
+F(df1 = 1, df2 = 20) = 3.4451, p-val = 0.0782
+
+Model Results:
+
+                                    estimate      se    tval  df    pval 
+intrcpt                               0.4164  0.2535  1.6425  20  0.1161 
+droplevels(df2$comparator)protocol    1.7751  0.9564  1.8561  20  0.0782 
+                                      ci.lb   ci.ub    
+intrcpt                             -0.1124  0.9452    
+droplevels(df2$comparator)protocol  -0.2198  3.7700  . 
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modSource2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     0.6838
+tau (square root of estimated tau^2 value):             0.8269
+I^2 (residual heterogeneity / unaccounted variability): 88.00%
+H^2 (unaccounted variability / sampling variability):   8.33
+
+Tests for Residual Heterogeneity:
+Wld(df = 16) = 135.1594, p-val < .0001
+LRT(df = 16) = 187.0805, p-val < .0001
+
+Test of Moderators (coefficients 2:6):
+F(df1 = 5, df2 = 16) = 3.3793, p-val = 0.0284
+
+Model Results:
+
+                            estimate      se     tval  df    pval    ci.lb 
+intrcpt                      -0.3517  0.3203  -1.0981  16  0.2884  -1.0306 
+df2$sourcejournal             1.6186  0.4626   3.4989  16  0.0030   0.6379 
+df2$sourceOther: funder       2.9203  1.4041   2.0798  16  0.0540  -0.0563 
+df2$sourcereg,journal         0.9517  0.9029   1.0540  16  0.3075  -0.9624 
+df2$sourcereg,searchEngine    2.1280  0.9400   2.2639  16  0.0378   0.1353 
+df2$sourcesearchEngine        0.5912  0.6049   0.9774  16  0.3429  -0.6911 
+                             ci.ub     
+intrcpt                     0.3272     
+df2$sourcejournal           2.5993  ** 
+df2$sourceOther: funder     5.8968   . 
+df2$sourcereg,journal       2.8658     
+df2$sourcereg,searchEngine  4.1206   * 
+df2$sourcesearchEngine      1.8735     
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modVersion2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     1.2281
+tau (square root of estimated tau^2 value):             1.1082
+I^2 (residual heterogeneity / unaccounted variability): 93.15%
+H^2 (unaccounted variability / sampling variability):   14.60
+
+Tests for Residual Heterogeneity:
+Wld(df = 18) = 164.5429, p-val < .0001
+LRT(df = 18) = 247.8955, p-val < .0001
+
+Test of Moderators (coefficients 2:4):
+F(df1 = 3, df2 = 18) = 0.3299, p-val = 0.8038
+
+Model Results:
+
+                                estimate      se     tval  df    pval    ci.lb 
+intrcpt                           0.3831  0.4475   0.8560  18  0.4033  -0.5571 
+df2$versionMost recent version    0.5515  0.6480   0.8512  18  0.4058  -0.8098 
+df2$versionNo                    -0.0300  0.6500  -0.0462  18  0.9637  -1.3956 
+df2$versionOther                  0.1605  0.9210   0.1743  18  0.8636  -1.7744 
+                                 ci.ub    
+intrcpt                         1.3233    
+df2$versionMost recent version  1.9128    
+df2$versionNo                   1.3356    
+df2$versionOther                2.0954    
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modDisclosed2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     1.2148
+tau (square root of estimated tau^2 value):             1.1022
+I^2 (residual heterogeneity / unaccounted variability): 93.11%
+H^2 (unaccounted variability / sampling variability):   14.52
+
+Tests for Residual Heterogeneity:
+Wld(df = 18) = 173.0004, p-val < .0001
+LRT(df = 18) = 241.2204, p-val < .0001
+
+Test of Moderators (coefficients 2:4):
+F(df1 = 3, df2 = 18) = 0.5040, p-val = 0.6843
+
+Model Results:
+
+                                                                estimate 
+intrcpt                                                           0.2683 
+df2$disclosedexcludedDisclosedDiscrepancies                       0.7064 
+df2$disclosedNo                                                   0.3885 
+df2$disclosedYes, and NONE of the discrepancies were disclosed   -0.5224 
+                                                                    se     tval 
+intrcpt                                                         0.6643   0.4039 
+df2$disclosedexcludedDisclosedDiscrepancies                     1.0390   0.6799 
+df2$disclosedNo                                                 0.7324   0.5304 
+df2$disclosedYes, and NONE of the discrepancies were disclosed  1.0664  -0.4899 
+                                                                df    pval 
+intrcpt                                                         18  0.6910 
+df2$disclosedexcludedDisclosedDiscrepancies                     18  0.5052 
+df2$disclosedNo                                                 18  0.6023 
+df2$disclosedYes, and NONE of the discrepancies were disclosed  18  0.6301 
+                                                                  ci.lb   ci.ub 
+intrcpt                                                         -1.1273  1.6639 
+df2$disclosedexcludedDisclosedDiscrepancies                     -1.4765  2.8894 
+df2$disclosedNo                                                 -1.1503  1.9272 
+df2$disclosedYes, and NONE of the discrepancies were disclosed  -2.7627  1.7179 
+                                                                  
+intrcpt                                                           
+df2$disclosedexcludedDisclosedDiscrepancies                       
+df2$disclosedNo                                                   
+df2$disclosedYes, and NONE of the discrepancies were disclosed    
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> modPubYear2
+
+Mixed-Effects Model (k = 22; tau^2 estimator: ML)
+
+tau^2 (estimated amount of residual heterogeneity):     1.3181
+tau (square root of estimated tau^2 value):             1.1481
+I^2 (residual heterogeneity / unaccounted variability): 93.94%
+H^2 (unaccounted variability / sampling variability):   16.51
+
+Tests for Residual Heterogeneity:
+Wld(df = 20) = 199.2193, p-val < .0001
+LRT(df = 20) = 284.0615, p-val < .0001
+
+Test of Moderators (coefficient 2):
+F(df1 = 1, df2 = 20) = 0.1305, p-val = 0.7217
+
+Model Results:
+
+             estimate        se     tval  df    pval      ci.lb     ci.ub    
+intrcpt      -55.6213  155.4756  -0.3577  20  0.7243  -379.9378  268.6951    
+df2$pubYear    0.0279    0.0772   0.3613  20  0.7217    -0.1331    0.1889    
+
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+> count <- 1
+
+> for (i in grep("discAny", colnames(df)):grep("discTime", 
++     colnames(df))) {
++     if (!is.null(metaListAll[[i]])) {
++         png(paste0("fores ..." ... [TRUNCATED] 
+
+> count <- 1
+
+> for (i in seq(from = grep("discOtherElig", colnames(df))[1], 
++     to = grep("discOtherResults", colnames(df))[1], by = 2)) {
++     if (!is.null(me .... [TRUNCATED] 
+
+> knitr::kable(gaps, caption = "Supplementary Table J1. Additional themes related to registration and discrepancies", 
++     booktabs = T, linesep = " ..." ... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Supplementary Table J1. Additional themes related to registration and discrepancies</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Theme </th>
+   <th style="text-align:left;"> Quotes </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Many studies are never registered </td>
+   <td style="text-align:left;width: 12cm; "> “The more concerning issue, however, is the lack of registration or provision of registration number for randomized controlled trials within these journals.” (Wiebe et al., 2017)  
+
+“Only 16 per cent of the published orthodontic RCTs had been registered.” (Koufatzidou et al., 2019) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Registrations are imprecise </td>
+   <td style="text-align:left;width: 12cm; "> “Our results suggest that [selective outcome reporting] might well be substantial; however, the bias can only be broadly identified as protocols are not sufficiently precise.” (Hahn et al., 2002)  
+
+“Only 5 out of the 109 trials (5%) provided enough information for us to be confident that the outcomes reported in the published trial were consistent with the original registration” (Nankervis et al., 2012) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Consumers of research should be aware of outcome switching </td>
+   <td style="text-align:left;width: 12cm; "> “If clinicians base their decisions on evidence distorted by primary outcome switching, patient care could be negatively affected” (C. W. Jones et al., 2017)  
+
+“Readers of medical literature should not assume that selective outcome reporting is not present, even if the report has been published in a high IF journal.” (Shinohara et al., 2015) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Registration should be mandated or enforced </td>
+   <td style="text-align:left;width: 12cm; "> “there is insufficient quality control of data by data providers, ClinicalTrials.gov administrators, and journal editors, emphasizing much-needed enforcement of complete descriptions of drug interventions.”  (Jurić et al., 2020)  
+
+“Journal editors, regulators, research ethics committees, funders, and sponsors should implement policies mandating prospective registration for all clinical trials” (Chan et al., 2017)  
+
+“Reporting completeness and consistency were significantly better after July 2005. The ICMJE requirement for mandatory registration was associated with significant improvement in reporting quality in infectious diseases trials.” (Shepshelovich et al., 2017) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Additional initiatives are needed to reduce reporting discrepancies </td>
+   <td style="text-align:left;width: 12cm; "> “Efforts to prevent nonregistration of protocols and selective reporting are needed.” (Krsticevic et al., 2019)  
+
+“To foster credible evidence-based medicine, additional initiatives are needed to minimize selective reporting.” (Raghav et al., 2015)  
+
+“Novel approaches are required to address this problem.” (Fleming et al., 2015) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;width: 3cm; "> Analysis plans should be registered </td>
+   <td style="text-align:left;width: 12cm; "> “More immediate and specific remedies for the deficiencies of diet trial registries include (1) posting a detailed final statistical analysis plan before unmasking random group assignments or beginning data analyses as a minimum quality criterion...” (Ludwig et al., 2019)  
+
+“Definitive judgments regarding credibility of claimed subgroup effects are not possible without access to protocols and analysis plans of randomised controlled trials.” (Kasenda et al., 2014) </td>
+  </tr>
+</tbody>
+</table>

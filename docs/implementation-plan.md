@@ -90,3 +90,15 @@ and the original scorer remain separate. The v0.4.0 release and all failures per
 
 See [the four-pair diagnosis](lesson-pair-analysis-v4.md),
 [revision protocol](lesson-revision-protocol.md), and [comparison](controller-comparison.md).
+
+## v0.6.0: completed controlled-execution evaluation
+
+All sixty scientific cells completed under one unchanged freeze: A 24/30, B 20/30,
+with 0 separately retained infrastructure failures. B now
+uses original-file capabilities and typed/provenance submissions; this is not a
+lesson-only intervention. A's exact model-facing baseline is preserved. Original
+execution verification, scoring and semantic evidence support are separate measures.
+Unverified A runs are not a measured zero fidelity rate. The cohort is exposed.
+
+[Protocol](fidelity-protocol-v6.md) · [Development evidence](fidelity-development-v6.md) ·
+[A decline](baseline-decline-v5.md) · [Comparison](controller-comparison.md)

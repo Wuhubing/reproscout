@@ -1,0 +1,190 @@
+library(readr)
+library(metafor)
+
+#run each analysis non adjusted, and adjusted at 2 stages of confounds
+
+## less 3 more 3 ORs
+for (i in c("OR","OR_AgeSexBmi","OR_multiadj","OR_nohi","OR_AgeSexBmi_nohi", "OR_multiadj_nohi")){
+        d <- read_csv("/data/less3more3.csv")
+        head(d)
+        
+        LCI <- paste0(i,"_LCI")
+        UCI <- paste0(i,"_UCI")
+        
+        
+        d$logor<-log(d[[i]]) 
+        d$se1<-(log(d[[UCI]])-d$logor)/1.96
+        d$se2<-(d$logor-log(d[[LCI]]))/1.96
+        d$se<-(d$se1+d$se2)/2
+        d$age_baseline<-d$age_psychiatric_outcome-d$dist_yrs_average
+        
+        #table(d$CRP_categories)
+        table(d$age_baseline)
+        print(i)
+        dmres<-rma.uni(yi=logor, sei=se, 
+                        data=d, method = "REML",
+                        slab = Authoryear)
+        print(summary(dmres))
+        print(regtest(dmres))
+        #funnel(dmres)
+        weights(dmres)
+        subtitle<-ifelse(test = i=="OR",yes = "",no = 
+                       ifelse(test = i=="OR_AgeSexBmi",yes = "Adjusted for age, sex and BMI*",no = 
+                                      ifelse(test = i=="OR_multiadj",yes = "Adjusted for age, sex, BMI, \nsmoking, alcohol consumption, socioeconomic status*",no = 
+                                                     ifelse(test = i=="OR_nohi",yes = "After excluding subjects with CRP >10mg/L at baseline",no = 
+                                                                    ifelse(test = i=="OR_AgeSexBmi_nohi",yes = "After excluding subjects with CRP >10mg/L at baseline\nAdjusted for age, sex and BMI",no = 
+                                                                                   "After excluding subjects with CRP >10mg/L at baseline\nAdjusted for age, sex, BMI,\nsmoking, alcohol consumption, socioeconomic status*")))))
+        
+        N_pop<-ifelse(rep(grepl(pattern = "nohi",i),length(d$N)),format(d$N_nohi,big.mark=","),format(d$N,big.mark=","))
+        N_cases<-ifelse(rep(grepl(pattern = "nohi",i),length(d$`N-outcome`)),format(d$N_outcomes_nohi,big.mark=","),format(d$`N-outcome`,big.mark=","))
+        
+        ##FOREST PLOT
+        png(filename = paste0("/results/",i,"_less3more3_",Sys.Date(),".png"), width = 1800, height = 900, res = 180)#, overwrite = T)
+        forest(dmres, atransf=exp, 
+               xlim=c(-2.5,5.6), at = log(c(0.3,1,2.7,7)),
+               ylim=c(-1, 12),rows=c(8,7,3,2),cex=1, 
+               ilab=cbind(N_cases, N_pop, d$age_psychiatric_outcome), ilab.xpos=c(2.4,2.95,3.5),showweights=T,
+               xlab="Meta-analytic Odds Ratio", mlab="",  header=FALSE,#"Author(s) and Year",
+               main=NULL)
+        ### set font expansion factor (as in forest() above) and use bold italic
+        ### font and save original settings in object 'op'
+        op <- par()
+        par(cex=0.85, font=4)
+        ### add text for the subgroups
+        text(-2.4, c(4,9), pos=4, c("CRP measured in childhood/adolescence",
+                                    "CRP measured in adulthood/old age"))
+        ### switch to bold font
+        par(font=2)
+        ## add text for plot title and subtitle
+        text(0,11.5, paste0(#"Meta analysis of ORs for psychosis of CRP >3 vs ≤3 mg/L\n",
+                         subtitle))
+        text(c(2.4,2.95,3.5,4.1), 11, c("N\npsychosis","N\nsample","age at\noutcome","study\nweight"))
+        
+       
+        
+        ### fit random-effects model in the three subgroups
+        res.O <- rma.uni(yi=logor, sei=se, subset=(age=="O"), data=d, method = "REML", slab = Authoryear)
+        res.E <- rma.uni(yi=logor, sei=se, subset=(age=="E"), data=d, method = "REML",slab = Authoryear)
+        
+        ### add summary polygons for the three subgroups
+        addpoly(res.E, row=1, cex=1, atransf=exp, mlab="")
+        addpoly(res.O, row= 6, cex=1, atransf=exp, mlab="")
+        
+        
+        ### add text for subgroups
+        text(-2.4, 1, pos=4, cex=1, bquote("RE Model for Subgroup"))
+        text(-2.4, 6, pos=4, cex=1, bquote("RE Model for Subgroup"))
+        
+        dev.off()
+        par(op)
+}
+
+
+
+
+## continuous CRP over outcome
+for (i in c("OR","OR_AgeSexBmi","OR_multiadj","OR_nohi","OR_AgeSexBmi_nohi", "OR_multiadj_nohi")){
+        d <- read_csv("/data/per-sd.csv")
+        head(d)
+        
+        LCI <- paste0(i,"_LCI")
+        UCI <- paste0(i,"_UCI")
+        
+        
+        d$logor<-log(d[[i]]) 
+        d$se1<-(log(d[[UCI]])-d$logor)/1.96
+        d$se2<-(d$logor-log(d[[LCI]]))/1.96
+        d$se<-(d$se1+d$se2)/2
+        d$age_baseline<-d$age_psychiatric_outcome-d$dist_yrs_average
+        
+        
+        table(d$age)
+
+        
+        
+        (dmres<-rma.uni(yi=logor, sei=se,  #mods = dist_yrs_average,
+                        data=d, method = "REML",
+                        slab = Authoryear)) #, mods = ~ factor(CRP_categories)
+        print(i)
+        print(summary(dmres))
+        print(regtest(dmres))
+        #funnel(dmres)
+        weights(dmres)
+        subtitle<-ifelse(test = i=="OR",yes = "",no = 
+                                 ifelse(test = i=="OR_AgeSexBmi",yes = "Adjusted for age, sex and BMI*",no = 
+                                                ifelse(test = i=="OR_multiadj",yes = "Adjusted for age, sex, BMI, \nsmoking, alcohol consumption, socioeconomic status*",no = 
+                                                               ifelse(test = i=="OR_nohi",yes = "After excluding subjects with CRP >10mg/L at baseline",no = 
+                                                                              ifelse(test = i=="OR_AgeSexBmi_nohi",yes = "After excluding subjects with CRP >10mg/L at baseline\nAdjusted for age, sex and BMI",no = 
+                                                                                             "After excluding subjects with CRP >10mg/L at baseline\nAdjusted for age, sex, BMI,\nsmoking, alcohol consumption, socioeconomic status*")))))
+        
+        N_pop<-ifelse(rep(grepl(pattern = "nohi",i),length(d$N)),format(d$N_nohi,big.mark=","),format(d$N,big.mark=","))
+        N_cases<-ifelse(rep(grepl(pattern = "nohi",i),length(d$`N-outcome`)),format(d$N_outcomes_nohi,big.mark=","),format(d$`N-outcome`,big.mark=","))
+        
+       
+        ##FOREST PLOT
+        png(filename = paste0("/results/",i,"_perSD_",Sys.Date(),".png"), width = 1900, height = 900, res = 180)#, overwrite = T)
+        forest(dmres, atransf=exp, 
+               xlim=c(-1,1.6), at = log(c(0.65,1,1.65)),
+               ylim=c(-1, 12),rows=c(8,7,3,2),cex=1, 
+               ilab=cbind(N_cases, N_pop, d$age_psychiatric_outcome), ilab.xpos=c(0.6,0.78,0.96),showweights=T,
+               xlab="Meta-analytic Odds Ratio", mlab="",  header=FALSE,#"Author(s) and Year",
+               main=NULL)
+        ### set font expansion factor (as in forest() above) and use bold italic
+        ### font and save original settings in object 'op'
+        op <- par()
+        par(cex=0.85, font=4)
+        ### add text for the subgroups
+        text(-0.95, c(4,9), pos=4, c("CRP measured in childhood/adolescence",
+                                    "CRP measured in adulthood/old age"))
+        ### switch to bold font
+        par(font=2)
+        ## add text for plot title and subtitle
+        text(0,11.5, paste0(#"Meta analysis of ORs for psychosis of CRP >3 vs ≤3 mg/L\n",
+                subtitle))
+        text(c(0.6,0.78,0.96,1.15), 11, c("N\npsychosis","N\nsample","age at\noutcome","study\nweight"))
+        
+        
+        ### fit random-effects model in the three subgroups
+        res.O <- rma.uni(yi=logor, sei=se, subset=(age=="O"), data=d, method = "REML", slab = Authoryear)
+        res.E <- rma.uni(yi=logor, sei=se, subset=(age=="E"), data=d, method = "REML",slab = Authoryear)
+        
+        ### add summary polygons for the three subgroups
+        addpoly(res.E, row=1, cex=1, atransf=exp, mlab="")
+        addpoly(res.O, row= 6, cex=1, atransf=exp, mlab="")
+        
+        
+        ### add text for subgroups
+        text(-0.95, 1, pos=4, cex=1, bquote("RE Model for Subgroup"))
+        text(-0.95, 6, pos=4, cex=1, bquote("RE Model for Subgroup"))
+        
+        dev.off()
+        par(op)
+}
+
+
+
+
+
+
+
+
+
+## multi level (<1, 1-3, >3)
+for (i in c("OR","OR_AgeSexBmi","OR_multiadj","OR_nohi","OR_AgeSexBmi_nohi", "OR_multiadj_nohi")){
+        
+        d <- readr::read_csv("/data/multi-level.csv")
+        head(d)
+        
+        #table(d$CRP_categories)
+        d$CRP_categories<-factor(d$CRP_categories, levels = c("1--3", ">3") )
+        levels(d$CRP_categories)<- c("1-3", ">3")
+        
+        LCI <- paste0(i,"_LCI")
+        UCI <- paste0(i,"_UCI")
+        
+        
+        d$logor<-log(d[[i]]) 
+        d$se1<-(log(d[[UCI]])-d$logor)/1.96
+        d$se2<-(d$logor-log(d[[LCI]]))/1.96
+        d$se<-(d$se1+d$se2)/2
+        

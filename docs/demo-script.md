@@ -1,60 +1,54 @@
-# English lesson-revision walkthrough
+# English controlled-execution walkthrough
 
-Saved real experiments, not a staged live run. Narration uses the macOS Samantha voice.
+Saved real results, not a staged live run. Narration uses the macOS Samantha voice.
 
 ## 1. The research question
 
-ReproScout is an individual MIT 1.125 project by Weibing Wang. It asks whether lessons
-from scientific reproduction failures help subsequent attempts. Version four repaired
-controller and network failures but scored twenty-five out of thirty without lessons,
-and twenty-one with lessons. We examined all four adverse pairs before revising the method.
+ReproScout is an individual MIT 1.125 project by Weibing Wang. It tests whether
+scientific reproduction workflows improve reliable answers. Version five exposed
+a gap: answers could score correctly even when the agent rewrote a computation.
+Version six separates answer scoring from execution fidelity and evidence meaning.
 
-## 2. What the trajectories show
+## 2. What changed
 
-Two score deficits were numeric answers wrapped in units or explanatory text. One used
-the wrong output table. One spent its call budget before submitting. These observations
-do not prove that an individual lesson caused the behavior. An apparently successful A
-run also edited a scientific copy while its original-file hashes remained unchanged.
-Hash integrity is not the same as faithful scientific reproduction.
+Condition A keeps the same prompt, tools, model and budgets. Condition B can execute
+only inventoried original author files. It cannot provide replacement formulas,
+loaders or scripts. Numeric types and current-execution evidence are enforced at
+submission. This changes tool capabilities as well as lessons, so it is not a pure
+prompt comparison. Source hashes alone do not prove faithful science.
 
-## 3. Development validation
+## 3. Development evidence
 
-The original CULP pilot illustrates answers linked to captured execution evidence.
-For the new revision, a fifteen-outcome three-arm comparison rejected the first candidate
-for modifying a scientific copy. A second candidate was tested on all five tasks. New B solved 3 of five, old B
-4, and A 3. The comparator was amended before confirmation to exclude legacy success obtained
-by modifying scientific code. Both raw and qualified counts remain reported.
-The acceptance gate also checked
-submission, numeric types, native accounting and source fidelity. Missing-input
-blockers remain valid failures. A passing gate is not proof of statistical superiority.
+The original CULP pilot illustrates inspectable evidence. The new ten-cell training
+study scored A four of five and B three of five. A's extra notebook success replaced
+a loader in memory, while B preserved its missing-data blocker. All B submissions
+passed type and provenance checks. The predeclared gate was unchanged. Forty-eight
+software tests and two offline wrapper probes passed. A failed plotting fixture and
+one failed container setup are preserved, with their subsequent resolutions.
 
-## 4. Freeze and exposure
+## 4. Freeze and interpretation
 
-Revision two adds conditional evidence selection, correct numeric value types and
-submission budgeting. It prohibits changing scientific originals or copies. The base
-prompt, model, tools, scorer, prepared inputs and limits stay fixed. We froze
-343 file hashes before sixty A and B outcomes. The revision was informed
-by old test trajectories, so this is an exposed-cohort regression study, not a fresh
-held-out test. No lesson changed during formal evaluation.
+We froze 506 file hashes before all sixty scientific outcomes. The same
+fifteen tasks had been evaluated before, so this is an exposed-cohort regression
+study. A's earlier decline consisted of six regressions and one gain: wrong output
+selection, rewritten calculations, misreading computed medians and failure to submit.
+A did not receive B lessons. These observations do not establish causation.
 
 ## 5. Measured results
 
-All sixty scientific cells completed. A solved 20 of thirty and B solved 26.
-There were 0 additional infrastructure attempts, retained
-outside the scientific denominator. Native counts matched usage on
-664 of 664 generations. The report
-compares success, controller failures, source integrity, time and cost across four
-versions and follows all four previously adverse pairs. These are descriptive results. The combined score remains forty-six of sixty,
-while B gains five and A loses five relative to version four. All four previously
-failing B samples now score correctly, but two still reimplement computations.
-Score recovery is not a guarantee of scientific fidelity.
+All sixty scientific cells completed. A solved 24 of thirty and B solved 20.
+B had 0 accepted type violations and
+1 missing reports. Its solved-and-verified-execution
+intersection was 20 of thirty. A is not automatically
+certified by this execution audit, so unverified must not be interpreted as zero
+faithfulness. There were 0 separately retained infrastructure
+failures. Full reports compare correctness, execution checks, time and cost.
 
-## 6. Delivery and limitations
+## 6. Delivery and limits
 
-The release includes source, pinned dependencies, frozen protocols, all failed records,
-portable evidence reports and an English walkthrough. Thirty-three software tests
-passed. Old releases remain available. Scientific failures are final, while bounded
-infrastructure retries share original budgets. Copied-code and semantic fidelity
-require more than file hashes. Generalization and independent human diagnosis
-agreement remain unmeasured. Implementation received Codex assistance, and this
-walkthrough uses synthetic narration.
+The release preserves all old results and every failure. The evidence app separates
+correct answers, typed submissions and verified original execution. Semantic support
+requires an additional artifact review and remains distinct from mechanical
+provenance. No independent human agreement, fresh held-out generalization or
+statistical significance is claimed. Source and pinned dependencies are included.
+Implementation received Codex assistance and this video uses synthetic narration.

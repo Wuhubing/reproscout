@@ -1,0 +1,120 @@
+#Function reading data from github (does not work for main Experiment, as there are more than 1000 data files in the folder and not all are shown on git)
+read_gitdata <- function(page, extension){
+    github_page <- read_html(page)
+    file_nodes <- html_nodes(github_page, ".content .css-truncate-target .js-navigation-open")
+    file_names <- html_text(file_nodes)
+    file_url <- html_attr(file_nodes, "href")[grep(extension, file_names)]
+    file_names <- gsub(".txt", "", file_names)
+    file_url <- paste0("https://raw.githubusercontent.com", file_url)
+    file_url <- gsub("blob/", "", file_url)
+    #add data to a data frame
+    data <- lapply(file_url, read.delim)
+    data <- do.call("rbind", data)
+    data
+}
+
+
+#calculate HDI and plotting plot
+BFtHDIlow <- function(value, xpos = 1, postit = 100000){
+  post <- BayesFactor::posterior(BayesFactor::ttestBF(value, mu = 0), iterations = postit)
+  HDI <- coda::HPDinterval(post[, "mu"])
+  arrows(x0 = xpos, y0 = mean(value), y1 = HDI[1], angle = 90, length = 0.1)
+}
+BFtHDIup <- function(value, xpos = 1, postit = 100000){
+  post <- BayesFactor::posterior(BayesFactor::ttestBF(value, mu = 0), iterations = postit)
+  HDI <- coda::HPDinterval(post[, "mu"])
+  arrows(x0 = xpos, y0 = mean(value), y1 = HDI[2], angle = 90, length = 0.1)
+}
+
+BFtMean <- function(value, postit = 100000){
+  mean(BayesFactor::posterior(BayesFactor::ttestBF(value, mu = 0), iterations = 10000)[, "mu"])
+}
+  
+```
+
+
+The evaluative conditioning (EC) effect is a change in evaluation of an initially neutral conditioned stimulus (CS) after (repeated) pairing with a negative or positive unconditioned stimulus (US) in the direction of the valence of the US [@de_houwer_conceptual_2007].
+While there is no doubt about the existence of the effect [@hofmann_evaluative_2010], there are currently two opposing views about the underlying processes explaining EC effects; namely propositional single-process views [@mitchell_propositional_2009] and dual-process views [@gawronski_associative_2006; @gawronski_associative-propositional_2014].
+One important difference between the two views concerns the role of  CS-US contingency awareness and its necessity for EC effects to occur [for a review see @sweldens_role_2014].
+Proponents of propositional single-process views claim that contingency awareness is a necessary precondition for EC effects to occur [@mitchell_propositional_2009].
+Put differently, participants have to be aware of both the CS, the US, and their co-occurrence during the learning phase in order for a change in CS valence (in line with US valence) in a subsequent evaluation to occur. 
+Support for this claim comes from studies demonstrating that EC effects were only found when participants were aware of the US valence with which CSs had been shown [@stahl_respective_2009].
+
+Proponents of dual-process views [for example as described in the associative-propositional evaluation model; @gawronski_associative_2006; @gawronski_associative-propositional_2014] claim that in addition to a propositional learning process, associative learning processes exist that require no contingency awareness for associations to form.
+A change in preference -- in an associative framework -- can be the result of a co-occurrence of a CS and US in the absence of the explicit knowledge of participants that these two stimuli appeared together.
+Dual-process theories are supported by findings of EC effects in experimental conditions under which contingency awareness is highly unlikely or even impossible:
+If EC effects can be found with a subliminal presentation schedule, contingency awareness between CS and US can be ruled out.
+Such effects could therefore not be explained by propositional single-process views [@mitchell_propositional_2009].
+
+A number of studies empirically support the notion of EC effects with subliminally presented stimuli [e.g., @dijksterhuis_i_2004; @niedenthal_implicit_1990; @rydell_two_2006].
+Most of these studies, however, have been criticized on methodological grounds [e.g., manipulation of US valence between participants allowing for mood differences between groups as an explanation for evaluation differences; @sweldens_role_2014] or could not be replicated by an independent lab [@heycke_two_2018].
+
+Additional empirical evidence for the absence of EC with briefly presented stimuli was recently introduced by @stahl_subliminal_2016.
+In a series of studies, with presentation conditions similar to those realized in previous subliminal-EC research, they found evidence for the *absence* of an EC effect [^Stahl]. 
+In most of the experiments, Stahl and colleagues measured the visibility of the briefly presented words using an online visibility check.
+Specifically, after every trial during the learning phase, participants had to select the CS (from a selection of CSs) that was presented during that trial.
+This online check of visibility enabled the researchers to obtain a more accurate estimation of the actual visibility of stimuli during the experiment [@lovibond_role_2002] as compared to asking for memory of briefly presented stimuli only at the end of the study [e.g., @rydell_two_2006].
+One could speculate, however, that this online visibility check might interfere with the learning procedure in two ways:
+(I) participants might be in a deliberative and analytic mindset during the task as they are trying to identify the briefly presented stimuli, and therefore associations between the briefly presented CS and the US might not form if they depend on holistic processes,
+(II) assuming that a new evaluative response toward the CSs is acquired during the learning phase, showing multiple CSs that were paired with USs of different valence after every trial during the learning phase could be considered an additional trial of the learning phase, and could therefore interfere with the intended CS-US pairing schedule.
+A recent experiment by @heycke_subliminal_2017 attempted to tackle this potential interference by omitting the online visibility check, while also addressing another potential limitation: the presentation schedule of the CS-US pairs.
+
+[^Stahl]: Note that, in these studies, CS presentation was not fully subliminal: Although CS identification performance was very low, it was significantly above chance levels, thereby ruling out the alternative explanation that the CSs have not been processed at all.
+
+
+One potentially important factor in EC with briefly presented stimuli -- central to the studies reported by Heycke and colleagues -- is the simultaneous presentation of CS and US.
+Recent findings support a claim by the implicit misattribution theory [@jones_implicit_2009] that EC effects acquired in an associative automatic fashion require a simultaneous presentation of CS and US [@hutter_implicit_2013; @sweldens_evaluative_2010].
+If this characteristic of the learning phase is indeed necessary for automatic EC effects to occur, it could help explain why recent replication studies did not find an EC effect in a sequential learning paradigm [@heycke_two_2018].
+Studies showing the need for a simultaneous CS-US presentation for associative automatic EC effects, however, did not use a subliminal presentation schedule.
+In a subliminal presentation paradigm, participants' visual attention might be focused on either the briefly presented CS, or the US, but not both.
+It therefore seems difficult to realize a simultaneous visual presentation of CS and US when either one is presented subliminally.
+
+Heycke and colleagues (2017) speculated that a cross-modal EC paradigm, with (subliminal) visual CSs and positive/negative sounds as USs, might allow for a simultaneous presentation (or, more importantly, simultaneous processing) of CS and US.
+Presenting CS and US simultaneously using this cross-modal paradigm might therefore provide a better test of subliminal EC effects acquired via implicit misattribution (Jones et al., 2009).
+In a high-powered study using this paradigm -- that avoided the potential problem of the online visibility check -- indications for an EC effect with briefly presented stimuli were indeed found. 
+These results were in contrast to previous findings of no EC effect with suboptimally presented CSs (Stahl et al., 2016).
+
+Two limitations should be noted, however. First, the Bayes factor found by Heycke and colleagues (2017) in support of this finding ($\mathit{BF_{10}}$ = 6.88) was not convincing if one were to hold a strong prior believe against the existence of EC effects with subliminal stimuli.
+Second, pilot studies showed that CSs were recognized at above-chance levels under the conditions realized in that study.
+
+Taken together, Heycke et al. (2017) found an EC effect for briefly presented -- but slightly supraliminal -- CSs in a cross-modal presentation paradigm.
+While the cross-modal approach appears promising, it remains to be seen whether the EC effect found by Heycke et al. (2017) can be replicated, and whether it relies on above-chance CS identification or extends to CSs detected at chance level.
+
+# Methods
+
+As the current study aims at replicating the findings by Heycke et al. (2017), we used the same experimental script, with some minor adjustments:
+(1) In order to ensure that the effect found by Heycke et al. (2017) can be generalized to different stimuli, we used a new set of CSs that were randomly assigned to a brief and a longer CS presentation time condition.
+(2) We additionally added an extensive visibility check, which was conducted after the measurement of the dependent variable.
+The study can therefore be considered a close replication of the study by Heycke et al. (2017), using different participants, different CSs, and adding an extensive visibility check.
+(3) The original study by Heycke et al. (2017) made use of a second dependent variable alongside an evaluative task, namely a choice task in which participants were presented with CSs (paired with positive versus negative USs) and had to indicate the one they preferred. 
+No EC effect for briefly presented CSs was found using this choice task and the task appeared to have had an effect on subsequent evaluative ratings. 
+We therefore dropped the choice task in order to focus on evaluative ratings as the more promising dependent variable.
+(4) We added a ten-trial practice phase before the learning phase, in which we provided feedback to the task in which participants had to react to a specific stimulus by pressing the space bar. 
+These practice trials were included because we had observed in previous studies that the task was not executed properly by all participants.
+
+## Design
+
+The study followed a 2 (US Valence: positive vs. negative) $\times$ 2 (CS duration: 30 ms vs. 1000 ms) within subjects design. 
+
+## Material
+
+We used the same 800 ms long sounds as USs that were used in the study by Heycke et al. (2017). 
+The sounds were consonant and dissonant triad chords, with the consonant sounds rated as more pleasant than the dissonant sounds [@topolinski_phasic_2012; @topolinski_phasic_2013]. 
+The Pokemon images used as CSs by Heycke et al. (2017) were replaced by a new set of images depicting less popular toy figures.
+
+```{r StimTest}
+
+# Visibility Data: did participants identify the correct CS after each trial
+# Read the item ident data
+if(cacheGitData){
+  load("../data/VisibilityData4")
+} else{
+VisibilityData4 <- read_gitdata("https://github.com/methexp/rawdata/tree/master/croco4", "DataTrials_Croco4")
+}
+
+# Get outliers for the 80ms criterion
+# Get average correct ident rate per participant
+VisibilityCorrData4 <- aggregate(correctAnswer ~ ParticipantNumber * CS * Length, VisibilityData4, mean)
+
+
+#t test for each CS: 02.png", "12.png", "13.png", "14.png", "16.png", "20.png", "39.png", "43.png", "67.png", "68.png", "70.png", "72.png", "77.png", "81.png", "98.png", "99.png"

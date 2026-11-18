@@ -1,0 +1,82 @@
+# defining our function
+x = np.array([a for a in range(41,51)])
+
+y1 = np.array([3.910362983,
+4.826951623,
+5.729691529,
+6.64875474,
+7.662363029,
+8.408527803,
+9.397049761,
+11.25717583,
+12.03709865,
+13.07107432
+])
+
+y2 = np.array([31.824031,
+43.57801902,
+55.63877158,
+68.18024266,
+80.44786737,
+92.67567444,
+105.9118191,
+132.2637429,
+143.2289096,
+156.0652623
+])
+
+y1_error = np.array([0.065873203,
+0.031205339,
+0.091085096,
+0.13129789,
+0.219426439,
+0.119096686,
+0.130001355,
+0.110648817,
+0.176074341,
+0.150415171
+])
+
+y2_error = np.array([6.333240147,
+1.86871551,
+2.503610008,
+2.716302008,
+3.124187132,
+2.961852965,
+3.858790084,
+4.499441478,
+4.811335846,
+4.369233276])
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.grid(zorder=0,axis='both',color="black", linestyle = (0,(0.5,2)))
+ax.plot(x, y1, label="Label-based", marker ='o',color="#4ca5ff",zorder=3)
+ax.plot(x, y2, label="Semantic-based", marker ='^',color="#ff4d4c",zorder=3)
+ax.errorbar(x, y1, yerr = y1_error, color="#4ca5ff", capsize=2, capthick=1,)
+ax.errorbar(x, y2, yerr = y2_error, color="#ff4d4c", capsize=2, capthick=1,)
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of Elements",fontsize=20, **csfont)
+ax.set_ylabel("Execution Time",fontsize=20, **csfont)
+
+x_ticks = np.arange(41, 51, 1)
+y_ticks = np.arange(0,180, 20)
+plt.xticks(x_ticks,visible=True)
+plt.yticks(y_ticks,visible=True)
+
+
+
+
+plt.savefig('../results/mapper-time-v2.eps', format='eps')

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nfiles <- c('/data/less3more3.csv','/data/per-sd.csv','/data/multi-level.csv')\nfor (f in files) {\n  d <- read.csv(f, stringsAsFactors=FALSE)\n  cat('\\nFILE', f, '\\n')\n  cat('cols:', paste(names(d), collapse=', '), '\\n')\n  idx <- grepl('Wium', paste(d, collapse=' '), ignore.case=TRUE)\n  if (any(idx)) {\n    print(d[idx, intersect(names(d), c('Authoryear','Author','Year','N','N-outcome','N_nohi','N_outcomes_nohi','age_psychiatric_outcome','age','CRP_categories'))])\n  } else {\n    cat('No Wium rows found\\n')\n  }\n}\nRS",
+  "exit_code": 0,
+  "seconds": 0.8921687919646502,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

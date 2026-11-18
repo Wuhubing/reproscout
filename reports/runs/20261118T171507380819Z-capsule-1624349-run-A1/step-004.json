@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom traitlets.config import Config\nfrom pathlib import Path\n\nnb_path = Path('FS-Filters.ipynb')\nout_path = Path('/results/FS-Filters.html')\n\nnb = nbformat.read(nb_path, as_version=4)\n\nc = Config()\n# disable timeout and allow errors\nc.ExecutePreprocessor.timeout = None\nc.ExecutePreprocessor.allow_errors = True\nc.ExecutePreprocessor.kernel_name = 'python3'\n\n\u10d4\u10de = ExecutePreprocessor(config=c)\n# execute in /code so relative paths work as in notebook\nnb, resources = \u10d4\u10de.preprocess(nb, {'metadata': {'path': str(Path('/code'))}})\n\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(nb)\nout_path.write_text(body, encoding='utf-8')\nprint(f'Wrote {out_path}')\nPY",
+  "exit_code": 0,
+  "seconds": 35.06659025000408,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

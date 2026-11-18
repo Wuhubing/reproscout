@@ -22,52 +22,52 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
-## v0.5.0: evaluated lesson revision
+## v0.6.0: controlled execution and separate fidelity assessment
 
-All sixty scientific A/B cells completed under one unchanged freeze. A solved
-**20/30**, B solved **26/30**. B scored higher than A in this rerun. This is a descriptive result,
-not evidence of statistical significance or unseen generalization.
-V4 scored A 25/30 and B 21/30: B gains five while A loses five, leaving the
-combined score unchanged at 46/60. Two of the four recovered B scores still involve
-reimplemented computations; one also violates the numeric-type reminder.
+All **60 scientific A/B cells** completed under one unchanged freeze: **A 24/30,
+B 20/30**. The previous v5 run scored A 20/30 and B 26/30; v4 scored A 25/30
+and B 21/30. These are repeated samples on fifteen exposed tasks, not a new
+held-out generalization result or proof of a causal lesson effect.
 
-The [four-pair analysis](docs/lesson-pair-analysis-v4.md) found two numeric-format
-failures, one wrong-output-family selection, and one exhausted submission budget.
-It also found an A run that altered a scientific copy while original-file hashes
-remained unchanged. Hash integrity and answer scoring do not establish full fidelity.
-Revision 2 adds conditional execution, evidence selection, submission-budget and
-JSON-type reminders, with an explicit prohibition on changing scientific copies.
-The scorer, base prompt, scientific tools, model and limits remain unchanged.
+V6 changes B capabilities: it can execute only hash-verified original author files,
+read generated outputs and submit typed evidence. It cannot supply replacement
+scientific code, formulas, loaders or interpreter arguments. Numeric strings,
+booleans and nonfinite numbers are rejected. Non-null citations must trace to a
+successful original execution. A retains the exact v5 prompt and four tool schemas;
+model, scorer, resource limits, transport and sandbox are unchanged.
 
-Before the formal freeze, a fifteen-outcome three-arm training comparison rejected
-the first candidate for a scientific-copy edit. A second candidate was then run
-on all five training tasks, for twenty development outcomes in total. New B solved 3/5; old B
-4/5; A 3/5. The final candidate submissions, numeric
-formats, input hashes and manual scientific-copy checks passed the amended gate.
-The legacy fidelity-qualified count was 3/5.
-Original raw-score floor passed: False. The comparator
-was amended before confirmation after a legacy success modified original code;
-[the amendment is retained](docs/lesson-confirmation-protocol.md).
-This is a limited mechanism check, not proof of superiority.
+**Scoring and fidelity are distinct.** B has 29/30 typed
+submissions, 0 accepted type violations,
+1 missing submissions and 8 runs
+with null answers. B execution statuses: `{'verified_original_execution': 22, 'unverified': 7, 'violated': 1}`.
+The solved-and-verified-execution intersection is 20/30.
+This verifies a capability boundary and output provenance, not full scientific
+coverage or semantic interpretation. A is not automatically certified because it
+lacks the controlled ledger; unverified does not mean zero faithful reproductions.
+Read the separate semantic review rather than equating score or hashes with fidelity.
 
-**Exposure disclosure:** the revision was informed by prior test trajectories.
-The same fifteen test tasks were rerun twice. This is test-informed method development
-and an exposed-cohort regression study, not a fresh held-out test.
+Development completed ten scientific cells plus one retained setup failure: A 4/5,
+B 3/5. A's extra notebook success replaced a loader in memory; B preserved the
+missing-input blocker. All B typed submissions and provenance checks passed, with
+three verified original-execution successes. The predeclared gate was not lowered.
+48 software tests and two final offline wrapper probes passed; the initial failed
+plotting fixture is also retained. See [development evidence](docs/fidelity-development-v6.md).
 
-All 60 formal attempts are retained, including 0
-infrastructure failures outside the sixty-cell scientific denominator. Total estimated
-model cost: $1.50081; calendar interval:
-134.55 minutes. Original-input audits across all attempts:
-`{'unchanged': 60}`. All old releases and 297 portable run records are preserved.
+The [A-decline analysis](docs/baseline-decline-v5.md) accounts for every v4-to-v5
+transition: six regressions and one gain. Wrong output selection, a contradiction
+of computed medians, reimplemented calculations and failure to submit explain the
+observed trajectories. A did not receive B's lessons; causation is not established.
 
-[Download v0.5.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.5.0) ·
-[Results app](reports/index.html) · [Four-version comparison](docs/controller-comparison.md) · [Four-pair follow-up](docs/adverse-pair-followup-v5.md) ·
-[Full results](docs/results.md) · [Lessons analysis](docs/lessons-analysis.md) · [Development results](docs/lesson-development-results.md) ·
-[English video](deliverables/reproscout-demo.mp4) · [Reproduction guide](docs/delivery-guide.md)
+All 60 formal attempts, 0 infrastructure failures,
+old results and failed development evidence remain available in 368 portable
+reports. Estimated formal model cost: $1.64149; calendar
+interval: 138.03 minutes. 506 frozen file hashes
+remained unchanged. Costs exclude development, host and image costs.
 
-33 software tests passed. Source and dependency integrity, browser navigation,
-artifact hashes and release checks are recorded in reports/delivery-validation.json.
-Reading the saved evidence requires no API key.
+[Download v0.6.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.6.0) ·
+[Results app](reports/index.html) · [Full comparison](docs/controller-comparison.md) ·
+[Fidelity interpretation](docs/lessons-analysis.md) · [Focused B follow-up](docs/controlled-followup-v6.md) · [All outcomes](docs/results.md) ·
+[English video](deliverables/reproscout-demo.mp4) · [Delivery guide](docs/delivery-guide.md)
 
 ## Install
 
@@ -182,3 +182,5 @@ multi-user service or a general promise to reproduce arbitrary papers.
 - [AI assistance disclosure](docs/ai-disclosure.md)
 
 Scientific capsules retain their own code/data licenses. Project code is MIT licensed.
+
+[What A and B mean, and why B scores lower](docs/ab-interpretation-v6.md)

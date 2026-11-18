@@ -1,0 +1,124 @@
+1/8           
+2/8 [setup]   
+3/8           
+4/8 [packages]
+5/8           
+6/8 [analysis]
+7/8           
+8/8 [output]  
+[1] "/results/reproscout-author.R"
+
+> knitr::opts_chunk$set(include = FALSE)
+
+> set.seed(1313)
+
+> library(tidyverse)
+
+> library(knitr)
+
+> library(kableExtra)
+
+> filename <- file.path("..", "data", "rec_data_raw.csv")
+
+> rec <- read.csv(filename, header = T)
+
+> us <- rec %>% filter(country == "us" & !is.na(expenditure_rank))
+
+> uk <- rec %>% filter(country == "uk" & !is.na(expenditure_rank))
+
+> rec_flowchart <- function(df) {
++     flowchart <- data.frame(item = c("Institutions sampled", 
++         "Public forms identified", "Institutions c ..." ... [TRUNCATED] 
+
+> rec_outcomes <- function(df) {
++     outcomes <- data.frame(item = c("Sample size", "Justification", 
++         "Calculation", "Calculation (indirec ..." ... [TRUNCATED] 
+
+> us_flowchart <- rec_flowchart(us)
+
+> uk_flowchart <- rec_flowchart(uk)
+
+> us_outcomes <- rec_outcomes(us)
+
+> uk_outcomes <- rec_outcomes(uk)
+
+> us_combined <- bind_rows(rec_flowchart(us), rec_outcomes(us))
+
+> uk_combined <- bind_rows(rec_flowchart(uk), rec_outcomes(uk))
+
+> rec_results <- cbind(us_combined, uk_combined$count)
+
+> knitr::kable(rec_results, caption = "Table 1. Form inclusion and results", 
++     booktabs = T, linesep = "\\addlinespace", col.names = c("Flowchart ..." ... [TRUNCATED] 
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>Table 1. Form inclusion and results</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Flowchart item </th>
+   <th style="text-align:right;"> US (n) </th>
+   <th style="text-align:right;"> UK (n) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Institutions sampled </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 14 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Public forms identified </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Institutions contacted </td>
+   <td style="text-align:right;"> 16 </td>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Public forms identified after contact </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Private forms provided </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Forms indicated as not available to share </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> No response </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sample size </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Justification </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Calculation </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Calculation (indirectly) </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+</tbody>
+<tfoot>
+<tr>
+<td style = 'padding: 0; border:0;' colspan='100%'><sup></sup> These numbers are to be input into the the flowchart in the manuscript (Figure 1).</td>
+</tr>
+</tfoot>
+</table>

@@ -1,0 +1,7 @@
+{
+  "command": "python -c 'PATH='\"'\"'/code/FS-Filters.ipynb'\"'\"'\nimport nbformat, base64, json\nfrom pathlib import Path\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nnb = nbformat.read(PATH, as_version=4)\nExecutePreprocessor(timeout=None, kernel_name=nb.metadata.get('\"'\"'kernelspec'\"'\"', {}).get('\"'\"'name'\"'\"', '\"'\"'python3'\"'\"')).preprocess(nb, {'\"'\"'metadata'\"'\"': {'\"'\"'path'\"'\"': '\"'\"'/code'\"'\"'}})\nout=Path('\"'\"'/results/reproscout-notebook'\"'\"');out.mkdir(exist_ok=True)\nnbformat.write(nb, out/'\"'\"'executed.ipynb'\"'\"')\nbody,_=HTMLExporter().from_notebook_node(nb)\n(out/'\"'\"'executed.html'\"'\"').write_text(body)\nlines=[]\nfor i,c in enumerate(nb.cells):\n for j,o in enumerate(c.get('\"'\"'outputs'\"'\"', [])):\n  lines.append('\"'\"'CELL %s OUTPUT %s'\"'\"' % (i,j))\n  if '\"'\"'text'\"'\"' in o: lines.append(o.text)\n  data=o.get('\"'\"'data'\"'\"', {})\n  if '\"'\"'text/plain'\"'\"' in data: lines.append(data['\"'\"'text/plain'\"'\"'])\n  if '\"'\"'image/png'\"'\"' in data:\n   p=out/('\"'\"'cell-%s-output-%s.png'\"'\"' % (i,j));p.write_bytes(base64.b64decode(data['\"'\"'image/png'\"'\"']));lines.append(str(p))\ntext='\"'\"'\\n'\"'\"'.join(lines)\n(out/'\"'\"'outputs.txt'\"'\"').write_text(text)\nprint(text)\n'",
+  "exit_code": 0,
+  "seconds": 35.287128083989955,
+  "stdout": "artifacts/step-003.stdout.txt",
+  "stderr": "artifacts/step-003.stderr.txt"
+}
