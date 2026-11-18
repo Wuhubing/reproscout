@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, os, sys\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\nipynb = 'FGBR_OC.ipynb'\nout_html = Path('/results/FGBR_OC.html')\nwith open(ipynb) as f:\n    nb = nbformat.read(f, as_version=4)\n\nep = ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\n# execute in /code\ntry:\n    ep.preprocess(nb, {'metadata': {'path': '/code'}})\nexcept Exception as e:\n    print('EXECUTION_EXCEPTION:', repr(e))\n\n# save executed notebook too maybe not needed\nwith open('/results/FGBR_OC_executed.ipynb', 'w') as f:\n    nbformat.write(nb, f)\n\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(nb)\nout_html.write_text(body, encoding='utf-8')\nprint('saved', out_html)\nPY",
+  "exit_code": 0,
+  "seconds": 13.04662575002294,
+  "stdout": "artifacts/step-003.stdout.txt",
+  "stderr": "artifacts/step-003.stderr.txt"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, os\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\nimport pandas as pd\nfrom sklearn.datasets import load_iris\n\nnb = nbformat.read('FGBR_OC.ipynb', as_version=4)\npatch = nbformat.v4.new_code_cell(\"\"\"\nimport seaborn as sns\nfrom sklearn.datasets import load_iris\nimport pandas as pd\n\ndef _local_load_dataset(name, sep=','):\n    if name == 'iris':\n        data = load_iris(as_frame=True)\n        df = data.frame.copy()\n        df = df.rename(columns={'sepal length (cm)':'sepal_length','sepal width (cm)':'sepal_width','petal length (cm)':'petal_length','petal width (cm)':'petal_width'})\n        df['species'] = data.target.map(dict(enumerate(data.target_names)))\n        return df[['sepal_length','sepal_width','petal_length','petal_width','species']]\n    raise RuntimeError(f'Unsupported dataset {name}')\n\nsns.load_dataset = _local_load_dataset\n\"\"\")\nnb.cells.insert(0, patch)\n\nep = ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\nep.preprocess(nb, {'metadata': {'path': '/code'}})\nwith open('/results/FGBR_OC_executed.ipynb', 'w') as f:\n    nbformat.write(nb, f)\nbody, _ = HTMLExporter().from_notebook_node(nb)\nPath('/results/FGBR_OC.html').write_text(body, encoding='utf-8')\nprint('done')\nPY",
+  "exit_code": 0,
+  "seconds": 35.22017354203854,
+  "stdout": "artifacts/step-007.stdout.txt",
+  "stderr": "artifacts/step-007.stderr.txt"
+}

@@ -59,6 +59,28 @@ The following are mechanism hypotheses, distinguished from measured outcomes:
    rules cover selected failures, not every language, plotting task, dependency,
    or algorithmic obstacle. They are not an autonomous learned reproduction policy.
 
+## Development result after repairing the controller
+
+The ten-run development matrix completed before the formal freeze. A and B each
+answered 4/5 training tasks correctly. A had 4/5 answer-solved attempts with
+unchanged prepared inputs; B had 3/5. All ten native-counting paths worked, and
+nine source audits were unchanged. The extra startup attempt remains recorded
+separately and is not presented as a successful validation run.
+
+On capsule-0940461, A completed in ten model calls without changing prepared
+inputs. B used fifteen calls and replaced the original seaborn network data
+loader with sklearn data in `/code/my_datasets.py`. Its correct answers therefore
+do not establish faithful reproduction under the unchanged-input policy. This
+is a concrete limit of relying on a textual instruction alone. It does not show
+that L2 caused the edit, because the two trajectories also differ stochastically.
+The original prompts and tool permissions are kept for the formal comparison;
+source-integrity flags and the secondary metric expose such behavior explicitly.
+
+[Development validation evidence](../reports/development-v3-validation.json)
+contains every run ID, accounting check, source-audit flag, and retained
+initialization/validation failure. The gate establishes correct request admission
+and usage accounting, not universal scientific correctness or source fidelity.
+
 ## Repair evaluation design
 
 The [prepared-v3 protocol](controller-repair-protocol.md) keeps the original model,
@@ -82,6 +104,67 @@ source audits and evidence provenance remain separate.
 
 ## Completed repaired comparison
 
-The repaired formal comparison will be summarized here only after all sixty
-planned records are complete. Historical results remain in prepared-v2 and the
-v0.2.0 release, and are never overwritten or pooled with the new denominator.
+**Experiment status: complete attempt matrix; lesson-effect comparison inconclusive because of host-side DNS failures.**
+
+| Condition / repetition | prepared-v2 solved | prepared-v3 solved | v3 solved with unchanged inputs |
+|---|---:|---:|---:|
+| A1 | 6/15 | 0/15 | 0/15 |
+| B1 | 4/15 | 1/15 | 1/15 |
+| A2 | 5/15 | 0/15 | 0/15 |
+| B2 | 5/15 | 0/15 | 0/15 |
+
+## Interpretation
+
+All sixty frozen attempts are present, with no mid-run change, outcome replacement,
+or silent rerun. In prepared-v3, 59 attempts encountered `APIConnectionError` caused
+by `[Errno 8] nodename nor servname provided, or not known` while counting input.
+This is host-side name-resolution failure before any HTTP response. It is not
+an observed 429, quota exhaustion, authentication rejection, or scientific-code failure.
+Of those attempts, 55 made no model generation. The other four stopped after
+some model/tool activity. The sole completed successful attempt was capsule-1175539 B1.
+
+The frozen no-retry policy refused generation when counting failed. This was the
+specified behavior, but it meant the completed run matrix did not produce a useful
+lesson-effect comparison. The arithmetic average B-minus-A solved-count difference
+is +0.5, compared with -1.0 before; **this is not evidence that lessons improved**.
+Network failure dominates the new denominator. Do not report a conditional success
+rate on the tiny reachable subset as a replacement primary result.
+
+The repair's accounting mechanism did work on the requests that reached the API:
+39/39 native input counts matched returned input usage exactly, eight generations
+continued beyond the historical byte bound, and the largest observed input was
+13,296 tokens. No measured-token cap or monetary admission limit was reached.
+These observations validate those calls, not service reliability across the cohort.
+Zero new context stops must be read together with 59 DNS failures; they are not a
+standalone claim that the overall application became more reliable.
+
+All sixty new input audits were unchanged, but 55 of those attempts had no model
+call. This is not an improvement in scientific fidelity over the previous study.
+Answer correctness, source integrity, and semantic evidence support remain distinct.
+The development B notebook data-loader edit remains documented separately.
+
+Lower model cost and recorded runtime mostly reflect early refusals and do not
+establish a speedup or better cost-effectiveness. Costs are estimates from returned
+usage, not billing receipts; they exclude development, host compute, and preparation.
+Recorded sample timers and the calendar interval measure different quantities.
+The latter includes gaps between attempts and must not be called CPU time.
+
+A single post-run native-count connectivity probe succeeded on November 17, 2026
+(New York time). It made no model generation and changed no experimental result.
+This establishes connectivity at that later instant, not the cause or repair of
+the earlier DNS failures. The record is linked below.
+
+All fifteen official test tasks were previously evaluated. This is an iterative
+repair study on a reused cohort. Any future network-resilience change needs its own
+development validation, freeze, and complete experiment; it is not folded into v3.
+The current delivery preserves the failed experiment rather than selecting replacements.
+
+## Evidence
+
+- [Machine-readable comparison](../reports/controller-comparison.json)
+- [All 59 transport failure records](../reports/transport-failures-v3.json)
+- [Post-run connectivity diagnostic](../reports/post-run-connectivity-v3.json)
+- [Old controller token audit](../reports/controller-v2-analysis.json)
+- [Development validation and source violation](../reports/development-v3-validation.json)
+- [Execution freeze](../experiments/prepared-v3/freeze.json)
+- [Complete per-run results](results.md)

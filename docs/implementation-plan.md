@@ -54,3 +54,13 @@ navigation checks, and a source release with no credentials or private answer ke
 The success criterion is a complete and auditable experiment, not a positive A/B
 effect. The original proposed improvement of two solved tasks is tested rather
 than assumed.
+
+## v0.3.0 completion record
+
+Native request accounting was implemented and validated on five training tasks
+under both conditions. Twenty-two software tests and thirteen environment checks
+passed. A new immutable freeze preceded sixty formal attempts. All sixty records
+were retained, but 59 DNS failures made the lesson-effect comparison inconclusive.
+The delivery includes the failure diagnosis and full comparison rather than a
+selective rerun. Network-resilience changes belong to a separately validated and
+frozen future experiment, not an in-place alteration of this release.

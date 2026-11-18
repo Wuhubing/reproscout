@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nfrom pathlib import Path\np=Path('my_datasets.py')\ns=p.read_text()\nold='''def my_load_iris():\n    # Load the seaborn iris dataset  \n    df = sns.load_dataset(\"iris\", sep=\",\")\n    df = df.dropna()\n    Y=df[\"petal_width\"]\n    df=df.drop([\"species\",\"petal_width\"],axis=1)\n    X=df\n    \n    X_train, X_test, y_train, y_test = train_test_split(X, Y, random_state=0, test_size=0.1)\n    X_train = X_train.to_numpy()\n    X_test = X_test.to_numpy()\n    y_train = y_train.to_numpy()\n    y_test = y_test.to_numpy()\n    return X_train, X_test, y_train, y_test\n'''\nnew='''def my_load_iris():\n    # Load the iris dataset from sklearn to avoid external network access.\n    data = datasets.load_iris(as_frame=True)\n    df = data.frame.copy()\n    # Use petal width as the regression target, matching the original notebook.\n    Y = df[\"petal width (cm)\"]\n    df = df.drop([\"target\", \"petal width (cm)\"], axis=1)\n    X = df\n\n    X_train, X_test, y_train, y_test = train_test_split(X, Y, random_state=0, test_size=0.1)\n    X_train = X_train.to_numpy()\n    X_test = X_test.to_numpy()\n    y_train = y_train.to_numpy()\n    y_test = y_test.to_numpy()\n    return X_train, X_test, y_train, y_test\n'''\nif old not in s:\n    raise SystemExit('pattern not found')\np.write_text(s.replace(old,new))\nprint('patched')\nPY",
+  "exit_code": 0,
+  "seconds": 0.2547612499911338,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

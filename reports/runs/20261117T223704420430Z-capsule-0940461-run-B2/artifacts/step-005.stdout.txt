@@ -1,0 +1,75 @@
+035:     my_load_planets()
+036:     my_load_diamonds()
+037:     my_load_mpg()
+038:     my_load_tips()
+039:     my_load_taxis()
+040:     """
+041:     
+042:     # replace with the required my_load_...() function
+043:     X_train,X_test,y_train,y_test = my_load_iris()
+044: 
+045:     r.seed(0) # initialization of the random generator.
+046: 
+047:     # fuzzy number representation: A=(mode,l_width,r_width)
+048: 
+049:     # in experiments the folowing forms of the FN are used
+050:     #     l_max_width=0.2 and r_max_witth=0.2  (symmetrical case)
+051:     #     l_max_width=0.2 and r_max_witth=0.0  (left skewned case)
+052:     #     l_max_width=0.0 and r_max_witth=0.2  (right skewned case)
+053:     
+054:     l_max_width=0.2  # left max width of fuzzyness
+055:     r_max_width=0.0  # right max width of fuzzyness
+056: 
+057:     # reservation of empty fuzzy data 
+058:     y_fuz_train=[[0,0,0] for _ in range(len(y_train))]
+059:     y_fuz_test=[[0,0,0] for _ in range(len(y_test))]
+060:     
+061:     # generation of random fuzzy data 
+062:     for i in range(len(y_train)):
+063:         y_fuz_train[i] = [y_train[i],y_train[i]*(l_max_width*r.random()),y_train[i]*(r_max_width*r.random())]
+064:     for i in range(len(y_test)):    
+065:         y_fuz_test[i] = [y_test[i],y_test[i]*(l_max_width*r.random()),y_test[i]*(r_max_width*r.random())]
+066:     
+067:    
+068:     # Standartization of the inputs
+069: 
+070:     sc = MinMaxScaler()
+071:     X_train_std = sc.fit_transform(X_train)
+072:     X_test_std = sc.transform(X_test)
+073: 
+074:     # -------- Parameters ----------
+075:     M=201  # number of boosting iterations
+076:     learning_rate=0.1 
+077:     tree_depth=1  # depth of the stump trees
+078:     max_leaf=2**tree_depth  # maximum leaf number of the stump trees
+079: 
+080:     F=[[[0,0,0] for i in range(len(X_train))] for j in range(M)]
+081:     
+082:     # fuzzy average of the fuzzy train outputs. c is the optimism parameter of the WABL.
+083:     f_ave=fuzAve(y_fuz_train,c)
+084:   
+085:     # F[i] is the fuzzy outputs of the model after i.th iteration
+086:     F[0]=[f_ave for _ in range(len(X_train))]
+087: 
+088:     # gamma is the predicted fuzzy output (as a Fuzzy Number) according to the leaf 
+089:     gamma=[[[0,0,0] for i in range(max_leaf)] for j in range(M)]
+090:     trees=[]
+180:             minRMSE=RMSE
+181:             maxM=m
+182:         if m%10==0:
+183:             pass #print("%10.4f %10.4f"%(R2,RMSE))   
+184: 
+185:     print("-- TEST: the best R^2 and RMSE values with according iteration number --")
+186:     print("maxM =",maxM)
+187:     print("maxR2 = %10.4f"%(maxR2))
+188:     print("minRMSE = %10.4f"%(minRMSE))
+189: 
+190: # in case of the WABL, calculations are made for all values of the optimism parameter - c
+191: # in case of the other defuzzification methods, this cycle shold be commented
+192: for c in [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]:
+193:     c_cycle(c)
+194:     
+195: # in case of the other defuzzification methods, c does not matter. If should be fixed, for example, c = 0.5 
+196: # and the following two lines should be uncommented.
+197: #c=0.5
+198: #c_cycle(c)

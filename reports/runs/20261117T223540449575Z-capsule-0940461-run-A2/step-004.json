@@ -1,0 +1,7 @@
+{
+  "command": "cd /results && python - <<'PY'\nimport nbformat, re, json\nnb = nbformat.read('FGBR_OC_executed.ipynb', as_version=4)\nfor i, cell in enumerate(nb.cells):\n    if cell.cell_type=='code':\n        src = cell.source\n        if 'c = 1.0' in src or 'best test' in src.lower() or 'R^2' in src or 'RMSE' in src:\n            print('\\nCELL', i)\n            print(src)\n            outs = cell.get('outputs', [])\n            for o in outs:\n                if 'text' in o:\n                    print('OUTPUT:', o['text'])\n                if 'data' in o and 'text/plain' in o['data']:\n                    print('DATA:', o['data']['text/plain'])\nPY",
+  "exit_code": 0,
+  "seconds": 0.6562325420090929,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

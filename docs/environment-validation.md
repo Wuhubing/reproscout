@@ -39,3 +39,18 @@ previous disk remained at 40 GiB. CPU allocation stayed at four and memory at
 Recovery checks host free space before downloading additional uncached images.
 The old HTTP 429 failure records remain available. Successful authenticated
 manifest requests and verified digest pulls are recorded in recovery-v2.json.
+
+## Controller-repair validation and network findings
+
+V3 restarted the same Colima configuration: four CPUs, 8 GiB memory, 80 GiB disk,
+and QEMU amd64 emulation. A deterministic check initially reported failure because
+standalone test itself crashed with exit 139. Using bash's builtin test made the
+probe observable and yielded thirteen passed checks in run
+20261117T223433045169Z-capsule-6460826-validate-A1. Earlier failed checks and startup
+attempts are retained in reports/development-v3-validation.json.
+
+The subsequent frozen formal experiment encountered 59 host-side DNS resolution
+failures during native token counting. No HTTP response was observed for these
+failures. This is separate from the deliberately offline scientific containers.
+A later post-run counting-only connectivity probe succeeded; it changed no outcome.
+See reports/transport-failures-v3.json and reports/post-run-connectivity-v3.json.

@@ -21,8 +21,8 @@ billing receipt. Failed or interrupted calls can retain reserved unknown cost.
 
 ## Limits of interpretation
 
-- The expanded held-out cohort has fifteen unique capsules, with two previously
-  evaluated in v0.1.0 and thirteen newly evaluated. Repeated runs do
+- The v3 cohort has fifteen unique capsules, all previously evaluated. In v2,
+  two had previous v0.1.0 exposure and thirteen were newly evaluated. Repeated runs do
   not increase the number of independent tasks. Neither significance nor broad
   language/modality performance should be inferred from these counts.
 - Prepared author environments remove the environment-construction burden of
@@ -82,7 +82,7 @@ also counts actual image-tool artifacts separately. The expanded study retains
 five development tasks and frozen lessons; it does not claim ten development tasks
 merely because the original held-out target of fifteen was recovered.
 
-## Application request bound versus model context capacity
+## Historical v1/v2 request bound versus model context capacity
 
 `Pilot context limit reached` is raised by ReproScout's own request-reservation
 controller, not by the OpenAI service. It stops when the serialized request byte
@@ -112,3 +112,39 @@ Encrypted provider payloads may contain random strings that resemble credentials
 The public exporter removes those opaque fields while retaining the conservative
 credential check for visible content. Tests verify that visible evidence survives,
 original in-memory data is not mutated, and a visible key still blocks export.
+
+## Native-count controller and v3 transport failures
+
+V3 counts the full native request, including tools, images and encrypted reasoning,
+and adds a 2,048-token margin under a 60,000-token input cap. Maximum output,
+monetary reservation, model-call count, command timeout and wall-time policies
+remain separately enforced. No context is deleted for counting. The conversion
+adapter is isolated and pinned to Inspect 0.3.290; count failures refuse generation.
+
+All sixty formal attempts completed without changing the freeze. Fifty-nine
+failed during host-side DNS resolution before a count-request HTTP response, and
+55 made no model call. The sole successful attempt cannot establish a lesson effect.
+All 39 generated requests had exact native/returned input-count agreement; eight
+crossed the historical byte threshold. These accounting observations do not
+establish end-to-end reliability. Lower time/cost and unchanged-input rates are
+strongly affected by early refusal. Read controller-comparison.md for all five
+comparison dimensions and the transport failure records.
+
+Development validation covered both conditions on five training tasks. One B
+notebook attempt changed its data loader despite correct answers; it remains
+flagged and is not described as faithful reproduction. Correctness and unchanged
+input hashes do not, even together, establish semantic evidence support.
+
+Two initial timeout checks failed because the standalone test executable itself
+exited with 139 under emulation. The revised deterministic probe uses bash's builtin
+and records the exit code. It passed all thirteen checks; prior failures remain
+in development-v3-validation.json. This did not change the agent's command timeout.
+
+## Frozen execution and rendered-report interpretation
+
+No frozen source, script, configuration, lesson, input or protocol was amended
+for v3, including after completion. The rendered HTML homepage was annotated with
+the DNS-failure finding and its zero-call label was made cause-neutral. Markdown
+reports distinguish primary answer scoring, input integrity, runtime and transport
+failure. These are presentation artifacts, not replacement experimental records.
+Regenerating the generic exporter alone does not recreate all editorial annotations.

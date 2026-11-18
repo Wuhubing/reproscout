@@ -1,0 +1,7 @@
+{
+  "command": "cd /results && python - <<'PY'\nimport nbformat, re\nnb=nbformat.read('FGBR_OC_executed.ipynb', as_version=4)\nfor i,cell in enumerate(nb.cells):\n    if cell.cell_type=='code':\n        text=''\n        for o in cell.outputs:\n            if o.output_type=='stream': text += o.text\n            elif o.output_type=='execute_result': text += o.data.get('text/plain','')\n        if 'c = 1.0' in text or 'c = 1' in text:\n            print('CELL',i)\n            print(text)\nPY",
+  "exit_code": 0,
+  "seconds": 0.6418202919885516,
+  "stdout": "artifacts/step-008.stdout.txt",
+  "stderr": "artifacts/step-008.stderr.txt"
+}

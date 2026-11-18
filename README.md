@@ -11,7 +11,7 @@ See [implementation references](docs/research-references.md).
 ## What works
 
 - Independent loading and preparation of official CORE-Bench train/test capsules.
-- Archived author images pinned by digest; unchanged author code.
+- Archived author images pinned by digest; audits of original author inputs.
 - No runtime network, privileged mode, host directory mounts, or Docker socket.
 - Inspect ReAct with project-owned shell, file, image/PDF, and evidence submission tools.
 - External answer scoring, per-call usage accounting, and request cost reservations.
@@ -23,50 +23,39 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
-## Controller repair validated; new comparison pending
+## v0.3.0: completed rerun, network-limited evidence
 
-Native full-request token counting replaces the historical byte proxy. Five
-training tasks completed A/B validation before the new formal freeze. The
-accounting gate passed; one development B attempt changed its original data
-loader and is explicitly retained as a source-integrity failure. The new report
-will separate answer correctness from unchanged-input audits.
+**All 60 frozen attempts completed, but the A/B comparison is inconclusive.**
+The repaired controller encountered 59 host-side DNS failures while requesting
+native token counts; 55 attempts made no model call. No frozen file, condition,
+lesson, or outcome was changed mid-run, and no failed attempt was replaced.
 
-See [repair protocol](docs/controller-repair-protocol.md),
-[lesson analysis](docs/lessons-analysis.md), and
-[development evidence](reports/development-v3-validation.json).
-The published metrics below remain the historical v0.2.0 result until all sixty
-fresh formal attempts are complete.
+A solved 0/15 in both repetitions; B solved 1/15 and 0/15. The arithmetic +0.5
+B-minus-A average does not establish a lesson benefit. The previous v0.2.0 result
+was A=6/15 and 5/15, B=4/15 and 5/15, with 39 byte-proxy context stops.
 
-## Expanded release: v0.2.0
+On the 39 generations that did occur, native input counts matched returned usage
+exactly; eight requests continued beyond the old byte bound. Measured-token stops
+were zero, but that must be read alongside the 59 transport failures. All sixty
+source audits were unchanged, mostly on attempts with no generation. Formal model
+cost was about $0.05651; lower cost and runtime reflect early refusal, not efficiency.
 
-All 15 selected held-out author images were recovered and verified. The expanded
-experiment completed **60 fresh runs: 15 tasks × A/B × two repetitions**, with no
-missing cells or score-based task replacements. Thirteen capsules are newly
-evaluated; two have explicitly disclosed prior v0.1.0 results. Five development
-tasks and three frozen lessons remain unchanged.
+[Download v0.3.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.3.0) ·
+[Portable results app](reports/index.html) · [Full comparison](docs/controller-comparison.md) ·
+[Per-run results](docs/results.md) · [Lessons analysis](docs/lessons-analysis.md) ·
+[English demo](deliverables/reproscout-demo.mp4)
 
-See the [expanded protocol](docs/expanded-experiment-protocol.md) and
-[registry recovery evidence](docs/registry-recovery.md).
+The delivery preserves 145 agent records: 60 new formal attempts, 68 earlier formal
+attempts, and 17 development attempts. Five training tasks completed A/B controller
+validation before freezing. One development B attempt changed its original data
+loader and is retained as a source-integrity violation despite correct answers.
+All fifteen test tasks have prior exposure; this is a repair study, not unseen
+generalization. Original v0.1.0 and v0.2.0 releases remain available.
 
-[Download v0.2.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.2.0)
-
-## Review the delivered results
-
-Open [the portable results app](reports/index.html) locally. Read the
-[project overview](docs/project-overview.md), [measured results](docs/results.md),
-and [delivery/reproduction guide](docs/delivery-guide.md). The report contains real
-execution evidence and both successful and failed attempts.
-
-A solved 6/15 and 5/15 across the two repetitions; B solved 4/15 and 5/15. Average B-minus-A solved-count change was -1.0; estimated model cost for all 60 formal attempts was $0.75550.
-
-The report retains 74 agent records: 60 new formal runs, eight historical formal
-runs, and six development runs. The proposed +2 solved-task improvement was
-not met.
-Failures include 39 application request-bound stops and one zero-call
-initialization failure; these remain in the primary denominator.
-
-[English demo video](deliverables/reproscout-demo.mp4) ·
-[Demo transcript](docs/demo-script.md) · [Validation limits](docs/validation-and-limitations.md)
+See the [repair protocol](docs/controller-repair-protocol.md),
+[development evidence](reports/development-v3-validation.json),
+[project overview](docs/project-overview.md), and [reproduction guide](docs/delivery-guide.md).
+No API key is needed to inspect the saved evidence.
 
 ## Install
 
@@ -143,7 +132,8 @@ are disabled and unknown failed-call costs retain their reservation.
 Standard API prices checked on November 17, 2026: $0.75/M uncached input tokens,
 $0.075/M cached input tokens, and $4.50/M output tokens. See the
 [official model page](https://developers.openai.com/api/docs/models/gpt-5.4-mini).
-The controller also has a fixed conservative request-size bound, described in
+The controller counts complete native requests, with a 60,000-token input cap
+and a 2,048-token margin. The policy and historical byte proxy are described in
 [validation limits](docs/validation-and-limitations.md); this is separate from the
 provider model context window.
 
@@ -158,7 +148,7 @@ uv run ruff check src tests scripts
 uv run ruff format --check src tests scripts
 ```
 
-The release passes 18 software tests and 13 deterministic environment checks.
+The release passes 22 software tests and 13 deterministic environment checks.
 Tests cover unsafe archives, stale result exclusion, evidence boundaries, original
 numeric scoring, cached-token accounting, pre-dispatch reservations, and freeze
 integrity. Container checks are run separately through `validate`.

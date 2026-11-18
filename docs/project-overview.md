@@ -98,3 +98,13 @@ research result is a separate question. The original +2 solved improvement targe
 80 percent agreement with independent human diagnoses, and ten adversarial model
 prompts are not automatically satisfied by a working application. Report these as
 unestablished unless the corresponding experiment has actually been conducted.
+
+## Current v0.3.0 research status
+
+The repaired controller passed a five-task A/B development accounting check and
+then completed a frozen sixty-attempt matrix on the same fifteen test tasks.
+Fifty-nine attempts failed during host-side DNS resolution for native counting;
+the lesson comparison is therefore inconclusive. The application delivers an
+auditable failed experiment, with old/new success, control failures, input audits,
+time and cost visible together. It does not present completion of the run matrix
+as proof of a successful scientific comparison. All previous releases remain intact.
