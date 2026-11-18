@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = Path('FS-Filters.ipynb')\noutdir = Path('../results')\noutdir.mkdir(exist_ok=True)\nexecuted = nbformat.read(infile, as_version=4)\n\n\u10d4\u10de = ExecutePreprocessor(timeout=-1, kernel_name='python3')\n# allow errors by letting execution continue? nbclient/nbconvert preprocessors have allow_errors attr\n\u10d4\u10de.allow_errors = True\n\u10d4\u10de.preprocess(executed, {'metadata': {'path': '/code'}})\n\n# save executed notebook and html\nnb_path = outdir / 'FS-Filters-executed.ipynb'\nnbformat.write(executed, nb_path)\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(executed)\n(html_path := outdir / 'FS-Filters.html').write_text(body, encoding='utf-8')\nprint(html_path)\nPY",
+  "exit_code": 0,
+  "seconds": 36.14127733401256,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

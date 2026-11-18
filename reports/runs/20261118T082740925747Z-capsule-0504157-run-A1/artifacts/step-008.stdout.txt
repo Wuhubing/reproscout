@@ -1,0 +1,71 @@
+  likingRating ~ USval * correspondingTime + ParticipantNumber
+  , data = ratingData5Aggr
+  , whichRandom = "ParticipantNumber"
+  , whichModels = "top"
+  , rscaleFixed = "medium"
+  , multicore = mcore
+)
+while(any(aovBF5@bayesFactor$error > 0.01)) aovBF5 <- recompute(aovBF5, multicore = mcore)
+}
+
+aovBF5eta <- apa_print(aov_ez(
+  dv = "likingRating" 
+  , within = c("USval", "correspondingTime")
+  , data = ratingData5Aggr
+  , id = "ParticipantNumber"
+  , fun_aggregate = mean
+))
+
+
+
+# restructure data for t test
+ratingData5AggrW <- spread(
+  ratingData5Aggr
+  , key = "USval"
+  , value = "likingRating"
+)
+
+
+#t test for short presentation
+allD30 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "153")$positive,
+        subset(ratingData5AggrW, correspondingTime == "153")$negative,
+        paired = TRUE, 
+        rscale = "medium",
+        nullInterval = c(0, Inf))
+
+#t test for long presentation
+allD1000 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "250")$positive,
+        subset(ratingData5AggrW, correspondingTime == "250")$negative,
+        paired = TRUE,
+        rscale = "medium",
+        nullInterval = c(0, Inf))
+
+```
+
+```{r visAndRate5}
+tmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))
+
+#remove participants from exclusion list
+tmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))
+
+tmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)
+
+#merge data frames (add correct identification to each pp in rating data frame)
+names(tmpVis)[names(tmpVis)=="Length"] <- "correspondingTime"
+ratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c("ParticipantNumber", "correspondingTime"))
+
+ratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative
+
+
+# plot(subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "153")$EC, pch = 21,  col = "#045a8d", bg = "lightblue", ylab = "EC Effect", xlab = "mean visibility", main = "30 ms CS presentation")
+# abline(lm(subset(ratingData5AggrW, correspondingTime == "153")$EC ~ subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer), col="blue")
+# #no significant slope or intercept
+# 
+# plot(subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "250")$EC, pch = 21,  col = "#b30000", bg = "#fc8d59", ylab = "EC Effect", xlab = "mean visibility", main = "1000 ms CS presentation")
+# abline(lm(subset(ratingData5AggrW, correspondingTime == "250")$EC ~ subset(ratingData5AggrW, correspondingTime == "250")$correctAnswer), col="red")
+```
+
+We stopped data collection after `r allPP` participants took part in the study ($\mathit{N_{paid}}= 94$, all others received partial course credit), based on the results of the *t* tests (see below).
+Six participants were excluded, as they either took part in previous studies of this series <!-- pp 4, 5, 7, 13, 160-->or because they were told about the procedure of this study by others before taking part. <!--30-->
+One participant reported that she did not wear the headphone during the entire procedure and seven additional participants did not detect the surveillance target stimulus at least 7 times during the learning phase.
+These participants were also excluded before running any of the analyses.

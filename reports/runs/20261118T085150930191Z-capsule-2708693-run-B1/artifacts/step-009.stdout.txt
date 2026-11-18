@@ -1,0 +1,123 @@
+363:excludedDisclosedDiscrepancies = sum(grepl("excludedDisclosed", df$disclosedNum))
+364:# convert disclosedNum/Denom to numeric
+365:df$disclosedNum <- df$disclosedNum %>% as.numeric()
+366:df$disclosedDenom <- df$disclosedDenom %>% as.numeric()
+753:dfMeta <- df %>% filter(!is.na(df[,grep("disclosedNum", colnames(df))]))
+754:      meta <- meta::metaprop(dfMeta$disclosedNum, dfMeta$disclosedDenom,
+778:CIdisclosed <- paste0(round(inv.logit(meta$lower.random), 2)*100, "-",
+781:PIdisclosed <- paste0(signif(inv.logit(meta$lower.predict), 1)*100, "-",
+969:addCIs <- c(CIdisclosed,
+976:addPIs <- c(PIdisclosed,
+983:addk <- c(sum(!is.na(df$disclosedNum)),
+1673:Some publications disclose the discrepancies between their registration or study protocol and publication. Of the articles we reviewed, k = `r sum(df$disclosedNum==0, na.rm=TRUE)` state that none of the publications disclose their primary outcome discrepancies, k = `r sum(df$disclosedNum > 0, na.rm=TRUE)` state that one or more publication disclosed one or more primary outcome discrepancy, k = `r sum(is.na(df$disclosedNum))` do not report how many publications disclosed their primary outcome discrepancies, and k = `r excludedDisclosedDiscrepancies` included only publications with undisclosed discrepancies in their sample. A random effects meta-analysis of the k = `r sum(!is.na(df$disclosedNum))` articles that report the number of disclosed primary outcome discrepancies estimates that `r CIdisclosed` (95% CI) (95% prediction interval: `r PIdisclosed`) of publications with a discrepancy at least mention that a discrepancy is present (see Supplementary Figure G1 for a forest plot). Notably, a mention does not imply that the publication justified that discrepancy [e.g., @pandis2015]. A few articles identified a much higher proportion of publications that disclosed discrepancies compared to the other articles. These articles focused on acupuncture [@su2015], meta-analyses [@delgado2017a], and systematic reviews [@dwan2013].
+
+nexpFavorSig <- sum(meta$n)
+```
+
+```{r meta_analysis_stat_significance}
+# run meta analysis on the likelihood that publication with at least one outcome discrepancy, compared to a publication with no outcome discrepancy, reports statistically significant results.
+
+# for the forest plot to display properly, we need to first filter out all the NAs for the meta-analysis (otherwise the 'studlab' won't align with the outcomes.
+dfMeta <- df %>% filter(!is.na(df[,grep("sigDisc", colnames(df))]))
+
+temp <- metaRR(dfMeta$sigDisc, 
+               dfMeta$sigDisc + dfMeta$nonSigDisc, 
+               dfMeta$sigNonDisc, 
+               dfMeta$sigNonDisc + dfMeta$nonSigNonDisc, 
+               dfMeta)
+meta <- temp[[1]]
+CIexpStatSig <- temp[[2]]
+PIexpStatSig <- temp[[3]]
+nexpStatSig <- sum(meta$n.e, meta$n.c)
+
+png("forestExpStatSig.png", width = 850)
+meta::forest(meta,
+             #leftcols = "studlab",
+             leftlabs = c("Article", "significant", "total", "significant", "total"),
+             lab.e = "Discrepant",
+             lab.c = "Non-discrepant",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.2,5),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+)
+dev.off()
+
+```
+
+```{r meta_analysis_stat_significance_2}
+# run meta analysis on the likelihood that publication with statistically significant result, compared to a publication not reporting a statistically significant results, contains at least one outcome discrepancy.
+
+dfMeta <- df %>% filter(!is.na(df[,grep("sigDisc", colnames(df))]))
+
+temp <- metaRR(dfMeta$sigDisc, 
+               dfMeta$sigDisc + dfMeta$sigNonDisc, 
+               dfMeta$nonSigDisc,
+               dfMeta$nonSigDisc + dfMeta$nonSigNonDisc,
+               dfMeta)
+meta <- temp[[1]]
+CIexpStatSig2 <- temp[[2]]
+PIexpStatSig2 <- temp[[3]]
+nexpStatSig2 <- sum(meta$n.e, meta$n.c)
+
+png("forestExpStatSig2.png", width = 850)
+meta::forest(meta,
+             #leftcols = "studlab",
+             leftlabs = c("Article", "discrepant", "total", "discrepant", "total"),
+             lab.e = "Significant",
+             lab.c = "Non-significant",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.33,3),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+)
+dev.off()
+
+```
+
+```{r meta_analysis_industry_funding}
+# run meta-analysis on likelihood ratio of a study with industry funding being more likely to contain a discrepancy
+# pretty much the same code as for 'expStatSig' chunk above.
+
+dfMeta <- df %>% filter(!is.na(df[,grep("industryDisc", colnames(df))]))
+
+temp <- metaRR(dfMeta$industryDisc,
+               dfMeta$industryDisc + dfMeta$industryNonDisc, 
+               dfMeta$nonIndustryDisc, 
+               dfMeta$nonIndustryDisc + dfMeta$nonIndustryNonDisc, 
+               dfMeta)
+meta <- temp[[1]]
+CIexpIndustry <- temp[[2]]
+PIexpIndustry <- temp[[3]]
+nexpIndustry <- sum(meta$n.e, meta$n.c)
+
+png("forestExpIndustry.png", width = 850)
+meta::forest(meta,
+             leftlabs = c("Article", "discrepant", "total", "discrepant", "total"),
+             lab.e = "Industry",
+             lab.c = "Non-industry",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.2,5),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+             )
+dev.off()
+
+
+```
+
+```{r meta_analysis_registration_timing}
+# run meta analysis on the proportion of prospectively registered studies with discrepancies compared to the proportion of retrospectively registered studies with discrepancies
+
+#the \\b is necessary to differentiaite the variable "proDisc" from the variable "proDiscSec"
+dfMeta <- df %>% filter(!is.na(df[,grep("proDisc\\b", colnames(df))]))
+

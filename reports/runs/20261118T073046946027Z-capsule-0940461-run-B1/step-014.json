@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nnb=nbformat.read('FGBR_OC.ipynb', as_version=4)\ncell=nb.cells[0]\ncell.source=cell.source.replace('X_train,X_test,y_train,y_test = my_load_iris()','from sklearn.datasets import load_iris\\n    data=load_iris()\\n    X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, random_state=0, test_size=0.1)')\nnbformat.write(nb, 'FGBR_OC_local.ipynb')\nprint('saved /code/FGBR_OC_local.ipynb')\nPY\njupyter nbconvert --to notebook --execute FGBR_OC_local.ipynb --output FGBR_OC_local_executed.ipynb --output-dir /results --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.allow_errors=True >/tmp/nb3.log 2>&1; tail -20 /tmp/nb3.log\npython - <<'PY'\nimport nbformat\nnb=nbformat.read('/results/FGBR_OC_local_executed.ipynb', as_version=4)\nfor i,cell in enumerate(nb.cells):\n    if cell.cell_type=='code':\n        for out in cell.outputs:\n            if out.output_type=='stream':\n                if 'c = 1.0' in out.text or 'maxR2' in out.text:\n                    print('CELL',i)\n                    print(out.text)\n            elif out.output_type=='error':\n                print('ERROR cell',i,out.ename,out.evalue)\nPY",
+  "exit_code": 0,
+  "seconds": 50.191069334046915,
+  "stdout": "artifacts/step-014.stdout.txt",
+  "stderr": "artifacts/step-014.stderr.txt"
+}

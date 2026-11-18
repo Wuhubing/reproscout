@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && cat > /tmp/calc4.R <<'EOF'\nlibrary(tidyverse)\nlibrary(WebPower)\noutput<-function(d){d$type<-as.numeric(as.character(d$type)); d$tails<-as.character(d$tails); for(i in 1:nrow(d)){if(d$test[i]=='anova'){d$small[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=0.1,nscor=1,alpha=0.05,power=NULL,type=d$type[i])$power; d$medium[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=0.25,nscor=1,alpha=0.05,power=NULL,type=d$type[i])$power; d$large[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=0.4,nscor=1,alpha=0.05,power=NULL,type=d$type[i])$power; d$p80[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=NULL,nscor=1,alpha=0.05,power=.80,type=d$type[i])$f*2; d$p95[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=NULL,nscor=1,alpha=0.05,power=.95,type=d$type[i])$f*2}}; d}\nd<-read.csv('/data/fMRInf_regulation.csv'); d<-output(d); dTrial<-d%>%filter(pilot=='N'); t<-dTrial%>%summarize(mean(n),mean(small),mean(medium),mean(large),mean(p80),mean(p95)); print(t); cat('mean_p80=', t[[5]][1], '\\n')\nEOF\nRscript /tmp/calc4.R",
+  "exit_code": 0,
+  "seconds": 7.464523917005863,
+  "stdout": "artifacts/step-016.stdout.txt",
+  "stderr": "artifacts/step-016.stderr.txt"
+}

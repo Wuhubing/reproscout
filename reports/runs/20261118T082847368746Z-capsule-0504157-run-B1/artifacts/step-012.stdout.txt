@@ -1,0 +1,66 @@
+#table(tmp$correctAnswer)
+#chance level is 1/10
+
+```
+
+```{r Rating5, warning = FALSE}
+# Read in the Damographics data
+if(cacheGitData){
+  load("../data/ratingData5")
+} else{
+  
+#list of all data files
+file_url <- paste0("https://raw.githubusercontent.com/methexp/rawdata/master/croco5/DataRating_Croco5_", 1:N, ".txt")
+#add data to a data frame
+ratingData5 <- lapply(file_url, read.delim)
+ratingData5 <- do.call("rbind", ratingData5)    
+}
+
+#remove excluded participants (see above)
+ratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))
+
+ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)
+
+#recode US as pos or neg into new variable
+ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == "p", "positive", "negative")
+ratingData5$USval <- as.factor(ratingData5$USval)
+
+ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)
+
+ratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)
+ratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)
+
+
+```
+
+```{r analyzeRate5}
+if(cacheBF){
+  load("../data/aovBF5")
+} else{
+aovBF5 <- anovaBF(
+  likingRating ~ USval * correspondingTime + ParticipantNumber
+  , data = ratingData5Aggr
+  , whichRandom = "ParticipantNumber"
+  , whichModels = "top"
+  , rscaleFixed = "medium"
+  , multicore = mcore
+)
+while(any(aovBF5@bayesFactor$error > 0.01)) aovBF5 <- recompute(aovBF5, multicore = mcore)
+}
+
+aovBF5eta <- apa_print(aov_ez(
+  dv = "likingRating" 
+  , within = c("USval", "correspondingTime")
+  , data = ratingData5Aggr
+  , id = "ParticipantNumber"
+  , fun_aggregate = mean
+))
+
+
+
+# restructure data for t test
+ratingData5AggrW <- spread(
+  ratingData5Aggr
+  , key = "USval"
+  , value = "likingRating"
+)

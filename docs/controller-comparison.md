@@ -1,66 +1,62 @@
-# Controller and network recovery comparison
+# Controller, network, and lesson revision comparison
 
-Prepared-v4 completed all sixty scientific cells under one unchanged freeze. Infrastructure attempts are retained separately and never satisfy a cell. An unsolved scientific outcome remains final.
+V5 completed sixty scientific cells under one unchanged freeze. Infrastructure attempts are separately retained and cannot satisfy a cell. Scientific failures are final.
 
-| Metric | v2 | v3 | v4 |
-|---|---:|---:|---:|
-| Retained attempts | 60 | 60 | 61 |
-| Answer-solved / 60 planned cells | 20/60 (33.3%) | 1/60 (1.7%) | 46/60 (76.7%) |
-| A solved / 30 | 11/30 | 0/30 | 25/30 |
-| B solved / 30 | 9/30 | 1/30 | 21/30 |
-| Solved with unchanged prepared inputs | 20 | 1 | 46 |
-| Legacy byte-bound stops | 39 | 0 | 0 |
-| Native-token context stops | 0 | 0 | 0 |
-| Terminal counting failures | 0 | 59 | 0 |
-| Infrastructure attempts | 1 | 59 | 1 |
-| Zero-generation attempts | 1 | 55 | 1 |
-| Source unchanged / changed / missing | 59 / 0 / 1 | 60 / 0 / 0 | 58 / 2 / 1 |
-| Model generations | 423 | 39 | 721 |
-| Sum of recorded sample time (minutes) | 75.67 | 23.69 | 143.07 |
-| First-start to last-completion interval (minutes) | 76.93 | 57.03 | 147.75 |
-| Estimated returned model-usage cost | $0.75550 | $0.05651 | $1.84094 |
-| Uncached cost upper bound (including reservations) | $1.49456 | $0.14628 | $4.67572 |
-| 20-call budget stops | 0 | 0 | 8 |
-| Monetary admission stops | 0 | 0 | 0 |
-| Other Inspect sample limits | {} | {} | {} |
+| Metric | v2 | v3 | v4 | v5 |
+|---|---:|---:|---:|---:|
+| Retained attempts | 60 | 60 | 61 | 60 |
+| Answer-solved / 60 | 20/60 (33.3%) | 1/60 (1.7%) | 46/60 (76.7%) | 46/60 (76.7%) |
+| A solved / 30 | 11/30 | 0/30 | 25/30 | 20/30 |
+| B solved / 30 | 9/30 | 1/30 | 21/30 | 26/30 |
+| Original-input hashes unchanged / changed / missing | 59 / 0 / 1 | 60 / 0 / 0 | 58 / 2 / 1 | 60 / 0 / 0 |
+| Answer solved with original hashes unchanged | 20 | 1 | 46 | 46 |
+| Old byte-bound stops | 39 | 0 | 0 | 0 |
+| Native context stops | 0 | 0 | 0 | 0 |
+| 20-call stops | 0 | 0 | 8 | 4 |
+| Terminal count failures | 0 | 59 | 0 | 0 |
+| Infrastructure attempts | 1 | 59 | 1 | 0 |
+| Model generations | 423 | 39 | 721 | 664 |
+| Sample time, minutes (all attempts) | 75.67 | 23.69 | 143.07 | 130.39 |
+| Calendar interval, minutes | 76.93 | 57.03 | 147.75 | 134.55 |
+| Estimated model cost (all attempts) | $0.75550 | $0.05651 | $1.84094 | $1.50081 |
+| Uncached cost upper bound | $1.49456 | $0.14628 | $4.67572 | $3.91940 |
 
-The 20-call cap is a separate, unchanged policy from the repaired request-size guard. Scientific budget stops remain final unsolved outcomes, rather than infrastructure retries.
+V3 is infrastructure-invalid: its low cost and success rate reflect DNS aborts, not an informative scientific comparison. V4 repaired transport and request accounting; v5 revises only the B lesson treatment, with the same base prompt, scientific tools, model, scorer, inputs and limits. The shared retry guard now recognizes v5 IDs. Cross-version results also include sampling and time effects.
 
-## Interpretation
+V5 A solved 20/30 and B 26/30. Within v5, A-only pairs: 1; B-only: 7; both solved: 19; neither: 3. Thirty paired observations reuse fifteen tasks. No significance claim applies.
 
-Prepared-v3 was infrastructure-invalid: 59 DNS failures, 55 zero-generation attempts, and only one answer-solved attempt. Its low cost and time reflect early aborts, not efficiency. v2 had 39 premature byte-bound stops and one startup failure. Neither problem should be interpreted as evidence against lessons.
+All 664 generations are retained; native counts matched usage on 664. Application operations including preflights: 1448; failed operations: 0. These are application logs, not TCP packet traces.
 
-Under v4, A solved 12/15 and 13/15; B solved 10/15 and 11/15. Average B-minus-A solved count is -2.0. This is a descriptive observation on fifteen reused tasks, not a statistical-significance or unseen-generalization claim. Cross-version differences also include temporal and model-sampling variation.
+Compared with v4, B gains five scored successes while the unchanged A condition loses five; the combined score remains 46/60. This baseline movement prevents attributing the entire cross-version change to the lesson text. Calendar time decreases from 147.75 to 134.55 minutes and estimated model cost from $1.84094 to $1.50081. Within v5, all four call-cap failures are in A; B has none.
 
-Native counts matched returned input usage on 721 of 721 generations. 297 generated requests crossed the former byte guard. Retained request-level failures: 0; retained infrastructure attempts: 1. All-attempt answer success: 46/61.
+## Four previously adverse pairs
 
-Sample timers include in-task retries and scientific execution. The calendar interval also includes between-cell preflights, cooldowns and scheduling gaps; neither is CPU time. Costs use returned token usage, exclude host/image/development costs, and are not an invoice. Unknown usage remains represented by conservative reservations. All infrastructure attempt time and cost are included.
+| Task | Repeat | v4 A / B | v5 A / B | v5 B evidence |
+|---|---:|---|---|---|
+| capsule-0504157 | 2 | True / False | False / True | [Run](../reports/runs/20261118T093113458234Z-capsule-0504157-run-B2/report.html) |
+| capsule-2708693 | 1 | True / False | False / True | [Run](../reports/runs/20261118T085150930191Z-capsule-2708693-run-B1/report.html) |
+| capsule-9054015 | 1 | True / False | True / True | [Run](../reports/runs/20261118T082236563632Z-capsule-9054015-run-B1/report.html) |
+| capsule-9054015 | 2 | True / False | True / True | [Run](../reports/runs/20261118T092341047794Z-capsule-9054015-run-B2/report.html) |
 
-Source integrity is a separate criterion: correct answers produced after changing scientific inputs are not faithful unchanged-input reproductions. Audit absence is never treated as unchanged. See every run, including failed attempts, for evidence.
+## Fidelity and interpretation
 
-## Verification and retained evidence
+The original-input hash audit does not detect modifications to newly created scientific copies, nor prove semantic support. The v4 adverse-pair analysis identifies such a case even among answer-solved runs. Do not label the hash-and-answer intersection as fully faithful reproduction. Source exceptions and supplemental trajectory review remain separate from the unchanged scorer.
 
-- [Frozen recovery protocol](network-recovery-protocol.md)
-- [Development validation](../reports/development-v4-validation.json)
-- [Live network and injected recovery validation](../reports/network-development-v4/validation.json)
-- [Full comparison data](../reports/controller-comparison.json)
-- [Per-task results](results.md)
-- [Portable evidence browser](../reports/index.html)
-- [All 59 historical DNS failures](../reports/transport-failures-v3.json)
-- [Archived v3 interpretation](../reports/archive-v3/controller-comparison.md)
+This revision was informed by exposed test trajectories and validated on five training tasks. It is a test-informed regression study, not a new held-out generalization test. Formatting counterfactuals in the old analysis do not alter historical scores. All failures remain visible.
 
-The release retains v1, v2 and v3 experiments and their original public releases. The exact historical DNS root cause remains unknown; successful current requests and retry validation do not retroactively diagnose it.
+Costs use returned token usage and conservative reservations, exclude development/host/image costs, and are not invoices. Sample time includes in-task execution; calendar time also includes preflights, cooldowns and scheduling.
 
-## Request and source exception audit
+The four previously failing B samples now all pass the scorer, but targeted review finds continued scientific reimplementation in two of them (0504157 repeat 2 and 9054015 repeat 1). The former also submits a numeric string, contrary to the lesson. Read the [four-pair follow-up](adverse-pair-followup-v5.md) and [limited manual review](../reports/trajectory-review-v5.json); these are score recoveries, not four certified faithful reproductions.
 
-Application operations recorded, including preflights: 1564. Failed application operations: 0. [Complete network ledger](../reports/network-audit-v4.json). These logs observe application requests, not individual TCP connection attempts. The historical DNS resolver root cause remains unknown; successful live traffic and injected retry recovery do not prove that retries caused the observed recovery.
+## Evidence
 
-- `capsule-0504157` A1: source audit not recorded; answer-solved=False. [Run report](../reports/runs/20261118T053006883732Z-capsule-0504157-run-A1/report.html). Changed or missing original files: `[]`.
-- `capsule-0504157` A1: changed original input; answer-solved=False. [Run report](../reports/runs/20261118T053043940539Z-capsule-0504157-run-A1/report.html). Changed or missing original files: `['/code/manuscript_croco4_5.Rmd']`.
-- `capsule-3262218` B1: changed original input; answer-solved=False. [Run report](../reports/runs/20261118T060115837998Z-capsule-3262218-run-B1/report.html). Changed or missing original files: `['/data/processed/d_round2access.rds', '/data/processed/d_reference.rds', '/data/processed/d_contentAnalysis.rds', '/data/processed/d_citations.rds', '/data/processed/d_repCitations.rds', '/data/processed/d_coauthors.rds']`.
-
-[Source exception data](../reports/source-integrity-v4.json) retains absent audits separately from changed files.
-
-Across thirty task/repetition pairs, B-only answer success occurred 0 times and A-only success 4 times; both solved 21 and neither solved 5. These are descriptive paired observations on fifteen reused tasks. [Pair-level data](../reports/paired-outcomes-v4.json).
-
-The later [power-state incident analysis](network-incident-analysis.md) correlates all 59 v3 failure completions with sleep/background-wake transitions and retains the one successful DarkWake control. This is post-hoc association, not proof of the exact DNS mechanism.
+- [Four-pair diagnosis](lesson-pair-analysis-v4.md)
+- [Revision protocol](lesson-revision-protocol.md)
+- [Development results and gate amendment](lesson-development-results.md)
+- [Development validation](../reports/development-v5-validation.json)
+- [Full metrics](../reports/controller-comparison.json)
+- [All outcomes](results.md)
+- [Portable app](../reports/index.html)
+- [Source exceptions](../reports/source-integrity-v5.json)
+- [Application request ledger](../reports/network-audit-v5.json)
+- [Archived v4 interpretation](../reports/archive-v4/controller-comparison.md)

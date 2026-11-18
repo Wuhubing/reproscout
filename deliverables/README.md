@@ -1,14 +1,14 @@
 # Delivery artifacts
 
-- `reproscout-demo.mp4`: English walkthrough of saved real runs with disclosed
-  synthetic macOS narration; this is not a staged live run.
-- `../reports/index.html`: portable results and evidence application (217 reports).
-- `../docs/demo-script.md`: exact narration text.
-- `../docs/controller-comparison.md`: v2/v3/v4 success, controller/infrastructure
-  failures, source integrity, sample/calendar time, and estimated cost.
-- `../docs/results.md`: all sixty final scientific outcomes.
+The v0.5.0 package contains 297 portable run reports, all sixty v5 scientific
+outcomes, separately retained infrastructure attempts, previous studies, an English
+saved-results walkthrough, and reproducible source. Start with `../reports/index.html`.
 
-The v0.4.0 release retains every failed attempt and the previous experiments.
-Scientific inputs, author images, credentials, private answer keys and original
-binary logs are not bundled. The earlier videos and source packages remain in
-v0.1.0, v0.2.0 and v0.3.0 releases. No frozen v4 execution file changed mid-run.
+- `reproscout-demo.mp4`: saved real results with disclosed synthetic macOS narration.
+- `../docs/demo-script.md`: exact narration.
+- `../docs/lesson-pair-analysis-v4.md`: four adverse-pair diagnosis and fidelity caveat.
+- `../docs/controller-comparison.md`: four-version metrics and pair transitions.
+- `../docs/lesson-revision-protocol.md`: exposure disclosure, validation and freeze.
+
+No private answers, credentials, author archives or original binary logs are bundled.
+Earlier releases and every failed attempt remain available.

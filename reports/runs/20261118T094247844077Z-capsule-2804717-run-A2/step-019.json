@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && cat > /tmp/render.R <<'EOF'\nSys.setenv(R_DEFAULT_PACKAGES='datasets,utils,grDevices,graphics,stats,methods')\n# knit to markdown\nknitr::knit('ResultReproducibilityNotebook.Rmd', output='../results/ResultReproducibilityNotebook.md')\n# convert markdown to html\nmd <- readLines('../results/ResultReproducibilityNotebook.md', warn = FALSE)\nhtml <- c('<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>ResultReproducibilityNotebook</title></head><body><pre>',\n          htmltools::htmlEscape(paste(md, collapse='\\n')),\n          '</pre></body></html>')\nwriteLines(html, '../results/ResultReproducibilityNotebook.html')\nEOF\nnohup Rscript /tmp/render.R > /tmp/render.out 2> /tmp/render.err & echo $!",
+  "exit_code": 0,
+  "seconds": 0.13863324996782467,
+  "stdout": "artifacts/step-019.stdout.txt",
+  "stderr": "artifacts/step-019.stderr.txt"
+}

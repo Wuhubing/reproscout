@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && cat > /tmp/calc3.R <<'EOF'\nlibrary(WebPower)\noutput_anova<-function(d){d$type<-as.numeric(d$type); for(i in 1:nrow(d)){d$p80[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=NULL,nscor=1,alpha=0.05,power=.80,type=d$type[i])$f*2; d$p95[i]<-wp.rmanova(d$n[i],d$ng[i],d$nm[i],f=NULL,nscor=1,alpha=0.05,power=.95,type=d$type[i])$f*2}; d}\nd<-read.csv('/data/fMRInf_regulation.csv'); d<-subset(d, test=='anova' & pilot=='N'); d<-output_anova(d); cat(sprintf('%.2f\\n', mean(d$p80)))\nprint(d[1,c('Publication','p80')])\nEOF\nRscript /tmp/calc3.R",
+  "exit_code": 0,
+  "seconds": 3.9747532089822926,
+  "stdout": "artifacts/step-015.stdout.txt",
+  "stderr": "artifacts/step-015.stderr.txt"
+}

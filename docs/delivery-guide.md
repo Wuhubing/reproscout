@@ -149,3 +149,36 @@ does not require private inputs or an API key. Narrative interpretation and demo
 text are curated delivery artifacts and should be reviewed against regenerated data.
 
 For macOS execution, see the [power-state incident analysis](network-incident-analysis.md): keep the laptop awake with its display open, and use the documented `caffeinate -i` launch. This protects against idle sleep only; the frozen network gate remains necessary.
+
+## Review and replay v0.5.0
+
+Download v0.5.0 and open `reports/index.html`. Read `docs/lesson-pair-analysis-v4.md`
+first, then `docs/controller-comparison.md`, `docs/lesson-revision-protocol.md` and
+`reports/development-v5-validation.json`. The same fifteen test tasks were previously
+exposed and informed revision design; this is not unseen generalization.
+
+On a fresh checkout with prepared inputs, pinned author images and private reference
+extraction available, verify the published freeze and run:
+
+```bash
+caffeinate -i uv run python scripts/run_experiment.py experiments/prepared-v5 \
+  --key-file /absolute/path/to/your-key-file
+```
+
+Keep the laptop awake and open; idle-sleep inhibition does not replace network
+preflights. Scientific outcomes cannot be rerun in the same cell. Infrastructure
+attempts remain separate and share the original cell budget. Historical freezes
+should be verified at their respective release tags, not against later source.
+
+After all sixty scientific cells complete:
+
+```bash
+uv run python scripts/export_delivery.py --experiment experiments/prepared-v5
+uv run python scripts/summarize_experiment.py experiments/prepared-v5
+uv run python scripts/summarize_lessons.py
+```
+
+The comparison generator uses local raw Inspect logs for timing. The public package
+already contains generated reports and does not need private inputs for inspection.
+Curated interpretation, manual trajectory annotations and narration are delivery
+artifacts; regenerate them only from the new evidence, without altering old results.

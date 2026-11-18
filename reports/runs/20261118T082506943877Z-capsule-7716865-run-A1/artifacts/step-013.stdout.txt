@@ -1,0 +1,27 @@
+#create function to make a the table output for the fMRI summary data.
+tableMRI <- function(d){
+  
+# t for table  
+  t <- data.frame(matrix(ncol = 6, nrow = 4))
+  # distinguish between summary data that includes vs excludes studies marker as "pilot"
+  rownames(t) <- c("mean no pilot", "median no pilot", "mean all", "median all")
+  colnames(t) <- c("n", "small", "medium", "large", "p80", "p95")
+  
+  # filter out pilot studies
+  dTrial <- d %>% filter(pilot=="N")
+  
+  # summarize data excluding pilot studies
+  t[1,]<- dTrial %>% summarize(mean(n), mean(small), mean(medium), mean(large), mean(p80), mean(p95))
+  t[2,]<- dTrial %>% summarize(median(n), median(small), median(medium), median(large), median(p80), median(p95))
+  
+  # summarize data including pilot studies
+  t[3,]<- d %>% summarize(mean(n), mean(small), mean(medium), mean(large), mean(p80), mean(p95))
+  t[4,]<- d %>% summarize(median(n), median(small), median(medium), median(large), median(p80), median(p95))
+
+  # return summarized data
+return(t)
+}
+```
+
+```{r tableNIRS}
+# create function to output table for fNIRS summary data. This code differs from the fMRI table because the data does not include a column to distinguish pilot studies from non-pilot studies.

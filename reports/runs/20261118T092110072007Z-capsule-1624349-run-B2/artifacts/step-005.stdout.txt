@@ -1,0 +1,118 @@
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cv_acc_scores</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">tst_acc_scores</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">best_acc</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">best_k</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">kk</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">FS_trans</span> <span class="o">=</span> <span class="n">SelectKBest</span><span class="p">(</span><span class="n">mutual_info_classif</span><span class="p">,</span> 
+                           <span class="n">k</span><span class="o">=</span><span class="n">kk</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">X_tR_new</span> <span class="o">=</span> <span class="n">FS_trans</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+    <span class="n">X_tS_new</span> <span class="o">=</span> <span class="n">FS_trans</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">cv_acc</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_tR_new</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">cv_acc_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cv_acc</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">y_pred_temp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tR_new</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_tS_new</span><span class="p">)</span>
+    <span class="n">tst_acc_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_pred_temp</span><span class="p">,</span> <span class="n">y_test</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">cv_acc</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">best_acc</span><span class="p">:</span>
+        <span class="n">best_acc</span> <span class="o">=</span> <span class="n">cv_acc</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">best_k</span> <span class="o">=</span> <span class="n">kk</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Training Acc.&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv_acc_scores</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;Test Acc.&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tst_acc_scores</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">best_k</span><span class="p">,</span> <span class="n">best_acc</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+--- feature table ---
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Mutual Info.</th>
+      <th>Chi Square</th>
+    </tr>
+    <tr>
+      <th>Feature</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>RAWRED-MEAN</th>
+      <td>1.222189</td>
+      <td>290.963800</td>
+    </tr>
+    <tr>
+      <th>INTENSITY-MEAN</th>
+      <td>1.162590</td>
+      <td>293.436006</td>
+    </tr>
+    <tr>
+      <th>RAWGREEN-MEAN</th>
+      <td>1.136444</td>
+      <td>290.117395</td>
+    </tr>
+    <tr>
+      <th>HUE-MEAN</th>
+      <td>1.133297</td>
+      <td>268.862214</td>
+    </tr>
+    <tr>
+      <th>VALUE-MEAN</th>
+      <td>1.129592</td>
+      <td>287.668916</td>
+    </tr>
+    <tr>
+      <th>RAWBLUE-MEAN</th>
+      <td>1.108196</td>
+      <td>303.477831</td>
+    </tr>
+    <tr>
+      <th>REGION-CENTROID-ROW</th>
+      <td>0.954615</td>
+      <td>114.861611</td>
+    </tr>
+    <tr>
+      <th>EXGREEN-MEAN</th>
+      <td>0.951889</td>
+      <td>92.917809</td>
+    </tr>
+    <tr>
+      <th>SATURATION-MEAN</th>
+      <td>0.931822</td>
+      <td>81.646548</td>
+    </tr>
+    <tr>
+      <th>EXBLUE-MEAN</th>
+      <td>0.921240</td>
+      <td>111.019242</td>
+    </tr>
+    <tr>
+      <th>EXRED-MEAN</th>
+      <td>0.768096</td>
+      <td>54.253952</td>
+    </tr>
+    <tr>
+      <th>VEDGE-MEAN</th>
+      <td>0.493650</td>
+      <td>14.524558</td>
+    </tr>
+    <tr>
+      <th>HEDGE-MEAN</th>
+      <td>0.470754</td>
+      <td>17.747326</td>
+    </tr>
+    <tr>
+      <th>HEDGE-SD</th>
+      <td>0.355091</td>
+      <td>15.476829</td>
+    </tr>
+    <tr>
+      <th>VEDGE-SD</th>
+      <td>0.319451</td>
+      <td>20.006502</td>
+    </tr>
+    <tr>
+      <th>REGION-CENTROID-COL</th>
+      <td>0.120641</td>

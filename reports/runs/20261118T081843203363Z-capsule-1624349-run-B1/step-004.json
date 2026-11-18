@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nnb=nbformat.read('FS-Filters.ipynb', as_version=4)\nep=ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\nep.preprocess(nb, {'metadata': {'path': '/code'}})\nfor idx in [8,10,19,22]:\n    cell=nb.cells[idx]\n    print('\\nCELL', idx)\n    for out in cell.get('outputs',[]):\n        if out.output_type=='stream':\n            print(out.text)\n        elif out.output_type=='execute_result':\n            print(out['data'].get('text/plain',''))\n        elif out.output_type=='display_data':\n            print(out['data'].get('text/plain','[display]'))\n        elif out.output_type=='error':\n            print('ERROR', out.ename, out.evalue)\nPY",
+  "exit_code": 0,
+  "seconds": 35.73957054200582,
+  "stdout": "artifacts/step-004.stdout.txt",
+  "stderr": "artifacts/step-004.stderr.txt"
+}

@@ -1,0 +1,5 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport pandas as pd, numpy as np\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.preprocessing import scale\nfrom sklearn.neural_network import MLPClassifier\nimport sklearn.metrics as mt\n\ntable = pd.read_csv('/data/diabeticos2.csv')\ny = table['Tipo'].to_numpy(); X=table.drop(columns=['Tipo','G120','I120']).to_numpy(); X=scale(X)\nX_train,X_test,y_train,y_test=train_test_split(X,y,stratify=y,test_size=0.2)\nparam_nn = {'learning_rate_init':[0.001],'alpha':[0.0005],'hidden_layer_sizes':[(50,)],'max_iter':[10000]}\ncv=GridSearchCV(MLPClassifier(),param_nn,cv=5)\ncv.fit(X_train,y_train)\np=cv.predict(X_test)\nprint('acc',mt.accuracy_score(y_test,p))\nPY",
+  "status": "timeout",
+  "seconds": 180.11086362501374
+}

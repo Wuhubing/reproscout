@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && mkdir -p ../results && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = Path('FGBR_OC.ipynb')\nout_nb = Path('../results/FGBR_OC_executed.ipynb')\nout_html = Path('../results/FGBR_OC_executed.html')\n\nnb = nbformat.read(infile, as_version=4)\nep = ExecutePreprocessor(timeout=None, kernel_name='python3', allow_errors=True)\nep.preprocess(nb, {'metadata': {'path': '/code'}})\nnbformat.write(nb, out_nb)\n\nhtml_exporter = HTMLExporter()\nbody, resources = html_exporter.from_notebook_node(nb)\nout_html.write_text(body, encoding='utf-8')\nprint('Wrote', out_nb)\nprint('Wrote', out_html)\nPY",
+  "exit_code": 0,
+  "seconds": 12.537508041947149,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}

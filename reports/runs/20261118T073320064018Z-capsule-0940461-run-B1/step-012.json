@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat,re\nnb=nbformat.read('../results/FGBR_OC_executed.ipynb', as_version=4)\ntexts=[]\nfor c in nb.cells:\n    if c.cell_type=='code':\n        for o in c.get('outputs',[]):\n            if o.output_type=='stream':\n                texts.append(o.text)\ntext=''.join(texts)\nprint(text)\nprint('--- matches ---')\nfor m in re.finditer(r'c = 1.0.*?maxR2 =\\s*([0-9.\\-]+).*?minRMSE =\\s*([0-9.\\-]+)', text, re.S):\n    print(m.group(1), m.group(2))\nPY",
+  "exit_code": 0,
+  "seconds": 0.7977950000204146,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

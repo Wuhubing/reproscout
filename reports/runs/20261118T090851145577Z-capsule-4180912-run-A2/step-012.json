@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport pandas as pd, numpy as np\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.ensemble import RandomForestClassifier\nimport sklearn.metrics as mt\n\ntable = pd.read_csv('/data/diabeticos2.csv')\ny = table['Tipo'].to_numpy(); X=table.drop(columns=['Tipo','G120','I120']).to_numpy()\nNUM_TRIALS=10\nrf_f1_macro=[]\nfor i in range(NUM_TRIALS):\n    X_train,X_test,y_train,y_test=train_test_split(X,y,stratify=y,test_size=0.2)\n    cv_random = GridSearchCV(RandomForestClassifier(),{'n_estimators':[20],'criterion':['gini']},cv=5)\n    cv_random.fit(X_train,y_train)\n    pred = cv_random.predict(X_test)\n    rf_f1_macro.append(mt.f1_score(y_test,pred,average='macro'))\nprint('mean', np.mean(rf_f1_macro))\nPY",
+  "exit_code": 0,
+  "seconds": 15.064170041994657,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

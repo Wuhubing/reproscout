@@ -1,0 +1,220 @@
+     1	"""
+     2	Diabetes classification with decision trees and random forests
+     3	Copyright (C) 2019  Antonio Alvarez
+     4	
+     5	This program is free software: you can redistribute it and/or modify
+     6	it under the terms of the GNU General Public License as published by
+     7	the Free Software Foundation, either version 3 of the License, or
+     8	(at your option) any later version.
+     9	
+    10	This program is distributed in the hope that it will be useful,
+    11	but WITHOUT ANY WARRANTY; without even the implied warranty of
+    12	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    13	GNU General Public License for more details.
+    14	
+    15	You should have received a copy of the GNU General Public License
+    16	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    17	"""
+    18	
+    19	import pandas as pd
+    20	import numpy as np 
+    21	from sklearn.cluster import KMeans
+    22	from sklearn.svm import SVC
+    23	from sklearn.neural_network import MLPClassifier
+    24	from sklearn.linear_model import LogisticRegression
+    25	from sklearn.preprocessing import scale
+    26	import sklearn.metrics as mt
+    27	from sklearn.model_selection import GridSearchCV
+    28	from sklearn.model_selection import train_test_split
+    29	from sklearn.model_selection import cross_validate
+    30	#import matplotlib.pyplot as plt
+    31	from imblearn.over_sampling import SMOTE
+    32	import collections
+    33	#from sklearn.externals import joblib
+    34	from joblib import dump, load
+    35	
+    36	from sklearn.tree import DecisionTreeClassifier
+    37	from sklearn.ensemble import RandomForestClassifier
+    38	
+    39	from sklearn.model_selection import cross_validate
+    40	
+    41	if __name__ == '__main__':
+    42	
+    43	    NUM_TRIALS = 10
+    44	
+    45	    table = pd.read_csv('/data/diabeticos2.csv')
+    46	    table_results = table['Tipo']
+    47	    del table['Tipo']
+    48	    del table['G120']
+    49	    del table['I120']
+    50	    #del table['I0']
+    51	    #del table['G0']
+    52	    #del table['Edad']
+    53	
+    54	    #Convert to numpy array for sklearn
+    55	    table2 = table.to_numpy()
+    56	    table_results2 = table_results.to_numpy()
+    57	    
+    58	    #X_res_scaled = scale(table2)
+    59	    X_res_scaled = table2
+    60	
+    61	
+    62	    dt_accu = np.zeros(NUM_TRIALS)
+    63	    dt_pre_weighted = np.zeros(NUM_TRIALS)
+    64	    dt_rec_weighted = np.zeros(NUM_TRIALS)
+    65	    dt_f1_weighted = np.zeros(NUM_TRIALS)
+    66	    dt_pre_micro = np.zeros(NUM_TRIALS)
+    67	    dt_rec_micro = np.zeros(NUM_TRIALS)
+    68	    dt_f1_micro = np.zeros(NUM_TRIALS)
+    69	    dt_pre_macro = np.zeros(NUM_TRIALS)
+    70	    dt_rec_macro = np.zeros(NUM_TRIALS)
+    71	    dt_f1_macro = np.zeros(NUM_TRIALS)
+    72	
+    73	
+    74	    rf_accu = np.zeros(NUM_TRIALS)
+    75	    rf_pre_weighted = np.zeros(NUM_TRIALS)
+    76	    rf_rec_weighted = np.zeros(NUM_TRIALS)
+    77	    rf_f1_weighted = np.zeros(NUM_TRIALS)
+    78	    rf_pre_micro = np.zeros(NUM_TRIALS)
+    79	    rf_rec_micro = np.zeros(NUM_TRIALS)
+    80	    rf_f1_micro = np.zeros(NUM_TRIALS)
+    81	    rf_pre_macro = np.zeros(NUM_TRIALS)
+    82	    rf_rec_macro = np.zeros(NUM_TRIALS)
+    83	    rf_f1_macro = np.zeros(NUM_TRIALS)
+    84	
+    85	
+    86	    for i in range(NUM_TRIALS):
+    87	
+    88	        #Splitting in training-test sets
+    89	        X_train, X_test, y_train, y_test = train_test_split(X_res_scaled, table_results2,stratify=table_results2, test_size=0.20)
+    90	
+    91	        #counter = collections.Counter(y_test)
+    92	        #print(counter)
+    93	        #print(sum(counter.values()))
+    94	
+    95	        #sm = SMOTE(random_state=42,k_neighbors=3)
+    96	        #X_res, y_res = sm.fit_resample(X_train,y_train)
+    97	        X_res, y_res = X_train,y_train
+    98	        #print(y_test.shape)
+    99	
+   100	        #Model construction and training, only left the best paramaters, extend the param_xx with other parameters to do a grid search
+   101	        
+   102	        param_dt = {'criterion': ["gini"]}
+   103	        dt = DecisionTreeClassifier()
+   104	        cv_dt = GridSearchCV(dt,param_dt,cv=5)
+   105	        cv_dt.fit(X_res,y_res)
+   106	
+   107	        param_random = {'n_estimators':[20],'criterion': ['gini']}
+   108	        random = RandomForestClassifier()
+   109	        cv_random = GridSearchCV(random,param_random,cv=5)
+   110	        cv_random.fit(X_res,y_res)
+   111	
+   112	
+   113	        #print("terminado los entrenamientos\n")
+   114	
+   115	        predicted_dt = cv_dt.predict(X_test)
+   116	        conf_matrix_dt = mt.confusion_matrix(y_test,predicted_dt)
+   117	        dt_accu[i] = mt.accuracy_score(y_test,predicted_dt)
+   118	        dt_pre_weighted[i] = mt.precision_score(y_test,predicted_dt,average='weighted')
+   119	        dt_rec_weighted[i] = mt.recall_score(y_test,predicted_dt,average='weighted')
+   120	        dt_pre_micro[i] = mt.precision_score(y_test,predicted_dt,average='micro')
+   121	        dt_rec_micro[i] = mt.recall_score(y_test,predicted_dt,average='micro')
+   122	        dt_pre_macro[i] = mt.precision_score(y_test,predicted_dt,average='macro')
+   123	        dt_rec_macro[i] = mt.recall_score(y_test,predicted_dt,average='macro')
+   124	        dt_f1_weighted[i] = mt.f1_score(y_test,predicted_dt,average='weighted')
+   125	        dt_f1_micro[i] = mt.f1_score(y_test,predicted_dt,average='micro')
+   126	        dt_f1_macro[i] = mt.f1_score(y_test,predicted_dt,average='macro')
+   127	
+   128	        predicted_random = cv_random.predict(X_test)
+   129	        conf_matrix_random = mt.confusion_matrix(y_test,predicted_random)
+   130	        rf_accu[i] = mt.accuracy_score(y_test,predicted_random)
+   131	        rf_pre_weighted[i]= mt.precision_score(y_test,predicted_random,average='weighted')
+   132	        rf_rec_weighted[i] = mt.recall_score(y_test,predicted_random,average='weighted')
+   133	        rf_pre_micro[i] = mt.precision_score(y_test,predicted_random,average='micro')
+   134	        rf_rec_micro[i] = mt.recall_score(y_test,predicted_random,average='micro')
+   135	        rf_pre_macro[i] =  mt.precision_score(y_test,predicted_random,average='macro')
+   136	        rf_rec_macro[i] = mt.recall_score(y_test,predicted_random,average='macro')
+   137	        rf_f1_weighted[i] = mt.f1_score(y_test,predicted_random,average='weighted')
+   138	        rf_f1_micro[i] = mt.f1_score(y_test,predicted_random,average='micro')
+   139	        rf_f1_macro[i] =  mt.f1_score(y_test,predicted_random,average='macro')
+   140	
+   141	
+   142	        accuracy_dt = dt_accu.mean()
+   143	        precision_dt = dt_pre_weighted.mean()
+   144	        recall_dt = dt_rec_weighted.mean()
+   145	        precision_dt2 = dt_pre_micro.mean()
+   146	        recall_dt2 = dt_rec_micro.mean()
+   147	        precision_dt3 = dt_pre_macro.mean()
+   148	        recall_dt3 = dt_rec_macro.mean()
+   149	        f1score_dt = dt_f1_weighted.mean()
+   150	        f1score_dt2 = dt_f1_micro.mean()
+   151	        f1score_dt3 = dt_f1_macro.mean()
+   152	
+   153	        accuracy_random = rf_accu.mean()
+   154	        precision_random = rf_pre_weighted.mean()
+   155	        recall_random = rf_rec_weighted.mean()
+   156	        precision_random2 = rf_pre_micro.mean()
+   157	        recall_random2 = rf_rec_micro.mean()
+   158	        precision_random3 = rf_pre_macro.mean()
+   159	        recall_random3 = rf_rec_macro.mean()
+   160	        f1score_random = rf_f1_weighted.mean()
+   161	        f1score_random2 = rf_f1_micro.mean()
+   162	        f1score_random3 = rf_f1_macro.mean()
+   163	
+   164	
+   165	
+   166	    #showing metrics
+   167	    print("The accuracy for the classifiers are\n")
+   168	    print("dt: ", accuracy_dt)
+   169	    print("Random: ", accuracy_random)
+   170	    print("\n")
+   171	    
+   172	    print("The weighted precision for the classifiers are\n")
+   173	    print("dt: ", precision_dt)
+   174	    print("random: ", precision_random)
+   175	    print("\n")
+   176	    print("The micro precision for the classifiers are\n")
+   177	    print("precision_dt: ", precision_dt2)
+   178	    print("random: ", precision_random2)
+   179	    print("\n")
+   180	    print("The macro precision for the classifiers are\n")
+   181	    print("dt: ", precision_dt3)
+   182	    print("random: ", precision_random3)
+   183	
+   184	    print("\n")
+   185	    
+   186	    print("The weighted recall for the classifiers are\n")
+   187	 
+   188	    print("DT: ", recall_dt)
+   189	    print("random: ", recall_random)
+   190	    print("\n")
+   191	    print("The micro recall for the classifiers are\n")
+   192	  
+   193	    print("DT: ", recall_dt2)
+   194	    print("random: ", recall_random2)
+   195	    print("\n") 
+   196	    print("The macro recall for the classifiers are\n")
+   197	   
+   198	    print("DT: ", recall_dt3)
+   199	    print("random: ", recall_random3)
+   200	    print("\n") 
+   201	
+   202	    print("the weighted f1 score for the classifiers are\n")
+   203	   
+   204	    print("DT: ", f1score_dt)
+   205	    print("random: ", f1score_random)
+   206	    print("\n")
+   207	    print("the micro f1 score for the classifiers are\n")
+   208	   
+   209	    print("DT: ", f1score_dt2)
+   210	    print("random: ", f1score_random2)
+   211	    print("\n")
+   212	    print("the macro f1 score for the classifiers are\n")
+   213	   
+   214	    print("DT: ", f1score_dt3)
+   215	    print("random: ", f1score_random3)
+   216	    print("\n")
+   217	
+   218	
+   219	    print("\n The confusion matrix for the DT is:")
+   220	    print(conf_matrix_dt)

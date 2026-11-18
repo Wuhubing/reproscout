@@ -1,0 +1,111 @@
+We therefore dropped the choice task in order to focus on evaluative ratings as the more promising dependent variable.
+(4) We added a ten-trial practice phase before the learning phase, in which we provided feedback to the task in which participants had to react to a specific stimulus by pressing the space bar. 
+These practice trials were included because we had observed in previous studies that the task was not executed properly by all participants.
+
+## Design
+
+The study followed a 2 (US Valence: positive vs. negative) $\times$ 2 (CS duration: 30 ms vs. 1000 ms) within subjects design. 
+
+## Material
+
+We used the same 800 ms long sounds as USs that were used in the study by Heycke et al. (2017). 
+The sounds were consonant and dissonant triad chords, with the consonant sounds rated as more pleasant than the dissonant sounds [@topolinski_phasic_2012; @topolinski_phasic_2013]. 
+The Pokemon images used as CSs by Heycke et al. (2017) were replaced by a new set of images depicting less popular toy figures.
+
+```{r StimTest}
+
+# Visibility Data: did participants identify the correct CS after each trial
+# Read the item ident data
+if(cacheGitData){
+  load("../data/VisibilityData4")
+} else{
+VisibilityData4 <- read_gitdata("https://github.com/methexp/rawdata/tree/master/croco4", "DataTrials_Croco4")
+}
+
+# Get outliers for the 80ms criterion
+# Get average correct ident rate per participant
+VisibilityCorrData4 <- aggregate(correctAnswer ~ ParticipantNumber * CS * Length, VisibilityData4, mean)
+
+
+#t test for each CS: 02.png", "12.png", "13.png", "14.png", "16.png", "20.png", "39.png", "43.png", "67.png", "68.png", "70.png", "72.png", "77.png", "81.png", "98.png", "99.png"
+img02 <- ttestBF(subset(VisibilityCorrData4, CS == "02.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #
+img12 <- ttestBF(subset(VisibilityCorrData4, CS == "12.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #maybe
+img13 <- ttestBF(subset(VisibilityCorrData4, CS == "13.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img14 <- ttestBF(subset(VisibilityCorrData4, CS == "14.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #maybe
+img16 <- ttestBF(subset(VisibilityCorrData4, CS == "16.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) 
+img20 <- ttestBF(subset(VisibilityCorrData4, CS == "20.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img39 <- ttestBF(subset(VisibilityCorrData4, CS == "39.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img43 <- ttestBF(subset(VisibilityCorrData4, CS == "43.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #
+img67 <- ttestBF(subset(VisibilityCorrData4, CS == "67.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img68 <- ttestBF(subset(VisibilityCorrData4, CS == "68.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img70 <- ttestBF(subset(VisibilityCorrData4, CS == "70.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #
+img72 <- ttestBF(subset(VisibilityCorrData4, CS == "72.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #maybe
+img77 <- ttestBF(subset(VisibilityCorrData4, CS == "77.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #
+img81 <- ttestBF(subset(VisibilityCorrData4, CS == "81.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img98 <- ttestBF(subset(VisibilityCorrData4, CS == "98.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+img99 <- ttestBF(subset(VisibilityCorrData4, CS == "99.png")$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf)) #
+
+#overall visibility
+imgAll <- ttestBF(subset(VisibilityCorrData4, Length == 153)$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+
+# ############################################################
+# Second study with same stimuli but less contrast (brighter)
+# ############################################################
+
+# Visibility Data: did participants identify the correct CS after each trial
+# Read the item ident data
+if(cacheGitData){
+  load("../data/VisibilityData4B")
+} else{
+VisibilityData4B <- read_gitdata("https://github.com/methexp/rawdata/tree/master/croco4b", "DataTrials_Croco4b")
+}
+
+#remove pp 42- not an actual pp but started by accident by experimenter (no abort function - therefore clickign though to end of study -see demographics)
+VisibilityData4B <- subset(VisibilityData4B, !(ParticipantNumber == 42))
+
+# Get outliers for the 80ms criterion
+# Get average correct ident rate per participant
+VisibilityCorrData4B <- aggregate(correctAnswer ~ ParticipantNumber * CS * Length, VisibilityData4B, mean)
+
+#t test for each CS: 02.png", "12.png", "13.png", "14.png", "16.png", "20.png", "39.png", "43.png", "67.png", "68.png", "70.png", "72.png", "77.png", "81.png", "98.png", "99.png"
+img02b <- ttestBF(subset(VisibilityCorrData4B, CS == "02b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img12b <- ttestBF(subset(VisibilityCorrData4B, CS == "12b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img13b <- ttestBF(subset(VisibilityCorrData4B, CS == "13b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img14b <- ttestBF(subset(VisibilityCorrData4B, CS == "14b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img16b <- ttestBF(subset(VisibilityCorrData4B, CS == "16b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img20b <- ttestBF(subset(VisibilityCorrData4B, CS == "20b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img39b <- ttestBF(subset(VisibilityCorrData4B, CS == "39b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img43b <- ttestBF(subset(VisibilityCorrData4B, CS == "43.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img67b <- ttestBF(subset(VisibilityCorrData4B, CS == "67b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf))
+img68b <- ttestBF(subset(VisibilityCorrData4B, CS == "68b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img70b <- ttestBF(subset(VisibilityCorrData4B, CS == "70b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img72b <- ttestBF(subset(VisibilityCorrData4B, CS == "72b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img77b <- ttestBF(subset(VisibilityCorrData4B, CS == "77b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+img81b <- ttestBF(subset(VisibilityCorrData4B, CS == "81b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img98b <- ttestBF(subset(VisibilityCorrData4B, CS == "98b.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) #
+img99b <- ttestBF(subset(VisibilityCorrData4B, CS == "99.png")$correctAnswer, mu = 0.056, rscale = "medium", nullInterval = c(0, Inf)) 
+
+#overall visibility
+imgAllB <- ttestBF(subset(VisibilityCorrData4B, Length == 153)$correctAnswer, mu = 0.06, rscale = "medium", nullInterval = c(0, Inf))
+
+#The following stimuli were selected: 16b, 20b, 39b, 43, 68b, 70b, 81b, 98b
+```
+
+<!-- ### Pretests -->
+
+The CS selection procedure consisted of two parts: first, images were rated in order to select neutrally valenced images, second a visibility task was administered for this subset of images to select images that could not be identified above chance in a procedure similar to the learning paradigm of the main study.
+
+We downloaded 100 images of toy figures (Gogo's Crazy Bones), transformed them to black and white and removed all photo artifacts.
+In an online study, all images were rated on a scale ranging from -100 to 100 by 119 participants (who were shown 50 semi-randomly selected images each, resulting in 44 to 52 evaluations per image).
+We selected the 16 most neutral images (i.e., the 16 images with mean ratings closest to the midpoint of the scale) based on this pilot study.
+
+In a second pilot study, participants came to the lab and were presented with images in a procedure highly similar to the main study (see below):
+This second pilot study--in which each of the 16 images was shown 10 times for 30 ms in a cross-modal learning procedure -- served as a test for the visibility of stimuli.
+The images were presented along positive/negative sounds (randomly determined for each participant anew) to keep the presentation conditions as close as possible to the main study.
+After every trial, participants had to indicate which stimulus was shown in the preceding trial.
+Two additional images (that were not part of the selected 16 neutral images) were presented for 80 ms or 200 ms (10 times each) to raise the motivation to detect brief and masked stimuli [@pratte_task-difficulty_2009], which we will refer to as motivational stimuli.
+The intertrial interval, fixation cross, and timing of image-sound pairs was identical to the main study.
+In contrast to the main study, after every trial all 18 stimuli (16 CSs plus the two filler stimuli) were shown on the screen and participants were asked to select the image that had appeared during the trial.
+
+In a first part of this second pilot study with `r length(unique(VisibilityCorrData4$ParticipantNumber))` participants we identified four images that were identified at chance level (with $\mathit{BF_{01}}$ > 5).
+We reduced the contrast of all other images in order to reduce the visibility of the stimuli and ran another pilot study with the four images identified in the first part and all other images with a reduced contrast (16 CSs plus two filler stimuli).

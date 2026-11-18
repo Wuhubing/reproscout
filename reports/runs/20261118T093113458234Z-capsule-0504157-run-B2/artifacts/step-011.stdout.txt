@@ -1,0 +1,81 @@
+   520	
+   521	ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)
+   522	
+   523	#recode US as pos or neg into new variable
+   524	ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == "p", "positive", "negative")
+   525	ratingData5$USval <- as.factor(ratingData5$USval)
+   526	
+   527	ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)
+   528	
+   529	ratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)
+   530	ratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)
+   531	
+   532	
+   533	```
+   534	
+   535	```{r analyzeRate5}
+   536	if(cacheBF){
+   537	  load("../data/aovBF5")
+   538	} else{
+   539	aovBF5 <- anovaBF(
+   540	  likingRating ~ USval * correspondingTime + ParticipantNumber
+   541	  , data = ratingData5Aggr
+   542	  , whichRandom = "ParticipantNumber"
+   543	  , whichModels = "top"
+   544	  , rscaleFixed = "medium"
+   545	  , multicore = mcore
+   546	)
+   547	while(any(aovBF5@bayesFactor$error > 0.01)) aovBF5 <- recompute(aovBF5, multicore = mcore)
+   548	}
+   549	
+   550	aovBF5eta <- apa_print(aov_ez(
+   551	  dv = "likingRating" 
+   552	  , within = c("USval", "correspondingTime")
+   553	  , data = ratingData5Aggr
+   554	  , id = "ParticipantNumber"
+   555	  , fun_aggregate = mean
+   556	))
+   557	
+   558	
+   559	
+   560	# restructure data for t test
+   561	ratingData5AggrW <- spread(
+   562	  ratingData5Aggr
+   563	  , key = "USval"
+   564	  , value = "likingRating"
+   565	)
+   566	
+   567	
+   568	#t test for short presentation
+   569	allD30 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "153")$positive,
+   570	        subset(ratingData5AggrW, correspondingTime == "153")$negative,
+   571	        paired = TRUE, 
+   572	        rscale = "medium",
+   573	        nullInterval = c(0, Inf))
+   574	
+   575	#t test for long presentation
+   576	allD1000 <- ttestBF(subset(ratingData5AggrW, correspondingTime == "250")$positive,
+   577	        subset(ratingData5AggrW, correspondingTime == "250")$negative,
+   578	        paired = TRUE,
+   579	        rscale = "medium",
+   580	        nullInterval = c(0, Inf))
+   581	
+   582	```
+   583	
+   584	```{r visAndRate5}
+   585	tmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))
+   586	
+   587	#remove participants from exclusion list
+   588	tmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))
+   589	
+   590	tmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)
+   591	
+   592	#merge data frames (add correct identification to each pp in rating data frame)
+   593	names(tmpVis)[names(tmpVis)=="Length"] <- "correspondingTime"
+   594	ratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c("ParticipantNumber", "correspondingTime"))
+   595	
+   596	ratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative
+   597	
+   598	
+   599	# plot(subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer, subset(ratingData5AggrW, correspondingTime == "153")$EC, pch = 21,  col = "#045a8d", bg = "lightblue", ylab = "EC Effect", xlab = "mean visibility", main = "30 ms CS presentation")
+   600	# abline(lm(subset(ratingData5AggrW, correspondingTime == "153")$EC ~ subset(ratingData5AggrW, correspondingTime == "153")$correctAnswer), col="blue")

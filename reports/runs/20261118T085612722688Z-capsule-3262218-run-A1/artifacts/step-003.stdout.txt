@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -ex
+
+Rscript -e "rmarkdown::render(input = 'manuscript.Rmd', output_dir = '../results', clean = TRUE)"---
+---
+title             : "Citation patterns following a strongly contradictory replication result: Four case studies from psychology"
+shorttitle        : "Post-replication citation patterns"
+
+author: 
+  - name          : "Tom E. Hardwicke"
+    affiliation   : "1,2"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Nieuwe Achtergracht 129B, Department of Psychology, University of Amsterdam, 1018 WS Amsterdam, The Netherlands"
+    email         : "tom.hardwicke@uva.nl"
+  - name          : "Dénes Szűcs"
+    affiliation   : "3"
+  - name          : "Robert T. Thibault"
+    affiliation   : "4,5"
+  - name          : "Sophia Crüwell"
+    affiliation   : "2"
+  - name          : "Olmo R. van den Akker"
+    affiliation   : "6"
+  - name          : "Michèle B. Nuijten"
+    affiliation   : "6"
+  - name          : "John P. A. Ioannidis"
+    affiliation   : "2,7,8"
+
+affiliation:
+  - id            : "1"
+    institution   : "Department of Psychology, University of Amsterdam"
+  - id            : "2"
+    institution   : "Meta-Research Innovation Center Berlin (METRIC-B), QUEST Center for Transforming Biomedical Research, Charité – Universitätsmedizin Berlin"
+  - id            : "3"
+    institution   : "Department of Psychology, University of Cambridge, UK"
+  - id            : "4"
+    institution   : "School of Psychological Science, University of Bristol"
+  - id            : "5"
+    institution   : "MRC Integrative Epidemiology Unit at the University of Bristol"
+  - id            : "6"
+    institution   : "Department of Methodology and Statistics, Tilburg School of Social and Behavioral Sciences, Tilburg University"
+  - id            : "7"
+    institution   : "Meta-Research Innovation Center at Stanford (METRICS), Stanford University"
+  - id            : "8"
+    institution   : "Departments of Medicine, of Epidemiology and Population Health, of Biomedical Data Science, and of Statistics, Stanford University"
+
+author_note: >
+ 
+abstract: >
+   Replication studies that contradict prior findings may facilitate scientific self-correction by triggering a reappraisal of the original studies; however, the research community's response to replication results has not been studied systematically. One approach for gauging responses to replication results is to examine how they impact citations to original studies. In this study, we explored post-replication citation patterns in the context of four prominent multi-laboratory replication attempts published in the field of psychology that strongly contradicted and outweighed prior findings. Generally, we observed a small post-replication decline in the number of favourable citations and a small increase in unfavourable citations. This indicates only modest corrective effects and implies considerable perpetuation of belief in the original findings. Replication results that strongly contradict an original finding do not necessarily nullify its credibility; however, one might at least expect the replication results to be acknowledged and explicitly debated in subsequent literature. By contrast, we found substantial citation bias: the majority of articles citing the original studies neglected to cite relevant replication results. Of those articles that did cite the replication, but continued to cite the original study favourably, approximately half offered an explicit defence of the original study. Our findings suggest that even replication results that strongly contradict original findings do not necessarily prompt a corrective response from the research community. 
+  
+keywords          : "Replication, self-correction, citations, citation bias, meta-research"
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : yes
+always_allow_html: true
+
+lang              : "en-US"
+class             : "man"
+
+output            : 
+  papaja::apa6_pdf:
+    includes:
+        after_body: "appendix.tex"
+---
+
+```{r load_packages, warning=F}
+# load packages
+library(knitr) # for literate programming
+library(papaja) # for article template
+library(tidyverse) # for data munging
+library(here) # for finding files
+library(ggpubr) # for arranging plots
+library(kableExtra) # for table formatting
+```
+
+```{r perform_preprocessing}
+# loads raw data, performs preprocessing, saves preprocessed files
+source("preprocessing.R")
+```
+
+```{r load_data}
+# loads the processed data files output by the preprocessing performed above
+load(here("../data", "processed", "d_citations.rds"))
+load(here("../data", "processed", "d_reference.rds"))
+load(here("../data", "processed", "d_contentAnalysis.rds"))
+load(here("../data", "processed", "d_coauthors.rds"))
+```
+
+```{r load_functions}
+# load custom functions
+source("functions.R")
+```
+
+```{r add_standardized_citation_counts}
+# identify the five different case studies we are looking at
+caseNames <- c("baumeister", "sripada", "strack", "carter", "caruso")
+replicationYears <- c(2016, 2016, 2016, 2014, 2014)
+
+# set up some colour palettes
+teal <- "#00798c"
+blue <- "dodgerblue4"
+red <- "#CC6677"
+yellow <- "#DDCC77"
+lightgrey <- "grey75"
+darkgrey <- "grey35"
+beige <- "#D55E00"
+
+p1 <- c(lightgrey, darkgrey, red, yellow, teal)
+p2 <- c(lightgrey, beige, blue)
+
+# summarizes data at the year level for each case and adds standardized citation counts for target citations and reference class citations
+d_summary <- data.frame() # create empty list to hold data frames for each case
+for (i in seq(1, 5)) { # loop through cases
+  d <- standardizeCitations(
+    thisCase = caseNames[i],
+    citationData = d_citations %>% filter(case == caseNames[i]),
+    referenceData = d_reference %>% filter(case == caseNames[i]),
+    contentData = d_contentAnalysis %>% filter(case == caseNames[i]),
+    replicationYear = replicationYears[i]
+  )
+  d_summary <- bind_rows(d_summary, d) # append to dataframe

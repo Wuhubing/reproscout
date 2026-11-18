@@ -1,0 +1,3361 @@
+{
+  "scope": "Post-hoc follow-up of four selected pairs, not an independent test set.",
+  "pairs": [
+    {
+      "task_id": "capsule-0504157",
+      "repeat": 2,
+      "runs": {
+        "v4_A": {
+          "run_id": "20261118T063706044862Z-capsule-0504157-run-A2",
+          "summary": {
+            "run_id": "20261118T063706044862Z-capsule-0504157-run-A2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 2,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 125.68182970903581,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.049278300000000004,
+            "cost_uncached_upper_usd": 0.17265750000000002,
+            "model_calls": 19,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true
+              },
+              "correct_questions": 1,
+              "total_questions": 1,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 1000,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-009.stdout.txt",
+                  "line_start": 22,
+                  "line_end": 40
+                },
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 12,
+                  "line_end": 13
+                },
+                {
+                  "artifact": "artifacts/step-016.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_bT5Sb3CmmILT0HVWlKfi0lCY",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' README.md && printf '\n---REPRODUCING---\n' && sed -n '1,220p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ARnxFSrBnFCmUgpg26ICCLiG",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '---' && find . -maxdepth 2 -name 'manuscript.Rmd' -o -name '*.Rmd' -o -name 'run.sh' | sed 's#^./##'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_NEfLIuOe4iCYnK8zugW7wNbR",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' run.sh && printf '\n---RMD HEAD---\n' && sed -n '1,120p' manuscript_croco4_5.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5d1vPTesGTXfsph6suCXvJ4j",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && bash run.sh",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_8b460f33e31e45c7bd487b34f6d4b62a",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && bash run.sh"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ttu8miQK7KHCvpP5iEuK9vZZ",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '380,430p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Aspx88hlw15xPaQu23UxZ2cP",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find ../data -maxdepth 2 | sed -n '1,80p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_803d7df119e242c5ba1862ac690637b9",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('manuscript.Rmd')\ntext=p.read_text()\nold='''# This script automatically checks for the largest Participantnumber which is on github\ngithub_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\nfile_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")\nfile_names <- html_text(file_nodes)\nfile_names <- gsub(\".txt\", \"\", file_names)\n\n#get only Croco5_log files (these files appear at top of list on github)\ntmp <- subset(file_names, substring(file_names, 1, 10) == \"Croco5_log\")\nN <- as.numeric(length(tmp))'''\nnew='''# Use cached data to avoid network access in this reproduction environment\nload(\"../data/DemoData5\")\n# number of participant logs in the cached data\nN <- length(unique(DemoData5$ParticipantNumber)) - 1'''\nif old not in text:\n    raise SystemExit('pattern not found')\ntext=text.replace(old,new)\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render(input='manuscript.Rmd', output_dir='../results', clean=TRUE)\"",
+                "timeout": 0
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mKI3VGWSUB2AHyiZeeqsmY56",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('manuscript.Rmd')\ntext=p.read_text()\nold='''# This script automatically checks for the largest Participantnumber which is on github\ngithub_page <- read_html(\"https://github.com/methexp/rawdata/tree/master/croco5\")\nfile_nodes <- html_nodes(github_page, \".content .css-truncate-target .js-navigation-open\")\nfile_names <- html_text(file_nodes)\nfile_names <- gsub(\".txt\", \"\", file_names)\n\n#get only Croco5_log files (these files appear at top of list on github)\ntmp <- subset(file_names, substring(file_names, 1, 10) == \"Croco5_log\")\nN <- as.numeric(length(tmp))'''\nnew='''# Use cached data to avoid network access in this reproduction environment\nload(\"../data/DemoData5\")\n# number of participant logs in the cached data\nN <- length(unique(DemoData5$ParticipantNumber)) - 1'''\nif old not in text:\n    raise SystemExit('pattern not found')\ntext=text.replace(old,new)\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render(input='manuscript.Rmd', output_dir='../results', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ls0bs934X23B8B0x2ylsKeGA",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd manuscript.Rmd && perl -0pi -e 's/# This script automatically checks for the largest Participantnumber which is on github\\ngithub_page <- read_html\\(\"https:\\/\\/github.com\\/methexp\\/rawdata\\/tree\\/master\\/croco5\"\\)\\nfile_nodes <- html_nodes\\(github_page, \".content .css-truncate-target .js-navigation-open\"\\)\\nfile_names <- html_text\\(file_nodes\\)\\nfile_names <- gsub\\(\".txt\", \"\", file_names\\)\\n\\n#get only Croco5_log files \\(these files appear at top of list on github\\)\\ntmp <- subset\\(file_names, substring\\(file_names, 1, 10\\) == \"Croco5_log\"\\)\\nN <- as.numeric\\(length\\(tmp\\)\\)/# Use cached data to avoid network access in this reproduction environment\\nload(\"..\\/data\\/DemoData5\")\\n# number of participant logs in the cached data\\nN <- length(unique(DemoData5\\$ParticipantNumber)) - 1/s' manuscript.Rmd && Rscript -e \"rmarkdown::render(input='manuscript.Rmd', output_dir='../results', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_R7yRi2je77yjufHMEzjsXztr",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript.Rmd | sed -n '600,700p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mKOjtiusRvmOEcnwlgaimxH2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"ratingData5AggrW\" -n manuscript.Rmd | head -20 && nl -ba manuscript.Rmd | sed -n '520,600p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_H8LCTN4tNuMqahDs3so3nH0I",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nload('../data/DemoData5')\nload('../data/TrialData5')\nload('../data/VisibilityData4')\nload('../data/VisibilityData4B')\nload('../data/aovBF5')\nload('../data/ratingData5')\nload('../data/visData5')\n\nExclList5 <- c(4, 5, 7, 13, 30, 66, 160)\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)\nratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)\nratingData5AggrW <- tidyr::spread(ratingData5Aggr, key='USval', value='likingRating')\ntmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))\ntmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)\nnames(tmpVis)[names(tmpVis)=='Length'] <- 'correspondingTime'\nratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c('ParticipantNumber','correspondingTime'))\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_27jeMqGDMGgxr3QEj1RhVcSF",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nload('../data/ratingData5')\nprint(names(ratingData5))\nprint(head(ratingData5))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_6cRBNxsRbcdM0NxXMQUlsjlw",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"USval <-\" -n manuscript.Rmd | head -20 && nl -ba manuscript.Rmd | sed -n '500,530p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_FVHyMiOmc9tAD6s3RIwpvpwC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nload('../data/ratingData5')\nload('../data/visData5')\nExclList5 <- c(4, 5, 7, 13, 30, 66, 160)\nratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))\nratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS),1,1)=='p','positive','negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)\nratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)\nratingData5AggrW <- tidyr::spread(ratingData5Aggr, key='USval', value='likingRating')\ntmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))\ntmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)\nnames(tmpVis)[names(tmpVis)=='Length'] <- 'correspondingTime'\nratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c('ParticipantNumber','correspondingTime'))\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_n82unXmZxzaaS4PgeQjSQHkB",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nload('../data/visData5')\nprint(ls())\nprint(names(visData5))\nprint(head(visData5))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_d0672f8538a04bf288a727cf61087290",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nload('../data/ratingData5')\nload('../data/visData5')\nExclList5 <- c(4, 5, 7, 13, 30, 66, 160)\nratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5))\nratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS),1,1)=='p','positive','negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5Aggr$ParticipantNumber <- factor(ratingData5Aggr$ParticipantNumber)\nratingData5Aggr$correspondingTime <- factor(ratingData5Aggr$correspondingTime)\nratingData5AggrW <- tidyr::spread(ratingData5Aggr, key='USval', value='likingRating')\nvisData5Aggr <- aggregate(correctAnswer ~ ParticipantNumber * CS * US * Length, visData5, mean)\ntmpVis <- subset(visData5Aggr, !Length %in% c(158, 170))\ntmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN = sum)\nnames(tmpVis)[names(tmpVis)=='Length'] <- 'correspondingTime'\nratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by = c('ParticipantNumber','correspondingTime'))\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_OErRdgOBBcu1Ph5hH3bbl6j3",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":1000,\"evidence\":[{\"artifact\":\"artifacts/step-009.stdout.txt\",\"line_start\":22,\"line_end\":40},{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":12,\"line_end\":13},{\"artifact\":\"artifacts/step-016.stdout.txt\",\"line_start\":1,\"line_end\":3}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v4_B": {
+          "run_id": "20261118T063546423955Z-capsule-0504157-run-B2",
+          "summary": {
+            "run_id": "20261118T063546423955Z-capsule-0504157-run-B2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 2,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 75.04952191596385,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.046460100000000004,
+            "cost_uncached_upper_usd": 0.1912665,
+            "model_calls": 20,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": false
+              },
+              "correct_questions": 0,
+              "total_questions": 1,
+              "solved": false,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "1000 ms",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-018.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                },
+                {
+                  "artifact": "artifacts/step-008.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 19
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_UjruirnzHakbkRIrhO5dmBlC",
+              "function": "shell",
+              "arguments": {
+                "command": "pwd && ls -la && echo '--- /code ---' && ls -la /code && echo '--- /results ---' && ls -la /results && echo '--- /code/README.md ---' && sed -n '1,220p' /code/README.md && echo '--- /REPRODUCING.md ---' && sed -n '1,260p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_rXW2rYwrZlSoQz9wSV1lU2aS",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,200p' run.sh && echo '--- head of Rmd ---' && sed -n '1,120p' manuscript_croco4_5.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_BFNSb0HTvaVQb35h0DFXYCG7",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\"",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_cbIYXzMMy3FTCIoZZVoJCSuU",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_yvzSqe1CqZMxQXfHOZ8JymPR",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '380,430p' && echo '--- search for cacheGitData usage ---' && grep -n \"cacheGitData\\|read_html\\|github.com\" -n manuscript_croco4_5.Rmd | head -40 && echo '--- data dirs ---' && find /data -maxdepth 3 -type f | sed -n '1,120p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_zBdx1aQzhg52dJRZ6eWPBIgM",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /data && find . -maxdepth 2 -type f | sed -n '1,80p' && echo '--- count croco5 logs? ---' && find /data -type f | grep 'Croco5_log' | wc -l && find /data -type f | grep 'Croco5_log' | head"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_64649233ade5479c818ae76b2101795e",
+              "function": "shell",
+              "arguments": {
+                "command": "file /data/* && echo '--- object names maybe via R ---' && Rscript -e \"load('/data/DemoData5'); cat('DemoData5 rows', nrow(DemoData5), 'maxPN', max(DemoData5$ParticipantNumber), '\\n'); load('/data/VisibilityData4'); cat('VisibilityData4 rows', nrow(VisibilityData4), '\\n'); load('/data/VisibilityData4B'); cat('VisibilityData4B rows', nrow(VisibilityData4B), '\\n'); load('/data/ratingData5'); cat('ratingData5 rows', nrow(ratingData5), '\\n'); load('/data/TrialData5'); cat('TrialData5 rows', nrow(TrialData5), '\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_DAKNtmn2mq0ltzUGVGyb1HCA",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"Fig. 1\\|figure 1\\|Fig 1\\|presentation time\\|EC effect\" manuscript_croco4_5.Rmd | head -80"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_4JB4gujxFHOLajxIoEU8Pe1H",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '626,650p' && echo '--- nearby object definitions ---' && nl -ba manuscript_croco4_5.Rmd | sed -n '600,626p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_EkI3C1vmnb0SpH603TFxZwDT",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript -e \"load('/data/ratingData5'); cat('objects loaded: ratingData5 exists', exists('ratingData5'), 'class', class(ratingData5), 'rows', nrow(ratingData5), '\\n'); print(names(ratingData5)); cat('--- first rows ---\\n'); print(head(ratingData5,3))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Mn1PNj14wu6z76kBdQNH2FJt",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"ratingData5AggrW\" -n manuscript_croco4_5.Rmd | head -40"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_tXQ0YdG29EK4d7ZJaey8dFQ8",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript -e \"load('/data/ratingData5'); load('/data/VisibilityData4'); load('/data/VisibilityData4B'); ratingData5AggrW <- reshape(ratingData5, idvar=c('ParticipantNumber','correspondingTime'), timevar='CS', direction='wide'); # inspect names\ncat(names(ratingData5AggrW), '\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_GWBaG76LPS7TPasIJW2O8OfU",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '552,600p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_kIznRWFlFZcVGTQJKD3Xpyrl",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nload('/data/VisibilityData4')\nload('/data/VisibilityData4B')\n# mimic script up to figure 1\nlibrary(tidyr)\n# aggregate ratings by participant,time,USval\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * correspondingTime * correspondingUS, ratingData5, FUN = mean)\n# add USval based on correspondingUS names; infer from filename prefix p/n\nratingData5Aggr$USval <- ifelse(substr(ratingData5Aggr$correspondingUS,1,1)=='p','positive','negative')\nratingData5AggrW <- spread(ratingData5Aggr, key='USval', value='likingRating')\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, subset(VisibilityData5 <- if (exists('VisibilityData5')) VisibilityData5 else VisibilityData5, TRUE), FUN = sum)\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_uFuu2oiI5W4cVmnIOx3LaGfz",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript - <<'RS'\nload('/data/visData5')\ncat('objects', ls(), '\\n')\ncat('class', class(visData5), 'rows', nrow(visData5), '\\n')\nprint(names(visData5))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_LXvna8ZfmyeU4t81A2NFnaP4",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript - <<'RS'\nload('/data/ratingData5')\ncat('unique correspondingUS sample:\\n')\nprint(head(unique(ratingData5$correspondingUS),20))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_dfGZgJCX1jY9ZsxIZpC3MhJj",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nlibrary(tidyr)\n# aggregate ratings per participant, time, and US valence\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber + correspondingTime + correspondingUS, ratingData5, FUN = mean)\nratingData5Aggr$USval <- ifelse(substr(as.character(ratingData5Aggr$correspondingUS),1,1)=='p','positive','negative')\nratingData5AggrW <- spread(ratingData5Aggr, key = 'USval', value = 'likingRating')\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_YAg1bjS6QXkxbi7urw2Yc8Wz",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '520,565p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_faZ26b9h4ohbGekAREWlkeCr",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript - <<'RS'\nload('/data/ratingData5')\nratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime)\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == 'p', 'positive', 'negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(ratingData5$likingRating, by = list(ParticipantNumber=ratingData5$ParticipantNumber, USval=ratingData5$USval, correspondingTime=ratingData5$correspondingTime), FUN=mean)\nnames(ratingData5Aggr)[4] <- 'likingRating'\nlibrary(tidyr)\nratingData5AggrW <- spread(ratingData5Aggr, key='USval', value='likingRating')\nratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_v4X1LWllB90tkyPeh3jWNbDR",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"1000 ms\",\"evidence\":[{\"artifact\":\"artifacts/step-018.stdout.txt\",\"line_start\":1,\"line_end\":3},{\"artifact\":\"artifacts/step-008.stdout.txt\",\"line_start\":1,\"line_end\":19}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_A": {
+          "run_id": "20261118T093218449941Z-capsule-0504157-run-A2",
+          "summary": {
+            "run_id": "20261118T093218449941Z-capsule-0504157-run-A2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 2,
+            "experiment_id": "prepared-v5",
+            "status": "error",
+            "sample_error": "ValueError('Maximum model calls reached')",
+            "limit": null,
+            "seconds": 99.89942450000672,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.04482825000000001,
+            "cost_uncached_upper_usd": 0.17615625000000001,
+            "model_calls": 20,
+            "unsettled_model_requests": 0,
+            "evaluation": {},
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {},
+          "tool_calls": [
+            {
+              "id": "call_8SaTRi3wkXCs4Rb31ByHtTvQ",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && sed -n '1,220p' README.md && echo '--- REPRODUCING ---' && sed -n '1,220p' /REPRODUCING.md && echo '--- FILES ---' && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_OZSHnbiwVMaTqAKrKKQTLg1e",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"clean <-\\|clean=\" -n manuscript_croco4_5.Rmd | head -20 && grep -n \"cacheGitData\\|cacheBF\\|rmarkdown::render\\|render\" manuscript_croco4_5.Rmd | head -50 && sed -n '1,120p' run.sh"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_zyKWEdMz6lbwRVYGQHXTxvGC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,140p' manuscript_croco4_5.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_KuzvUuSiVjjJ04BbWg7B8Mgo",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"figure 1\\|Figure 1\\|CS presentation time\\|EC effect\" manuscript_croco4_5.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_uzzen2P5EJhwDug5p2g6DHSV",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p /results && Rscript -e \"rmarkdown::render('manuscript_croco4_5.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\"",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_PY6E84D5xnlHhcKs3XrRG9kK",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p /results && Rscript -e \"rmarkdown::render('manuscript_croco4_5.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_p9oBPdGvGotQyIiPaecqnKIu",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find . -maxdepth 3 -type d | sort | sed -n '1,120p' && find . -maxdepth 3 -type f | grep -i cached | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_HvYQkYAW4GnTXuMxlGAIwuG1",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find . -maxdepth 2 -type d -print"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_JaSoJ09MXsDRVhjRRn97NJiY",
+              "function": "shell",
+              "arguments": {
+                "command": "find /data -maxdepth 3 -type d -o -type f | sed -n '1,120p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_gYs7pNHHVtxKRRv2MoE5YuVl",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd /tmp/manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('/tmp/manuscript.Rmd')\ntext=p.read_text()\ntext=text.replace('cacheGitData <- TRUE','cacheGitData <- FALSE')\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render('/tmp/manuscript.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\"",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_zmvSoQNLCd1YWs4sXbANBhF5",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd /tmp/manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('/tmp/manuscript.Rmd')\ntext=p.read_text()\ntext=text.replace('cacheGitData <- TRUE','cacheGitData <- FALSE')\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render('/tmp/manuscript.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_2D3HS0fHJCsn1b6CyXwnzrdC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cp manuscript_croco4_5.Rmd /tmp/manuscript.Rmd && sed -i 's/cacheGitData <- TRUE/cacheGitData <- FALSE/' /tmp/manuscript.Rmd && grep -n 'cacheGitData' /tmp/manuscript.Rmd | head && Rscript -e \"rmarkdown::render('/tmp/manuscript.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_3UWF2Miyy3dktluMLfI2PDw0",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '210,320p' /tmp/manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_kbQCtzr1pESmCYmKFKV0UjZQ",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n 'read_gitdata' -n /tmp/manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Wpv91zYwqGH4SAoqLDXYp63Y",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '380,430p' /tmp/manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_26c2a740983747d4b3b9131e9277c87b",
+              "function": "shell",
+              "arguments": {
+                "command": "find /data/TrialData5 -maxdepth 1 -type f | sed -n '1,20p' && find /data/DemoData5 -maxdepth 1 -type f | sed -n '1,20p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_hg8E1VGwfSL2eCbEXA1j2OxN",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n 'github.com\\|raw.githubusercontent' /tmp/manuscript.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_XAlz2HCB5cfNyTYEaW66kPFH",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript -e \"load('/data/DemoData5'); cat('DemoData5 rows', nrow(DemoData5), 'participants', length(unique(DemoData5$ParticipantNumber)), '\\n'); load('/data/TrialData5'); cat('TrialData5 rows', nrow(TrialData5), 'participants', length(unique(TrialData5$ParticipantNumber)), '\\n'); load('/data/visData5'); cat('visData5 rows', nrow(visData5), 'participants', length(unique(visData5$ParticipantNumber)), '\\n'); load('/data/ratingData5'); cat('ratingData5 rows', nrow(ratingData5), 'participants', length(unique(ratingData5$ParticipantNumber)), '\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_3WR2qWjtvCqeX29hJiHBshSe",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript -e \"load('/data/DemoData5'); str(DemoData5[,1:5]); cat(names(DemoData5), '\\n'); table(DemoData5$ParticipantNumber)[1:10]\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_P03yYDRERPvVDSDeTonUVstm",
+              "function": "shell",
+              "arguments": {
+                "command": "Rscript -e \"load('/data/TrialData5'); cat(min(TrialData5$ParticipantNumber), max(TrialData5$ParticipantNumber), length(unique(TrialData5$ParticipantNumber)), '\\n'); print(head(unique(TrialData5$ParticipantNumber),20))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_B": {
+          "run_id": "20261118T093113458234Z-capsule-0504157-run-B2",
+          "summary": {
+            "run_id": "20261118T093113458234Z-capsule-0504157-run-B2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 2,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 61.0141797499964,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.029278199999999997,
+            "cost_uncached_upper_usd": 0.102027,
+            "model_calls": 13,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true
+              },
+              "correct_questions": 1,
+              "total_questions": 1,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "1000",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                }
+              ],
+              "explanation": "Figure 1 uses pTime labels 30 ms and 1000 ms; the computed mean EC is 0.7921687 for 153 (30 ms) and 20.4006024 for 250 (1000 ms), so 1000 ms is greatest."
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_a4pF5sRjEAZgij4l0t2SUEZf",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '---README---' && sed -n '1,220p' README.md && echo '---REPRODUCING---' && sed -n '1,220p' /REPRODUCING.md && echo '---FILES---' && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Id6vYUG5ameu19mz0XIh7re2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' run.sh && echo '---RMD HEAD---' && sed -n '1,120p' manuscript_croco4_5.Rmd && echo '---SEARCH CLEAN/CACHE---' && grep -n \"clean\\|cacheGitData\\|cacheBF\" -n manuscript_croco4_5.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_a17R5diN13VL76BulRwgHU20",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'manuscript_croco4_5.Rmd', output_dir = '../results', clean = TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_DayTMcnjmqJWyxKbeN60m0Sm",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '380,420p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_XBVvqZOq1w7u5UDh0CLbwo0k",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"figure 1\\|Fig. 1\\|EC effect\\|presentation time\" manuscript_croco4_5.Rmd | head -80"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_GnsG4mVVn8k2FcCnxor6Sdwy",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '626,650p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_20bfb6dbe34c4127a0824691a0cff71a",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find ../data -maxdepth 2 -type f | sed 's#^../data/##' | sort | head -100 && echo '---cachedResults---' && find . -maxdepth 2 -type d | sort | grep cached"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_OKGJYLkSdaFw2Jgl9IpjuT9D",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la ../data && echo '---' && find ../data -maxdepth 2 -type f | sed 's#^../data/##' | sort | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_96otwrd2sWt1GFSkooSWvFWW",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'load(\"../data/ratingData5\"); cat(\"objects:\\n\"); print(ls()); cat(\"str ratingData5:\\n\"); str(ratingData5); cat(\"names:\\n\"); print(names(ratingData5))'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_1QEy1BmN6u78J3ZAPn5Vg5KN",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"ratingData5AggrW\\|EC <-\\|aggregate(.*likingRating\" manuscript_croco4_5.Rmd | head -40"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_TRMfZluZ8VDV7Y5H712LNI2R",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba manuscript_croco4_5.Rmd | sed -n '520,600p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_xb4ycZWC7iwtOdI5dobeyBIT",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'load(\"../data/ratingData5\"); ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime); ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS),1,1)==\"p\", \"positive\", \"negative\"); ratingData5$USval <- as.factor(ratingData5$USval); ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean); ratingData5AggrW <- tidyr::spread(ratingData5Aggr, key=\"USval\", value=\"likingRating\"); ratingData5AggrW$EC <- ratingData5AggrW$positive - ratingData5AggrW$negative; print(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean));'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_BV3mZuKJGWrs7VRuHPJFNvLc",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"1000\",\"evidence\":[{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":1,\"line_end\":3}],\"explanation\":\"Figure 1 uses pTime labels 30 ms and 1000 ms; the computed mean EC is 0.7921687 for 153 (30 ms) and 20.4006024 for 250 (1000 ms), so 1000 ms is greatest.\"}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        }
+      },
+      "interpretation": "New B submits the numeric string `\"1000\"`, which the unchanged scorer accepts, instead of the old `\"1000 ms\"`. **It still violates the lesson requiring a JSON number.** Step 006 reads the author display mapping: internal time `250` corresponds to `1000 ms`; this is not a label contradiction. Step 012 calculates EC means from a newly assembled aggregation after the render fails. It omits the author visibility filtering and merge shown in step 011 (author lines 584\u2013594), rather than executing unchanged analytical blocks. Thus the score-format deficit disappears in this sample, but scientific-fidelity and strict output-type compliance remain unresolved. The old A success already involved an edited manuscript copy, so neither the old A score nor the new B score should be treated as an unqualified faithful reproduction. New A has no submission: it reaches the twenty-call limit after rendering/data searches, attempts to switch cacheGitData in a /tmp manuscript copy (009/010), and double-quoted R-variable queries (016\u2013018). The new A/B reversal is therefore partly a change in A, not simply a repaired B formatting deficit."
+    },
+    {
+      "task_id": "capsule-2708693",
+      "repeat": 1,
+      "runs": {
+        "v4_A": {
+          "run_id": "20261118T055452132871Z-capsule-2708693-run-A1",
+          "summary": {
+            "run_id": "20261118T055452132871Z-capsule-2708693-run-A1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 1,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 60.347165125014726,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.03006915,
+            "cost_uncached_upper_usd": 0.10385475,
+            "model_calls": 19,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 81,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 1
+                }
+              ]
+            },
+            "q2": {
+              "value": 620,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 2,
+                  "line_end": 2
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_NHyOK24vGc9u5RcEyo010jFh",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/README.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_f6b442279e4f49e5a7fd5098ea0c7abb",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '---' && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_vw1kBo2KCQ6EUnH4scIavD2K",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/readme.txt"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_350768e2a1a8495d9e4419e1caae16a0",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/run"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_MiphOL15SsHPh9EzQkRJc6pp",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'preregSR_manuscript.Rmd', output_dir = '../results', clean = TRUE)\"",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_wbpRKR5eRV4b05Eej5Axlq3X",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"rmarkdown::render(input = 'preregSR_manuscript.Rmd', output_dir = '../results', clean = TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_zvLwa7akLUe5v9AOW0MoLCpV",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"Table 1\\|Table 3\\|medicide\\|outcome discrepancy\" -n preregSR_manuscript.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_pdfv4gahONqFyTcnOUA535Mu",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '540,680p' preregSR_manuscript.Rmd && echo '---' && sed -n '950,1010p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_QjsmDA5wwF3QquWfpzu1BpuF",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"df<-read.csv('preregSR_dataClean.csv'); print(names(df)); print(table(df$discipline, useNA='ifany')); print(head(df[,c('discipline','denom','disclosedNum')]))\"",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_lTmvNoZIwpryEBOIWeiiyFji",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"df<-read.csv('preregSR_dataClean.csv'); print(names(df)); print(table(df$discipline, useNA='ifany')); print(head(df[,c('discipline','denom','disclosedNum')]))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_cd3f1a042cc64deda782beb32e6f123b",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la *.csv"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_MxoSS5YV0FM27QPNWp5Uc09E",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /data && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -100"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_I7CL9YpU08o93CEOs2hbfJZb",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"df<-read.csv('/data/preregSR_dataClean.csv'); cat('cols\\n'); print(names(df)); cat('discipline counts\\n'); print(table(df$discipline, useNA='ifany')); cat('head\\n'); print(head(df[,c('discipline','denom','disclosedNum')]))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_eJgBvyZrUgNwj4KIjtOqhweo",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'df<-read.csv(\"/data/preregSR_dataClean.csv\"); cat(\"discipline counts\\n\"); print(table(df$discipline, useNA=\"ifany\")); cat(\"head\\n\"); print(head(df[,c(\"discipline\",\"denom\",\"disclosedNum\")]));'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Q4DQf3tIiLrNtEnuvsWvm7yo",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'df<-read.csv(\"/data/preregSR_dataClean.csv\"); k_medicine <- sum(df$discipline==\"Medicine (MEDI)\"); n_disclosed <- sum(df$disclosedDenom, na.rm=TRUE); cat(\"medicine k:\", k_medicine, \"\\n\"); cat(\"table3 n disclosed:\", n_disclosed, \"\\n\");'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_fGpXGdfdIEJRACHKnWWI9CFe",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -l preregSR_manuscript.pdf && cp preregSR_manuscript.pdf ../results/"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_7ZnuznwLdzDatgbvcFT2ttK1",
+              "function": "shell",
+              "arguments": {
+                "command": "which pandoc && file /usr/bin/pandoc && /usr/bin/pandoc --version || true"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_dYrrE5kAxtl0gFwkat5sUk4H",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find . -name '*.pdf' -maxdepth 2 -type f | sed 's#^./##'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_0bde04d0c73148ad8e9d12407c131d12",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":81,\"evidence\":[{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":1,\"line_end\":1}]},\"q2\":{\"value\":620,\"evidence\":[{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":2,\"line_end\":2}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v4_B": {
+          "run_id": "20261118T055556608693Z-capsule-2708693-run-B1",
+          "summary": {
+            "run_id": "20261118T055556608693Z-capsule-2708693-run-B1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 1,
+            "experiment_id": "prepared-v4",
+            "status": "error",
+            "sample_error": "ValueError('Maximum model calls reached')",
+            "limit": null,
+            "seconds": 58.9968222079915,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.051880199999999994,
+            "cost_uncached_upper_usd": 0.13672500000000004,
+            "model_calls": 20,
+            "unsettled_model_requests": 0,
+            "evaluation": {},
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {},
+          "tool_calls": [
+            {
+              "id": "call_Bo56dnppmeR6QNbw1ahtiIRO",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && sed -n '1,220p' README.md && echo '--- REPRODUCING ---' && sed -n '1,220p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_TOJd0ary992Tf3sbx0FxnWkH",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && echo '--- readme.txt ---' && sed -n '1,220p' readme.txt && echo '--- REPRODUCING ---' && sed -n '1,220p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_2a902131f73146fa9d69e4785de8dc20",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && echo '--- run ---' && sed -n '1,220p' run && echo '--- head of Rmd ---' && sed -n '1,120p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_2yUAXX7lmnp4GBvVaTNdhLao",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p ../results && Rscript -e \"rmarkdown::render(input='preregSR_manuscript.Rmd', output_dir='../results', clean=TRUE)\"",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_70553fc02ffa47efb4a91843cc72c9b0",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p ../results && timeout 1200s Rscript -e \"rmarkdown::render(input='preregSR_manuscript.Rmd', output_dir='../results', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_o2HWTwOZqQNbhGRHard2LFVb",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && which pandoc && pandoc --version || true && Rscript -e \"cat('rmarkdown=', as.character(packageVersion('rmarkdown')), '\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_qGRG8dGBKtODcEWgZleRY2bY",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && command -v pandoc || true && find / -name pandoc -type f 2>/dev/null | head -20"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Vmx5Wcu6ISPnkX8jP0lw0F7X",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && /usr/lib/rstudio-server/bin/quarto/bin/tools/pandoc --version | head -5"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_hLnRNLSWHuj373IjHkvJBGD8",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"Table 1\\|medicide\\|medicide\\|Table 3\\|percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy\" -n preregSR_manuscript.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_fe316ce872dd4b1083cc7601289a6de2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '558,700p' preregSR_manuscript.Rmd && echo '--- table3 area ---' && sed -n '1188,1260p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_wmB1iSvbqICtEQIA82LasmCO",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"d<-read.csv('preregSR_dataClean.csv'); cat(names(d), sep='\\n'); cat('rows', nrow(d), '\\n'); print(table(d$discipline, useNA='ifany'))\"",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ucDt2HrGOrkb1EpLtoLUB2BI",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"d<-read.csv('preregSR_dataClean.csv'); cat(names(d), sep='\\n'); cat('rows', nrow(d), '\\n'); print(table(d$discipline, useNA='ifany'))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_M6g7FfQZYT3e74MW2bu1NvD2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /data && ls -la && echo '--- /code files with csv ---' && ls -la /code | grep csv"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mAq3d2oqhQ9lwZk3Z7QEMu7h",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"d<-read.csv('/data/preregSR_dataClean.csv'); cat('rows', nrow(d), '\\n'); print(sort(table(d$discipline), decreasing=TRUE)); cat('cols containing disc', grep('disc', names(d), value=TRUE), sep='\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_si1YUFqI7kDipU3SgzyjBJLV",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'd<-read.csv(\"/data/preregSR_dataClean.csv\"); cat(\"rows\", nrow(d), \"\\n\"); print(sort(table(d$discipline), decreasing=TRUE)); cat(\"cols containing disc\\n\"); print(grep(\"disc\", names(d), value=TRUE))'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_uzL1hvR70EeJUZ9sqo1Ro4Bj",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"disclose an outcome discrepancy\\|at least one outcome discrepancy\\|percentage of studies\" -n preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_47c3e627d28e47ae9ab2105a41b86f7a",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '930,980p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_UZIdAJmY1MeTHhbuiANFHyuO",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '800,930p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_2b464eda17b341e1894afff80f099ad2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '980,1045p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_a5Yb0qZ5XxyxPmGvTMVLl87b",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"ndisclosed\\|CIdisclosed\\|PIdisclosed\" -n preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_A": {
+          "run_id": "20261118T085034431301Z-capsule-2708693-run-A1",
+          "summary": {
+            "run_id": "20261118T085034431301Z-capsule-2708693-run-A1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 1,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 71.77714033302618,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.0519093,
+            "cost_uncached_upper_usd": 0.1467765,
+            "model_calls": 20,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": false
+              },
+              "correct_questions": 1,
+              "total_questions": 2,
+              "solved": false,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 81,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-017.stdout.txt",
+                  "line_start": 3,
+                  "line_end": 13
+                }
+              ]
+            },
+            "q2": {
+              "value": 21,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-017.stdout.txt",
+                  "line_start": 13,
+                  "line_end": 14
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_LiktUXvabxoISq2yyk0OVdEj",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' README.md && echo '\n---REPRODUCING---' && sed -n '1,220p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_kqR6ANYEDXJu3jDCIIejxhNp",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_qtqEkoZ950QGbsd24r7xbFqR",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' readme.txt && echo '\n---REPRODUCING---' && sed -n '1,220p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_t0SSSucAEGoNlA4s4dr2eJHE",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' run && echo '\n---RMD HEAD---' && sed -n '1,220p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_aPsToPpIJOevrIEPa7r1MH8A",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p ../results && Rscript -e \"rmarkdown::render(input='preregSR_manuscript.Rmd', output_dir='../results', clean=TRUE)\"",
+                "timeout": 1200000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_kDLVyNbzu7MoUWAdWj0IiNA2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p ../results && Rscript -e \"rmarkdown::render(input='preregSR_manuscript.Rmd', output_dir='../results', clean=TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_9902c7065a5f40f984ed5afcf4766f37",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && which pandoc && pandoc --version | head -5 && Rscript -e \"cat('rmd=', as.character(packageVersion('rmarkdown')), '\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mRpDyZ4pRE4lSN26wSl5nCfW",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"cat(rmarkdown::pandoc_available(), '\\n'); print(rmarkdown::find_pandoc())\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_O4rQnjdvim4lsbKEhAxAxsAR",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find /usr -path '*pandoc*' -type f 2>/dev/null | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_7c808556742d493a84ef86aab74d04a2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find /usr/lib/rstudio-server -type f -name pandoc -o -name pandoc.exe 2>/dev/null | head -20"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_TrzWaeS3Gtkq7oWRmteBleJt",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && /usr/lib/rstudio-server/bin/quarto/bin/tools/pandoc --version | head -5"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_j27D2QE2yiNpuJTIcgKzsSuD",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"Table 1\\|table 1\\|Table 3\\|table 3\" -n preregSR_manuscript.Rmd | head -20"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_XUcybP6QZ9MYfHPfqTZsz6Nn",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '530,700p' preregSR_manuscript.Rmd && echo '\n---TABLE3 AREA---' && sed -n '1170,1225p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_S7wmdV2AUdh1vAtfSFHbiifW",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"disclosed\" -n preregSR_manuscript.Rmd | head -40 && grep -n \"addFrame\" -n preregSR_manuscript.Rmd | head -40"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_K792UReRPb17ZagA1ZuBguN9",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '940,1010p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_VZy7K69ASC8Bcnsaav4n1jyk",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"df<-read.csv('/data/preregSR_dataClean.csv'); cat('nrow=',nrow(df),'\\n'); print(table(df$discipline)); cat('medicine k=', sum(df$discipline=='Medicine (MEDI)', na.rm=TRUE),'\\n'); cat('disclosed non-NA n=', sum(!is.na(df$disclosedNum)),'\\n'); cat('n disclosed total=', sum(df$disclosedNum, na.rm=TRUE),'\\n')\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_lOqSuODbwgPWha64Vug8TFIx",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"df<-read.csv('/data/preregSR_dataClean.csv'); cat('nrow=',nrow(df),'\\n'); print(sort(table(df$discipline), decreasing=TRUE)); cat('medicine k=', sum(df$discipline=='Medicine (MEDI)', na.rm=TRUE),'\\n'); cat('disclosed non-NA n=', sum(!is.na(df$disclosedNum)),'\\n');\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_46hjeZkPnE8jmonM0QAOuT2W",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'df<-read.csv(\"/data/preregSR_dataClean.csv\"); cat(\"nrow=\",nrow(df),\"\\n\"); print(sort(table(df$discipline), decreasing=TRUE)); cat(\"medicine k=\", sum(df$discipline==\"Medicine (MEDI)\", na.rm=TRUE),\"\\n\"); cat(\"disclosed non-NA n=\", sum(!is.na(df$disclosedNum)),\"\\n\");'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_WDmagML4ASNQ8HqmRG6uxJoz",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":81,\"evidence\":[{\"artifact\":\"artifacts/step-017.stdout.txt\",\"line_start\":3,\"line_end\":13}]},\"q2\":{\"value\":21,\"evidence\":[{\"artifact\":\"artifacts/step-017.stdout.txt\",\"line_start\":13,\"line_end\":14}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_B": {
+          "run_id": "20261118T085150930191Z-capsule-2708693-run-B1",
+          "summary": {
+            "run_id": "20261118T085150930191Z-capsule-2708693-run-B1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 1,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 49.86124649998965,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.03250785,
+            "cost_uncached_upper_usd": 0.10646625000000001,
+            "model_calls": 14,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 81,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 1
+                }
+              ]
+            },
+            "q2": {
+              "value": 620,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 4,
+                  "line_end": 18
+                },
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 2
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_f3eb8e0085ee4c5ea3489408800e7860",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && sed -n '1,220p' README.md && echo '--- REPRODUCING ---' && sed -n '1,260p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_II9bI9udhK6ZIUckALE6OYy3",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && echo '--- readme.txt ---' && sed -n '1,220p' readme.txt && echo '--- /REPRODUCING.md ---' && sed -n '1,260p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_308eW3kyEDAXrHKHBiXiOlXC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && cat run && echo '--- head of Rmd ---' && sed -n '1,220p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_14e8WRSyniTUmJETICQmyww7",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && mkdir -p ../results && Rscript -e \"rmarkdown::render(input = 'preregSR_manuscript.Rmd', output_dir = '../results', clean = TRUE)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_4022c130cf3b47468c10e149543b945a",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && which pandoc && pandoc --version || true && ls -l /usr/bin/pandoc || true && ls -l /usr/local/bin/pandoc || true && ls -l /results || true && ls -l ../results || true"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_z3xIDjfsjFRx6jwXemD5kalH",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n -i 'medicide\\|table 1\\|table 3\\|percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy' -n preregSR_manuscript.Rmd | head -50"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_pLYVcq2VUN8JbTE9ROHCfOfT",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '540,700p' preregSR_manuscript.Rmd && echo '--- table3 section ---' && sed -n '930,980p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_gwHD9f7dUnnQBjp7YzZk9FYq",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'df<-read.csv(\"/data/preregSR_dataClean.csv\"); cat(\"nrow\",nrow(df),\"\\n\"); print(table(df$discipline)); cat(\"--- disclosed? ---\\n\"); print(table(df$disclosed)); cat(\"--- row names cols ---\\n\"); print(names(df))'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_VAlLsg38F5lNmSUwtmptRGKk",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n 'CIdisclosed\\|PIdisclosed\\|disclosedNum\\|disclosedDenom' -n preregSR_manuscript.Rmd | head -40 && sed -n '820,930p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_nuVyU4F9iuKVvxKlFX0vAjDk",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '980,1010p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_RZF7FnDE5nZG8QaCwc6UpWjT",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '350,380p' preregSR_manuscript.Rmd"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_BOPAsFs9j9iqwGP9jQiqr5l2",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'df<-read.csv(\"/data/preregSR_dataClean.csv\"); cat(\"medicine_k\", sum(df$discipline==\"Medicine (MEDI)\"),\"\\n\"); cat(\"ndisclosed\", sum(as.numeric(df$disclosedDenom), na.rm=TRUE),\"\\n\"); cat(\"sum nonNA disclosedNum\", sum(!is.na(df$disclosedNum)),\"\\n\"); cat(\"table disclosedNum values\\n\"); print(table(df$disclosedNum, useNA=\"ifany\"))'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_q2UkRhkpJhcuglNmDqNgTVnI",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -l preregSR_manuscript.pdf && file preregSR_manuscript.pdf && cp preregSR_manuscript.pdf ../results/preregSR_manuscript.pdf && ls -l ../results/preregSR_manuscript.pdf"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_y4hq01VmsWeSmhaKmScb5KWG",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":81,\"evidence\":[{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":1,\"line_end\":1}]} ,\"q2\":{\"value\":620,\"evidence\":[{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":4,\"line_end\":18},{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":1,\"line_end\":2}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        }
+      },
+      "interpretation": "New B submits `(81, 620)` after a failed render, instead of exhausting twenty calls without a report. It reads the author Table 3 construction (010), checks the denominator conversion (011), and calculates `sum(as.numeric(df$disclosedDenom), na.rm=TRUE)` with protected R variables (012). New A instead submits `(81, 21)`: its repeated double-quoted R commands suffer shell-variable expansion (015/016), and its eventual quoted command (017) counts nonmissing studies rather than the requested denominator total. New B still uses direct targeted arithmetic instead of running the complete manuscript blocks; its PDF-copy attempt (013) fails before copying. This is a correct numeric answer and timely submission, not proof that rendering or full manuscript reproduction succeeded. The A/B reversal is an observed sample, not identification of the causal contribution of one reminder."
+    },
+    {
+      "task_id": "capsule-9054015",
+      "repeat": 1,
+      "runs": {
+        "v4_A": {
+          "run_id": "20261118T052421157449Z-capsule-9054015-run-A1",
+          "summary": {
+            "run_id": "20261118T052421157449Z-capsule-9054015-run-A1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 1,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 127.07819091697456,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.025046699999999998,
+            "cost_uncached_upper_usd": 0.06669149999999999,
+            "model_calls": 13,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 90,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-011.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 8
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_bELYJwwVG4cbFtONgDwMpGpi",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/README.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_JK2stwFofcj8APzGxbx6ONZ3",
+              "function": "read_file",
+              "arguments": {
+                "path": "/REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_FZExJ5LNDO6f9kaWUMS1Y126",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5zvDBQRv9uwXdgyKAScIeUjk",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R > /results/pancancer.out 2> /results/pancancer.err; echo EXIT:$?; wc -l /results/pancancer.out /results/pancancer.err; tail -50 /results/pancancer.out; tail -50 /results/pancancer.err"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_e317de0a82dc48fc8ed17d4fa55c0084",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"write\\|print\\|cat\\|q1\\|q2\\|probability\\|sensitivity\\|breast\" -n pancancer_calculation.R | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Zzw5Q0CWPhGphZSoroDbobIb",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_OncoXGKNF2DzgxFsFzx0tDGE",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,140p' pancancer_calculation.R && echo '---' && sed -n '140,260p' pancancer_calculation.R && echo '---' && sed -n '260,380p' pancancer_calculation.R && echo '---' && sed -n '380,620p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_cm0mHgOmYy79fqjEPZtRckrw",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"table1\\|table2\\|table3\\|supplemental_table1\\|supplemental_table2\\|supplemental_table3\" pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5915a378a12c4aa2884feb996762726f",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '370,460p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_FWFrjMIRMswLLhTKMzE1bWyE",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && python - <<'PY'\nimport pandas as pd\nfor f in ['table1_2021-05-15.csv','supplemental_table1_2021-05-15.csv']:\n    df=pd.read_csv(f)\n    print('FILE',f)\n    print(df.head(20).to_string())\n    print(df.columns.tolist())\nPY"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_lVMjn9cxKekdlyTe4n9pQY1D",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && Rscript - <<'RS'\nfor(f in c('table1_2021-05-15.csv','supplemental_table1_2021-05-15.csv')){\n  cat('FILE',f,'\\n')\n  d<-read.csv(f, check.names=FALSE)\n  print(head(d,20))\n  print(names(d))\n}\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_LKLdSe70tEv5eKY7eJOVgx0h",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && Rscript - <<'RS'\nlibrary(tidyverse)\nsource('/code/pancancer_calculation.R')\nd<-hypothetical_test(specificity=0.99)\nd<-d %>% ungroup() %>% filter(localization==0.8, prevalence==0.01) %>% select(sensitivity, CD) %>% distinct() %>% arrange(sensitivity)\nprint(d)\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mZeLZ1MJR03Ofiw9crxHbrW5",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":90,\"evidence\":[{\"artifact\":\"artifacts/step-011.stdout.txt\",\"line_start\":1,\"line_end\":8}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":1,\"line_end\":3}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v4_B": {
+          "run_id": "20261118T052632424013Z-capsule-9054015-run-B1",
+          "summary": {
+            "run_id": "20261118T052632424013Z-capsule-9054015-run-B1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 1,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 70.75833841698477,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.01695945,
+            "cost_uncached_upper_usd": 0.030524250000000003,
+            "model_calls": 7,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": false,
+                "q2": true
+              },
+              "correct_questions": 1,
+              "total_questions": 2,
+              "solved": false,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "80%",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-006.stdout.txt",
+                  "line_start": 7,
+                  "line_end": 8
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-005.stdout.txt",
+                  "line_start": 2,
+                  "line_end": 4
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_qvTpFRMFQocJ7rnFXFqU72zl",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '---README---' && (cat README.md 2>/dev/null || true) && echo '---REPRODUCING---' && cat /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_KEgektxnW7ftXG5bqaKyC9Qy",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' run && echo '--- head pancancer ---' && sed -n '1,220p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_xJJ7MAQMwonoyvz12UkIEfNU",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R > /results/run.out 2> /results/run.err; status=$?; echo EXIT:$status; tail -n 40 /results/run.err; tail -n 40 /results/run.out"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_eh3nykWTF0Kj2uTjDnHDrnEj",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_CEiF1REdlXdBI3gTmCaz0teu",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && echo 'table1'; head -20 table1_2021-05-15.csv; echo '---table2'; head -20 table2_2021-05-15.csv; echo '---table3'; head -20 table3_2021-05-15.csv; echo '---supp1'; head -20 supplemental_table1_2021-05-15.csv"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_YNsZAwOpB07ywJLxh4tWgycw",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && awk -F',' 'NR>1 {print}' supplemental_table1_2021-05-15.csv | sort -t',' -k6,6nr | head -20"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Ntd0PNxGDvtU9vlqxvyMjLJr",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"80%\",\"evidence\":[{\"artifact\":\"artifacts/step-006.stdout.txt\",\"line_start\":7,\"line_end\":8}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-005.stdout.txt\",\"line_start\":2,\"line_end\":4}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_A": {
+          "run_id": "20261118T082023636217Z-capsule-9054015-run-A1",
+          "summary": {
+            "run_id": "20261118T082023636217Z-capsule-9054015-run-A1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 1,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 128.6462140000076,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.028444499999999998,
+            "cost_uncached_upper_usd": 0.07726049999999998,
+            "model_calls": 11,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 90,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-009.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 5
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-008.stdout.txt",
+                  "line_start": 20,
+                  "line_end": 22
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_P89ISrfgtHNM2YFLSHFi9Gj9",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,200p' README.md && echo '---REPRODUCING---' && sed -n '1,200p' /REPRODUCING.md && echo '---FILES---' && ls -la"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_3ad88867938a429c8477ad5140e308fb",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find .. -name README.md -o -name REPRODUCING.md -o -name pancancer_calculation.R | sed -n '1,50p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_YloHs80Tn0xBzPrmokya7JrS",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,220p' /REPRODUCING.md && echo '---SCRIPT---' && sed -n '1,260p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_YQf5rXwi6h2fBsVR79cN8iKe",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '261,520p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Cual8a6SZx8GrioPWjJZrLur",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '520,760p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_BFQwih24wrRoo3EPVrJUw0Xa",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -lah ../data && ls -lah /data | sed -n '1,80p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ee3a5ada79654874a6545c58a85be0ff",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R",
+                "command_timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_QdzvcP9HY70yEcpaeXuN6tuM",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_nqAye5jJ9CFi16xpCYt6MOZd",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && ls -lah && echo '---table1---' && sed -n '1,40p' table1_2021-05-15.csv"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_EJjIk39l4icsrTvJNxrngkoY",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"source('pancancer_calculation.R'); d<-hypothetical_test(0.99); print(d %>% filter(prevalence==0.01) %>% arrange(desc(CD)) %>% select(sensitivity,prevalence,CD) %>% head(5))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_pMluQoEdzXsrgXBEDO27kQDw",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":90,\"evidence\":[{\"artifact\":\"artifacts/step-009.stdout.txt\",\"line_start\":1,\"line_end\":5}]} ,\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-008.stdout.txt\",\"line_start\":20,\"line_end\":22}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_B": {
+          "run_id": "20261118T082236563632Z-capsule-9054015-run-B1",
+          "summary": {
+            "run_id": "20261118T082236563632Z-capsule-9054015-run-B1",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 1,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 146.42373658303404,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.0421155,
+            "cost_uncached_upper_usd": 0.1047555,
+            "model_calls": 12,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 90,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 2,
+                  "line_end": 7
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-009.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 4
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_Rli3EpdISGFAp3yzMid6xQGv",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && sed -n '1,220p' README.md && echo '--- REPRODUCING ---' && sed -n '1,260p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_6ElrsLjzkzqVKIjnMYhn39Pg",
+              "function": "shell",
+              "arguments": {
+                "command": "sed -n '1,260p' /REPRODUCING.md && echo '--- pancancer head ---' && sed -n '1,260p' /code/pancancer_calculation.R && echo '--- run ---' && cat /code/run"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_7TlZQvti8U3Kc4j0q2IP2J1z",
+              "function": "shell",
+              "arguments": {
+                "command": "sed -n '261,520p' /code/pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_tIZSHY9hRmdaIV3ofsf3tDyU",
+              "function": "shell",
+              "arguments": {
+                "command": "sed -n '520,760p' /code/pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5ejrbKtZIbgjJUTuCafhx1FX",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R > /results/run_stdout.txt 2> /results/run_stderr.txt; echo EXIT:$?"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_t3kl7VpdrDjqMWlGteORTBFC",
+              "function": "shell",
+              "arguments": {
+                "command": "ls -la /results && echo '--- csvs ---' && find /results -maxdepth 1 -type f | sed 's#^#/##' | sort"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_geqMcZKpvZu6v9vJWlTeciku",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nsource('pancancer_calculation.R')\n# But script runs all computations; however source will do that. Instead just read results CSVs.\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Cxmw90RXgHSwHrqWl2MNE0FB",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nlibrary(readr)\nlibrary(dplyr)\nt1 <- read_csv('/results/table1_2021-05-15.csv', show_col_types=FALSE)\nprint(t1 %>% filter(`Tissue of origin`=='Breast', `Age, y`=='50') )\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_FFUj8ooqpQ2snP9KyVV3IwJg",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nlibrary(readr)\nlibrary(dplyr)\nt1 <- read_csv('/results/table1_2021-05-15.csv')\nprint(t1 %>% filter(`Tissue of origin`=='Breast', `Age, y`=='50'))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_0T8VZdCCNRHnt92jbW2kXUhM",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nsens <- seq(0.5, 0.9, by=0.1)\ncd <- 1000 * (0.005 + 0.01) * sens * 0.8\nprint(data.frame(sensitivity=sens, CD=cd))\ncat('max_sensitivity_pct=', sens[which.max(cd)]*100, '\\n')\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5eXxPippeixd23Jjrg5W4P4d",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":90,\"evidence\":[{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":2,\"line_end\":7}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-009.stdout.txt\",\"line_start\":1,\"line_end\":4}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        }
+      },
+      "interpretation": "New B submits numeric `90` and `1.24`, and passes both unchanged scoring checks; the old B selected `80%` from a different supplemental-table grid. New B executes the full author R script (step 005) and sources it again (007), then reads Table 1 for q2 (009). **Fidelity limitation:** q1 evidence is a newly implemented `1000*(0.005+0.01)*sensitivity*0.8` calculation (010), not a query of the author-generated hypothetical object. The constants/formula match the displayed author calculation for these conditions, but this violates the new instruction against reimplementing scientific computations. Thus the old wrong-table score deficit disappears in this sample, while strict lesson compliance is not established. New A queries the author `hypothetical_test(0.99)` object (009) and also passes. The primary scores are not adjusted by this manual review."
+    },
+    {
+      "task_id": "capsule-9054015",
+      "repeat": 2,
+      "runs": {
+        "v4_A": {
+          "run_id": "20261118T063058891718Z-capsule-9054015-run-A2",
+          "summary": {
+            "run_id": "20261118T063058891718Z-capsule-9054015-run-A2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 2,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 133.66683895897586,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.042688199999999996,
+            "cost_uncached_upper_usd": 0.09254100000000001,
+            "model_calls": 13,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "90%",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-009.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 8
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-008.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_6qtvVlgFUHFEXK04byDmv0oh",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/README.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_9372ab16c6b949339fd8518a4eec55a8",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '---' && find . -maxdepth 2 -name 'REPRODUCING.md' -o -name 'README.md' -o -name 'pancancer_calculation.R'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_me2H3qX4XDL6fffVxsQbr31p",
+              "function": "read_file",
+              "arguments": {
+                "path": "/REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_1zF6fqg7erXAKj4uygdeRzbI",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,260p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_dde226d44c614ea2afbad67c2f29b128",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '260,520p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_hOL24buKRBH98GtDxVhTefaC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '520,760p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_rurFDs2CMTsFNmuTUtLnvXOH",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_0fb894abb8d0467fb7dd2d66d260944f",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_0uVBjfyKWbDPP37w1lC43IQK",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && ls -la"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5waYUcJcFYLXYvSe1zKR56B6",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && cat table1_2021-05-15.csv"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_mzBV9L7NawMOYQ5ITZffNYkQ",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"source('pancancer_calculation.R'); d<-hypothetical_test(specificity=0.99); print(d %>% filter(prevalence==0.01, localization==0.8) %>% select(sensitivity, CD, EUC));\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5pZSDtQ3Qwdr4vEQbeNjYAYk",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"90%\",\"evidence\":[{\"artifact\":\"artifacts/step-009.stdout.txt\",\"line_start\":1,\"line_end\":8}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-008.stdout.txt\",\"line_start\":1,\"line_end\":3}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v4_B": {
+          "run_id": "20261118T062744402986Z-capsule-9054015-run-B2",
+          "summary": {
+            "run_id": "20261118T062744402986Z-capsule-9054015-run-B2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 2,
+            "experiment_id": "prepared-v4",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 190.29123858298408,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.0337794,
+            "cost_uncached_upper_usd": 0.10799700000000002,
+            "model_calls": 14,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": false,
+                "q2": true
+              },
+              "correct_questions": 1,
+              "total_questions": 2,
+              "solved": false,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "90% sensitivity for both cancers A and B",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-011.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 4
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 3
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_eXP4YXf4RbG3rsqtcv3knnVH",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && cat README.md && echo '--- REPRODUCING ---' && cat /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_5qpnNp6wl4VGF5owcM3eBxxu",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && echo '--- REPRODUCING ---' && cat /REPRODUCING.md && echo '--- run ---' && cat run"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_99VyjGCNSwz9UY5pAJ4mcjOv",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_le65zBsfkvtHOu2gC3VoxLYC",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_HVxME7oGU3ZrYPXPO2TqX206",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"5-year\\|diagnosis\\|sensitivity\\|preval\" -n pancancer_calculation.R && echo '--- tail stdout ---' && tail -n 60 artifacts/step-003.stdout.txt && echo '--- tail stderr ---' && tail -n 40 artifacts/step-003.stderr.txt"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_GY628NVTm56fdwffc62zTsK8",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '360,420p' pancancer_calculation.R && echo '--- around 500 ---' && sed -n '480,530p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_DIpXFmTtYr9dq3bGljNiKquT",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && find . -maxdepth 2 -type f | sed 's#^./##' | sort | head -200"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_U3xExKHkB552ZZHBn4aLObeB",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,120p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_07V8pNWYfBH7nou7WHMirTvG",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"source('pancancer_calculation.R'); d<-hypothetical_test(0.99); print(d %>% filter(prevalence==0.01) %>% select(sensitivity, localization, prevalence, EUC, CD) %>% arrange(desc(CD)))\"",
+                "timeout": 120000
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_50GOkcjkdphk71yKAs81fxL0",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"source('pancancer_calculation.R'); d<-hypothetical_test(0.99); print(d %>% filter(prevalence==0.01) %>% select(sensitivity, localization, prevalence, EUC, CD) %>% arrange(desc(CD)))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ghIsXNtMl2qVL9IPBJYyeXRK",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && python - <<'PY'\nimport pandas as pd\nf='table1_2021-05-15.csv'\ndf=pd.read_csv(f)\nprint(df.to_string(index=False))\nPY"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_RPcYZCigFRrTP7DlgYRZsPLY",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && Rscript -e \"d<-read.csv('table1_2021-05-15.csv'); print(d)\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_CXsWVSalc9uuNyCAvT6KTfX6",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"source('pancancer_calculation.R'); d<-hypothetical_test(0.99); x<-d %>% filter(prevalence==0.01) %>% arrange(desc(CD)) %>% slice(1); print(x %>% select(sensitivity, localization, prevalence, EUC, CD))\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_zq15H8MJBS0D1TleW0KsDfd5",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"90% sensitivity for both cancers A and B\",\"evidence\":[{\"artifact\":\"artifacts/step-011.stdout.txt\",\"line_start\":1,\"line_end\":4}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":1,\"line_end\":3}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_A": {
+          "run_id": "20261118T092553115314Z-capsule-9054015-run-A2",
+          "summary": {
+            "run_id": "20261118T092553115314Z-capsule-9054015-run-A2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "A",
+            "repeat": 2,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 104.37186066701543,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.0326439,
+            "cost_uncached_upper_usd": 0.09692550000000001,
+            "model_calls": 14,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": "90%",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-010.stdout.txt",
+                  "line_start": 10,
+                  "line_end": 12
+                }
+              ]
+            },
+            "q2": {
+              "value": "1.24%",
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-012.stdout.txt",
+                  "line_start": 1,
+                  "line_end": 4
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_GEpu5jz0I8zA3yqS3y0cajH1",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '1,200p' README.md && printf '\n---REPRODUCING---\n' && sed -n '1,200p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_LbAwxbDwA1uVgpAdm85QWuAX",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && find .. -name README.md -o -name REPRODUCING.md -o -name pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_kAMZENB13fspYs9NR8JWFsxH",
+              "function": "read_file",
+              "arguments": {
+                "path": "/REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_yobMgXT3XZWKAUBLKncXt9b0",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_fAPz0ycH81K32kERqnyO6QAM",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && tail -n 120 pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_qGgzKqQWXz8ulkbYGlY0i5XA",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e \"library(tidyverse); d<-readr::read_csv('../data/seer_merged_2000-2002_followup=15_2021-05-13.csv', col_types='ccddddddddd'); print(names(d)); print(head(d));\""
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Yh1At4R2Wm5T7y3jdtRoXZg1",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && grep -n \"probability of diagnosis\\|5-year probability\\|diagnosis\" -n pancancer_calculation.R | head -n 20"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_1hDFhGbnllVb95HRigYJxr2H",
+              "function": "read_file",
+              "arguments": {
+                "path": "/code/pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_YrCOhmyLZNppKdfjt77fWH47",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba pancancer_calculation.R | sed -n '380,410p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_wwldnCRIVLCPUhm8jGpteW62",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse)\n# q1 compute hypothetical_test at specificity 0.99 and localization 0.8 as plotted\nk_cancer_test <- function(dset, specificity=0.99, size=1000){\n gset <- dset %>% group_by(site)\n tset <- gset %>% summarize(prevs=value[feature == 'prevalence'], tests=value[feature == 'prevalence']*value[feature == 'sensitivity']*(1-value[feature == 'localization']))\n tests <- with(tset, size*(sum(tests)+(1-specificity)*(1-sum(prevs))))\n iset <- gset %>% summarize(cancers=value[feature == 'prevalence']*value[feature == 'sensitivity']*value[feature == 'localization'])\n cancers <- with(iset, size*sum(cancers))\n tibble(EUC=tests, CD=cancers)\n}\nhypothetical_test <- function(specificity, localization.a=c(0.5,0.8)){\n dset <- expand_grid(prevalence.a=0.005, prevalence.b=c(0,0.001,0.005,0.01,0.02), sensitivity.a=seq(0.5,0.9,by=0.1), localization.a=localization.a, mortality.a=0)\n dset <- dset %>% mutate(scenario=seq(nrow(dset)), sensitivity=sensitivity.a, localization=localization.a, prevalence=prevalence.b, sensitivity.b=sensitivity.a, localization.b=localization.a, mortality.b=mortality.a)\n dset <- dset %>% pivot_longer(-c(scenario,sensitivity,localization,prevalence), names_to=c('feature','site'), names_pattern='(.*)[.]([ab])', values_to='value')\n dset <- dset %>% mutate(specificity=specificity)\n dset <- dset %>% group_by(scenario,sensitivity,localization,specificity,prevalence)\n dset <- dset %>% do(k_cancer_test(., specificity=specificity))\n dset <- dset %>% ungroup()\n}\nd <- hypothetical_test(0.99) %>% filter(localization==0.8, prevalence==0.01)\nprint(d)\nprint(d %>% filter(CD==max(CD)))\n# q2 compute breast age 50 in seer data\ns <- read_csv('../data/seer_merged_2000-2002_followup=15_2021-05-13.csv', col_types='ccddddddddd') %>% rename(age=Age, site=Site) %>% select(-Population,-Diagnosis.Count,-Death.Count,-ends_with('Lower'),-ends_with('Upper')) %>% rename(prevalence=Diagnosis.Rate, mortality=Death.Rate)\nprint(s %>% filter(site=='Breast', age=='50-54') %>% select(prevalence))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ldoREFH5g54uLj1LHzBFDSwt",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && nl -ba pancancer_calculation.R | sed -n '360,380p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_wLrH8q8uJiOHtt6DkAi3hL34",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse)\nd<-read_csv('../data/seer_merged_2000-2002_followup=15_2021-05-13.csv', col_types='ccddddddddd') %>% rename(age='Age', site='Site') %>% select(site, age, prevalence='Diagnosis.Rate', mortality='Death.Rate') %>% mutate(site=factor(site, levels=c('Breast','Colon and Rectum','Liver and Intrahepatic Bile Duct','Lung and Bronchus','Ovary','Pancreas')), age=sub('-[567]4', '', age), prevalence=sprintf('%5.2f', 100*prevalence), mortality=sprintf('%5.2f', 100*mortality)) %>% arrange(site, age) %>% rename('Tissue of origin'=site,'Age, y'=age,'5-year probability of diagnosis, %'=prevalence,'15-year probability of death, %'=mortality)\nprint(d %>% filter(`Tissue of origin`=='Breast', `Age, y`=='50'))\nRS"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_cGB9thowkvbrFl99CO58CaeB",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R > /tmp/pan.out 2> /tmp/pan.err; echo EXIT:$?; tail -n 20 /tmp/pan.err; tail -n 20 /tmp/pan.out"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_Vehi4h8f67UsCPJn3Q2zBnZ9",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":\"90%\",\"evidence\":[{\"artifact\":\"artifacts/step-010.stdout.txt\",\"line_start\":10,\"line_end\":12}]},\"q2\":{\"value\":\"1.24%\",\"evidence\":[{\"artifact\":\"artifacts/step-012.stdout.txt\",\"line_start\":1,\"line_end\":4}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        },
+        "v5_B": {
+          "run_id": "20261118T092341047794Z-capsule-9054015-run-B2",
+          "summary": {
+            "run_id": "20261118T092341047794Z-capsule-9054015-run-B2",
+            "mode": "run",
+            "split": "official_test",
+            "condition": "B",
+            "repeat": 2,
+            "experiment_id": "prepared-v5",
+            "status": "success",
+            "sample_error": null,
+            "limit": null,
+            "seconds": 128.00988187501207,
+            "model": "openai/gpt-5.4-mini-2026-03-17",
+            "cost_estimated_usd": 0.03468765,
+            "cost_uncached_upper_usd": 0.06656925,
+            "model_calls": 9,
+            "unsettled_model_requests": 0,
+            "evaluation": {
+              "scorer": "reproscout-original-core-prediction-interval-v1",
+              "question_correct": {
+                "q1": true,
+                "q2": true
+              },
+              "correct_questions": 2,
+              "total_questions": 2,
+              "solved": true,
+              "policy": "Exact question mapping; no punctuation normalization or rounding adjustment."
+            },
+            "framework": "0.3.290",
+            "limitations": [
+              "Pre-provisioned environment, not unchanged Medium",
+              "Single-run report; see the frozen experiment for cohort comparisons",
+              "Artifact validity is not semantic evidence verification"
+            ],
+            "infrastructure_failure": false,
+            "infrastructure_reason": null,
+            "attempt_number": 1,
+            "network_attempt_failures": 0
+          },
+          "submission": {
+            "q1": {
+              "value": 90,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-008.png"
+                }
+              ]
+            },
+            "q2": {
+              "value": 1.24,
+              "evidence": [
+                {
+                  "artifact": "artifacts/step-006.stdout.txt",
+                  "line_start": 2,
+                  "line_end": 4
+                }
+              ]
+            }
+          },
+          "tool_calls": [
+            {
+              "id": "call_JbHXROxY2WxnI60aY7y0RdwW",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && ls -la && echo '--- README ---' && sed -n '1,220p' README.md && echo '--- REPRODUCING ---' && sed -n '1,260p' /REPRODUCING.md"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_JsYaVDiYf3VxO4IzfzIyrSKy",
+              "function": "shell",
+              "arguments": {
+                "command": "sed -n '1,260p' /REPRODUCING.md && echo '--- pancancer head ---' && sed -n '1,220p' /code/pancancer_calculation.R && echo '--- run ---' && cat /code/run"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_2rUUTAUmgMkrTabB0qkkU4zO",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '220,520p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_aw0VCT0sbKRMACZssrsyZuZR",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && sed -n '520,760p' pancancer_calculation.R"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_ueOKexKn6zE01r9PoBVlM3U0",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript pancancer_calculation.R > /results/run.out 2> /results/run.err; status=$?; echo EXIT:$status; ls -la /results;"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_oOmyPIWaHBCZ8cWmC9URQres",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /results && echo '--- table1 ---' && cat table1_2021-05-15.csv && echo '--- supplemental table1 ---' && cat supplemental_table1_2021-05-15.csv | sed -n '1,20p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_BHu39ykdNm1H0U8zyCdglMAO",
+              "function": "shell",
+              "arguments": {
+                "command": "cd /code && Rscript -e 'source(\"pancancer_calculation.R\"); d<-hypothetical_test(specificity=0.99); print(d %>% filter(prevalence==0.01, localization==0.8) %>% select(sensitivity, CD) %>% arrange(desc(CD)))' > /results/q1calc.txt 2>&1; cat /results/q1calc.txt | sed -n '1,120p'"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_sHqLyc2Dlh12sCm85eE84YoJ",
+              "function": "view_image",
+              "arguments": {
+                "path": "/results/hypothetical_cd_2021-05-15.png"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            },
+            {
+              "id": "call_UVrm8qBiCUsyIibjBdNEcwkY",
+              "function": "submit_report",
+              "arguments": {
+                "answers_json": "{\"q1\":{\"value\":90,\"evidence\":[{\"artifact\":\"artifacts/step-008.png\"}]},\"q2\":{\"value\":1.24,\"evidence\":[{\"artifact\":\"artifacts/step-006.stdout.txt\",\"line_start\":2,\"line_end\":4}]}}"
+              },
+              "parse_error": null,
+              "view": null,
+              "type": "function"
+            }
+          ]
+        }
+      },
+      "interpretation": "New B submits JSON numbers `90` and `1.24`, so the old prose-wrapped `90% sensitivity for both cancers A and B` failure is absent. It executes the original full R script (005), reads the generated Table 1 (006), and attempts a focused query of the author hypothetical function (007). That displayed query output is truncated by its own first-120-lines command and is mostly library messages, so it is not the cited numeric evidence. The actual q1 citation is the captured author-generated figure (008): the 90% curve is visibly highest at prevalence 1%. The preserved image was visually checked for this follow-up. Unlike repetition 1, no replacement scientific formula appears in this B trajectory. This supports the observed formatting/evidence improvement for this sample, without proving general compliance or a causal effect of one lesson. New A also scores correctly, but its cited step 010 uses an inline copy of the author function with the lives-saved computation and LS return column removed; step 012 reconstructs the Table 1 formatting pipeline. Running the original script later (013) does not change the provenance of its submitted evidence. Original hashes therefore must not be read as proof that both conditions performed unchanged science."
+    }
+  ]
+}

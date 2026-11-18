@@ -1,0 +1,294 @@
+This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.
+
+<sup>1</sup> You may need access to additional hardware and/or software licenses.
+
+# Prerequisites
+
+- [Docker Community Edition (CE)](https://www.docker.com/community-edition)
+- MATLAB/MOSEK/Stata licenses where applicable
+
+# Instructions
+
+## The computational environment (Docker image)
+
+This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:
+`registry.codeocean.com/published/2864e4d3-3d4f-45be-aca2-2f825938f391:v3`
+
+## Running the capsule to reproduce the results
+
+In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:
+```shell
+docker run --platform linux/amd64 --rm \
+  --workdir /code \
+  --volume "$PWD/data":/data \
+  --volume "$PWD/code":/code \
+  --volume "$PWD/results":/results \
+  registry.codeocean.com/published/2864e4d3-3d4f-45be-aca2-2f825938f391:v3 bash run
+```
+--- pancancer head ---
+##################################################
+# Project expected outcomes of pan-cancer testing
+# at age-specific screening occasions:
+# 1. expected exposed to unnecessary confirmation (EUCs)
+# 2. expected cancers detected (CDs)
+# 3. expected lives saved (LSs)
+##################################################
+library(tidyverse)
+library(scales)
+library(viridis)
+
+datestamp <- '2021-05-15'
+
+##################################################
+# Control paths
+##################################################
+basepath <- '..'
+datapath <- file.path(basepath, 'data')
+resupath <- file.path(basepath, 'results')
+
+##################################################
+# Project outcomes for k-cancer test
+#
+# Notation in paper         Variable name
+# ---------------------------------------
+# P_A                       prevalence (of A)
+# P_A(T+)                   sensitivity (of A)
+# L_A(T+)                   localization (of A)
+# Sp                        specificity
+# m_A                       mortality (of A)
+# R_A                       mortality reduction (of A)
+##################################################
+k_cancer_test <- function(dset, specificity=0.99, size=1000){
+    # group results by cancer site
+    gset <- dset %>% group_by(site)
+    # expected exposed to unnecessary confirmation
+    tset <- gset %>% summarize(prevs=value[feature == 'prevalence'],
+                               tests=value[feature == 'prevalence']*
+                                     value[feature == 'sensitivity'] *
+                                     (1-value[feature == 'localization']))
+    tests <- with(tset, size*(sum(tests)+(1-specificity)*(1-sum(prevs))))
+    # expected cancers detected
+    iset <- gset %>% summarize(cancers=value[feature == 'prevalence']*
+                                       value[feature == 'sensitivity']*
+                                       value[feature == 'localization'])
+    cancers <- with(iset, size*sum(cancers))
+    # expected lives saved
+    lset <- gset %>% summarize(lives=value[feature == 'effect']*
+                                     value[feature == 'sensitivity']*
+                                     value[feature == 'localization']*
+                                     value[feature == 'mortality'])
+    lives <- with(lset, size*sum(lives))
+    tibble(EUC=tests, CD=cancers, LS=lives)
+}
+
+##################################################
+# Pan-cancer test for two hypothetical cancers
+# across selected scenarios:
+# 1. varying sensitivity of both cancers=0.5 to 0.9
+# 2. fixed prevalence of cancer A=0.001
+# 3. varying prevalence of cancer B=0 to 0.01
+# 4. varying localization of both cancers=0.5 to 0.8
+# 5. varying specificity=0.95 to 0.99
+##################################################
+hypothetical_test <- function(specificity, localization.a=c(0.5, 0.8)){
+    dset <- expand_grid(prevalence.a=0.005,
+                        prevalence.b=c(0, 0.001, 0.005, 0.01, 0.02),
+                        sensitivity.a=seq(0.5, 0.9, by=0.1),
+                        localization.a=localization.a,
+                        mortality.a=0)
+    dset <- dset %>% mutate(scenario=seq(nrow(dset)),
+                            sensitivity=sensitivity.a,
+                            localization=localization.a,
+                            prevalence=prevalence.b,
+                            sensitivity.b=sensitivity.a,
+                            localization.b=localization.a,
+                            mortality.b=mortality.a)
+    dset <- dset %>% pivot_longer(-c(scenario,
+                                     sensitivity,
+                                     localization,
+                                     prevalence),
+                                  names_to=c('feature', 'site'),
+                                  names_pattern='(.*)[.]([ab])',
+                                  values_to='value')
+    dset <- dset %>% mutate(specificity=specificity)
+    dset <- dset %>% group_by(scenario,
+                              sensitivity,
+                              localization,
+                              specificity,
+                              prevalence)
+    dset <- dset %>% do(k_cancer_test(., specificity=specificity))
+    dset <- dset %>% ungroup()
+}
+
+##################################################
+# Read merged SEER incidence and IBM data
+##################################################
+read_data <- function(filename){
+    dset <- read_csv(file.path(datapath, filename), col_types='ccddddddddd')
+    dset <- dset %>% rename(age='Age', site='Site')
+    dset <- dset %>% select(-Population,
+                            -Diagnosis.Count,
+                            -Death.Count,
+                            -ends_with('Lower'),
+                            -ends_with('Upper'))
+    dset <- dset %>% rename(prevalence='Diagnosis.Rate',
+                            mortality='Death.Rate')
+    dset <- dset %>% mutate(site=factor(site,
+                                        levels=c('Breast',
+                                                 'Colon and Rectum',
+                                                 'Liver and Intrahepatic Bile Duct',
+                                                 'Lung and Bronchus',
+                                                 'Ovary',
+                                                 'Pancreas'),
+                                        labels=c('Breast',
+                                                 'Colorectal',
+                                                 'Liver',
+                                                 'Lung',
+                                                 'Ovary',
+                                                 'Pancreas')))
+}
+
+##################################################
+# Age-specific outcomes from SEER data
+##################################################
+age_analysis <- function(bset, aset, specificity=0.99){
+    dset <- bind_rows(bset, aset)
+    dset <- dset %>% mutate(candidate=unique(bset$site))
+    dset <- dset %>% pivot_longer(-c(age, site, candidate),
+                                  names_to='feature',
+                                  values_to='value')
+    dset <- dset %>% group_by(age)
+    dset <- dset %>% do(k_cancer_test(., specificity=specificity))
+    dset <- dset %>% ungroup()
+}
+
+##################################################
+# Age-specific incremental impact of candidate cancer
+##################################################
+age_analysis_incremental <- function(dset, existing, specificity=0.99){
+    aset <- dset %>% filter(site %in% existing)
+    bset <- dset %>% filter(!site %in% existing)
+    bset <- bset %>% group_by(site)
+    rset <- bset %>% do(age_analysis(., aset, specificity=specificity))
+    rset <- rset %>% ungroup()
+}
+
+##################################################
+# Control plot aesthetics
+##################################################
+gg_theme <- function(...){
+    theme_set(theme_classic())
+    theme_update(axis.text=element_text(size=10, colour='black'),
+                 axis.line=element_line(colour='black'),
+                 axis.title=element_text(size=14),
+                 axis.ticks.length=unit(0.2, 'cm'),
+                 strip.background=element_rect(colour=NA, fill=NA),
+                 strip.text=element_text(size=14))
+    theme_update(...)
+}
+
+##################################################
+# Visualize EUCs in hypothetical analysis
+##################################################
+hypothetical_euc_plot <- function(type, ext='png', saveit=FALSE){
+    dset <- bind_rows(hypothetical_test(specificity=0.97),
+                      hypothetical_test(specificity=0.98),
+                      hypothetical_test(specificity=0.99),
+                      hypothetical_test(specificity=1.0))
+    if(type == 'sensitivity'){
+        dset <- dset %>% filter(prevalence == 0.005,
+                                localization == 0.8)
+        dset <- dset %>% select(-prevalence, -localization, -CD, -LS)
+        dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+                                                   levels=unique(sensitivity),
+                                                   labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+        ltitle <- 'Sensitivity for\ncancers A and B'
+    }
+    if(type == 'prevalence'){
+        dset <- dset %>% filter(sensitivity == 0.7,
+                                prevalence != 0,
+                                localization == 0.8)
+        dset <- dset %>% select(-sensitivity, -localization, -CD, -LS)
+        dset <- dset %>% mutate(prevalence=factor(prevalence,
+                                                  levels=unique(prevalence),
+                                                  labels=sprintf('%3.1f%%', 100*unique(prevalence))))
+        ltitle <- 'Prevalence of\ncancer B'
+    }
+    if(type == 'localization'){
+        dset0.6 <- bind_rows(hypothetical_test(specificity=0.97, localization.a=0.6),
+                             hypothetical_test(specificity=0.98, localization.a=0.6),
+                             hypothetical_test(specificity=0.99, localization.a=0.6),
+                             hypothetical_test(specificity=1.0, localization.a=0.6))
+        dset0.7 <- bind_rows(hypothetical_test(specificity=0.97, localization.a=0.7),
+                             hypothetical_test(specificity=0.98, localization.a=0.7),
+                             hypothetical_test(specificity=0.99, localization.a=0.7),
+                             hypothetical_test(specificity=1.0, localization.a=0.7))
+        dset <- bind_rows(dset, dset0.6, dset0.7)
+        dset <- dset %>% filter(sensitivity == 0.7,
+                                prevalence == 0.005)
+        dset <- dset %>% select(-sensitivity, -prevalence, -CD, -LS)
+        dset <- dset %>% mutate(localization=factor(localization,
+                                                    levels=unique(sort(localization)),
+                                                    labels=sprintf('%2.0f%%', 100*unique(sort(localization)))))
+        ltitle <- 'Localization for\ncancers A and B'
+    }
+    gg_theme()
+    gg <- ggplot(data=dset)
+    gg <- gg+geom_line(aes_string(x='specificity',
+                                  y='EUC',
+                                  alpha=type),
+                       size=0.6)
+    gg <- gg+scale_x_continuous('\nSpecificity for cancers A and B',
+                                labels=percent_format(accuracy=1),
+                                breaks=seq(0.97, 1, by=0.01),
+                                limits=c(0.969, 1.001))
+    gg <- gg+scale_y_continuous('Exposed to unnecessary confirmation per 1,000 women\n',
+                                limits=c(0, 35),
+                                breaks=seq(0, 35, by=5),
+                                expand=c(0, 0))
+    gg <- gg+guides(alpha=guide_legend(title=ltitle,
+                                       keywidth=unit(1, 'cm'),
+                                       title.theme=element_text(size=12),
+                                       label.theme=element_text(size=12, angle=0)))
+    print(gg)
+    if(saveit){
+        filename <- paste('hypothetical_euc', type, datestamp, sep='_')
+        filename <- paste(filename, ext, sep='.')
+        ggsave(file.path(resupath, filename),
+               plot=gg,
+               width=6,
+               height=6)
+    }
+}
+
+##################################################
+# Visualize CDs in hypothetical analysis
+##################################################
+hypothetical_cd_plot <- function(ext='png', saveit=FALSE){
+    dset <- hypothetical_test(specificity=0.99)
+    dset <- dset %>% ungroup()
+    dset <- dset %>% filter(localization == 0.8)
+    dset <- dset %>% select(-specificity, -localization, -EUC, -LS)
+    dset <- dset %>% mutate(sensitivity=factor(sensitivity,
+                                               levels=unique(sensitivity),
+                                               labels=sprintf('%2.0f%%', 100*unique(sensitivity))))
+    gg_theme()
+    gg <- ggplot(data=dset)
+    gg <- gg+geom_line(aes(x=prevalence,
+                           y=CD,
+                           alpha=sensitivity),
+                       size=0.6)
+    gg <- gg+scale_x_continuous('\nPrevalence of cancer B',
+                                labels=percent_format(accuracy=0.1),
+                                breaks=seq(0, 0.02, by=0.005))
+    gg <- gg+scale_y_continuous('Cancers detected per 1,000 women\n',
+                                limits=c(0, 35),
+                                breaks=seq(0, 35, by=5),
+                                expand=c(0, 0))
+    gg <- gg+guides(alpha=guide_legend(title='Sensitivity for\ncancers A and B',
+--- run ---
+#!/usr/bin/env bash
+set -ex
+
+# This is the master script for the capsule. When you click "Reproducible Run", the code in this file will execute.
+Rscript pancancer_calculation.R "$@"

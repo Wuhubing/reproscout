@@ -1,0 +1,327 @@
+CELL 23 code
+# defining our function
+x = np.array([5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+
+y1 = np.array([159.97645508,170.29222656,175.70827148,193.30936523,214.00797852,246.58135742,287.28441406,385.15074219,635.50411133,1112.98717773,1577.06225586,2044.02054688,2652.12141602,3042.43119141,3448.40309570,3887.13243164])
+y2 = np.array([173.62732422,176.72299805,187.96225586,193.06586914,209.81939453,220.21913086,230.03536133,235.34520508,239.44790039,242.91797852,249.31519531,257.01619141,263.66392578,279.27941406,286.85210938,286.81621094])
+y3 = np.array([176.63676758,185.91016602,195.22315430,205.29654297,215.80696289,225.34723633,232.46809570,239.64948242,250.47525391,257.57812500,262.83149414,270.25841797,262.81876953,285.65182617,291.78979492,302.35929688])
+# defining our error
+y1_error = np.array([0.00462621,0.00190587,0.00162064,0.00389760,0.00114819,0.00463724,0.00200282,0.00175681,0.00320782,0.00157637,0.00439856,0.00226346,0.02876437,0.00232966,0.01225066,0.00219028])
+y2_error = np.array([0.00462621,0.00190587,0.00162064,0.00389760,0.00114819,0.00463724,0.00200282,0.00175681,0.00320782,0.00157637,0.00439856,0.00226346,0.02876437,0.00232966,0.01225066,0.00219028])
+y3_error = np.array([0.00462621,0.00190587,0.00162064,0.00389760,0.00114819,0.00463724,0.00200282,0.00175681,0.00320782,0.00157637,0.00439856,0.00226346,0.02876437,0.00232966,0.01225066,0.00219028])
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.plot(x, y1,label=" COMBINATION", marker ='o', color="r", markerfacecolor="None", markersize=8, mew=2)
+ax.plot(x, y2,label=" GREEDY", marker ='^', color="g", markerfacecolor="None", markersize=8, mew=2)
+ax.plot(x, y3,label=" LINEAR PROGRAMMING", marker ='s', color="b", markerfacecolor="None", markersize=8, mew=2)
+
+
+axins = inset_axes(ax, 2.5,2.5 , loc=2,bbox_to_anchor=(0.1, 0.80),bbox_transform=ax.transAxes)
+
+axins.plot(x, y1,label=" COMBINATION", marker ='o', color="r", markerfacecolor="None", markersize=8, mew=2)
+axins.plot(x, y2,label=" GREEDY", marker ='^', color="g", markerfacecolor="None", markersize=8, mew=2)
+axins.plot(x, y3,label=" LINEAR PROGRAMMING", marker ='s', color="b", markerfacecolor="None", markersize=8, mew=2)
+
+axins.set_xlim(4.5,12.5)
+axins.set_ylim(155,280)
+
+
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+ax.errorbar(x, y1, yerr = y1_error, color="r", capsize=2, capthick=1,)
+ax.errorbar(x, y2, yerr = y2_error, color="g", capsize=2, capthick=1,)
+ax.errorbar(x, y3, yerr = y3_error, color="b", capsize=2, capthick=1,)
+
+axins.errorbar(x, y1, yerr = y1_error, color="r", capsize=2, capthick=1,)
+axins.errorbar(x, y2, yerr = y2_error, color="g", capsize=2, capthick=1,)
+axins.errorbar(x, y3, yerr = y3_error, color="b", capsize=2, capthick=1,)
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of NSFs",fontsize=20, **csfont)
+ax.set_ylabel("Memory (KiB)",fontsize=20, **csfont)
+
+
+plt.xticks(visible=True)
+plt.yticks(visible=True)
+mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.5")
+
+
+major_ticks = np.arange(5, 21, 1)
+minor_ticks = np.arange(5, 13, 1)
+
+ax.set_xticks(major_ticks,fontname = "Times New Roman")
+axins.set_xticks(minor_ticks,fontname = "Times New Roman")
+
+ax.grid()
+axins.grid()
+
+plt.savefig('../results/provisioning-memory.eps', format='eps')
+---
+CELL 24 code
+# defining our function
+x = np.array([4,6,8,10,12,14])
+
+y1 = np.array([0.00020149,0.00021480,0.00025953,0.00031508,0.00038464,0.00043863]) * 1000
+y2 = np.array([0.00015232,0.00016220,0.00019786,0.00022296,0.00028351,0.00030767]) * 1000
+
+
+# defining our error
+y1_error = np.array([0.00001153,0.00000953,0.00000981,0.00001135,0.00001189,0.00001322]) * 1000
+y2_error = np.array([0.00000716,0.00000508,0.00000782,0.00001007,0.00001525,0.00001428]) * 1000
+
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+ax.grid(zorder=0,axis='y',color="black", linestyle = (0,(0.1,2)), dash_capstyle = 'projecting')
+# error bar
+ax.bar(x, y1, yerr=y1_error, label="Extraction with DFA-based YANG data model verification"   , color="#7f7fff", align='center', ecolor='black', capsize=5,zorder=3)
+ax.bar(x, y2, yerr=y2_error, label="Extraction without YANG data model verification", color="#7fbf7f", align='center', ecolor='black', capsize=5,zorder=3)
+
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+#plt.ticklabel_format(useMathText=True,axis='y', style='sci', scilimits=(0,1))
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of Elements",fontsize=20, **csfont)
+ax.set_ylabel("Time (milliseconds)",fontsize=20, **csfont)
+
+y_ticks = np.arange(0, 0.5, 0.05)
+plt.xticks(visible=True)
+plt.yticks(y_ticks,visible=True)
+
+plt.ylim(0.0,0.46)
+
+plt.savefig('../results/extractor-v2.eps', format='eps')
+---
+CELL 25 code
+# defining our function
+x = np.array([a for a in range(41,51)])
+
+y1 = np.array([1,
+0.986975399,
+0.974601401,
+0.961480008,
+0.950377148,
+0.937262379,
+0.923632924,
+0.912947245,
+0.902698418,
+0.892857143
+])
+y2 = np.array([0.925373134,
+0.914399586,
+0.904004267,
+0.892961714,
+0.883647397,
+0.876064392,
+0.867755313,
+0.859495929,
+0.851607877,
+0.845238095
+])
+
+y1_error = np.array([0,
+0.004281778,
+0.006789192,
+0.007949848,
+0.009302401,
+0.008693803,
+0.007048322,
+0.005591736,
+0.003395325,
+0.003395325
+])
+
+y2_error = np.array([0,
+0.002338553,
+0.003141094,
+0.00339428,
+0.002760979,
+0.002246777,
+0.002830657,
+0.002815485,
+0.00209472,
+0.00209472
+])
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.grid(zorder=0,axis='both',color="black", linestyle = (0,(0.5,2)))
+ax.plot(x, y1, label="Label-based", marker ='o',color="#4ca5ff",zorder=3)
+ax.plot(x, y2, label="Semantic-based", marker ='^',color="#ff4d4c",zorder=3)
+ax.errorbar(x, y1, yerr = y1_error, color="#4ca5ff", capsize=2, capthick=1,)
+ax.errorbar(x, y2, yerr = y2_error, color="#ff4d4c", capsize=2, capthick=1,)
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="lower left",prop=font)
+
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of Elements",fontsize=20, **csfont)
+ax.set_ylabel("Accuracy",fontsize=20, **csfont)
+
+x_ticks = np.arange(41, 51, 1)
+y_ticks = np.arange(0.6,1.1, 0.1)
+plt.xticks(x_ticks,visible=True)
+plt.yticks(y_ticks,visible=True)
+plt.ylim(0.8,1.01)
+
+
+
+plt.savefig('../results/mapper-v2.eps', format='eps')
+---
+CELL 26 code
+# defining our function
+x = np.array([a for a in range(41,51)])
+
+y1 = np.array([3.910362983,
+4.826951623,
+5.729691529,
+6.64875474,
+7.662363029,
+8.408527803,
+9.397049761,
+11.25717583,
+12.03709865,
+13.07107432
+])
+
+y2 = np.array([31.824031,
+43.57801902,
+55.63877158,
+68.18024266,
+80.44786737,
+92.67567444,
+105.9118191,
+132.2637429,
+143.2289096,
+156.0652623
+])
+
+y1_error = np.array([0.065873203,
+0.031205339,
+0.091085096,
+0.13129789,
+0.219426439,
+0.119096686,
+0.130001355,
+0.110648817,
+0.176074341,
+0.150415171
+])
+
+y2_error = np.array([6.333240147,
+1.86871551,
+2.503610008,
+2.716302008,
+3.124187132,
+2.961852965,
+3.858790084,
+4.499441478,
+4.811335846,
+4.369233276])
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.grid(zorder=0,axis='both',color="black", linestyle = (0,(0.5,2)))
+ax.plot(x, y1, label="Label-based", marker ='o',color="#4ca5ff",zorder=3)
+ax.plot(x, y2, label="Semantic-based", marker ='^',color="#ff4d4c",zorder=3)
+ax.errorbar(x, y1, yerr = y1_error, color="#4ca5ff", capsize=2, capthick=1,)
+ax.errorbar(x, y2, yerr = y2_error, color="#ff4d4c", capsize=2, capthick=1,)
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of Elements",fontsize=20, **csfont)
+ax.set_ylabel("Execution Time",fontsize=20, **csfont)
+
+x_ticks = np.arange(41, 51, 1)
+y_ticks = np.arange(0,180, 20)
+plt.xticks(x_ticks,visible=True)
+plt.yticks(y_ticks,visible=True)
+
+
+
+
+plt.savefig('../results/mapper-time-v2.eps', format='eps')
+---
+CELL 27 code
+# defining our function
+x = np.array([4,5,6,7,8,9,10,11,12,13,14])
+
+y1 = np.array([0.00072714,0.00079292,0.00082097,0.00083589,0.00084099,0.00090492,0.00092427,0.00100097,0.00101886,0.00100972,0.00104852]) * 1000
+y2 = np.array([0.00053829,0.00062002,0.00064371,0.00067920,0.00073272,0.00071281,0.00072842,0.00074143,0.00076172,0.00074148,0.00076645]) * 1000
+
+# defining our error
+y1_error = np.array([0.00001540,0.00001838,0.00001052,0.00001309,0.00001725,0.00002026,0.00001481,0.00001778,0.00002540,0.00002737,0.00002332]) * 1000
+y2_error = np.array([0.00001654,0.00001529,0.00002063,0.00001476,0.00001889,0.00001335,0.00002503,0.00003939,0.00002683,0.00002677,0.00002216]) * 1000
+
+width = 0.3
+
+# plotting our function and
+plt.figure(figsize=(8,6))
+
+ax = plt.axes()
+
+# error bar
+ax.grid(zorder=0,axis='y',color="black", linestyle = (0,(0.1,2)), dash_capstyle = 'projecting')
+ax.bar(x, y1,width, yerr=y1_error,  label="Policy Generator in XML format", color="#7f7fff", ecolor='black', capsize=3,zorder=3)
+ax.bar(x+width, y2, width,yerr=y2_error, label="Policy Generator in JSON format", color="#7fbf7f", ecolor='black', capsize=3,zorder=3)
+
+
+
+font = font_manager.FontProperties(family='Times New Roman', weight='roman',
+                                   style='normal', size=13)
+
+ax.legend(loc="upper left",prop=font)
+
+plt.ticklabel_format(useMathText=True,axis='y', style='sci', scilimits=(0,4))
+
+csfont = {'fontname':'Times New Roman'}
+#hfont = {'fontname':'Helvetica'}
+
+ax.set_xlabel("Number of Elements",fontsize=20, **csfont)
+ax.set_ylabel("Time (milliseconds)",fontsize=20, **csfont)
+
+x_ticks = np.arange(4, 15, 1)
+y_ticks = np.arange(0, 1.2, 0.1)
+plt.xticks(x+width/2,(4,5,6,7,8,9,10,11,12,13,14))
+plt.yticks(y_ticks,visible=True)
+
+
+
+plt.savefig('../results/perf-generator-v2.eps', format='eps')
+---

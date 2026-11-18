@@ -1,0 +1,56 @@
+A single object matching ‘getDynamicFollNet’ was found
+It was found in the following places
+  package:mFLICA
+  namespace:mFLICA
+with value
+
+function (TS, timeWindow, timeShift, sigma = 0.5, lagWindow = 0.1, 
+    silentFlag = FALSE) 
+{
+    if (length(dim(TS)) == 2) {
+        B <- array(0, c(dim(TS), 2))
+        B[, , 1] <- TS
+        TS <- B
+    }
+    invN <- dim(TS)[1]
+    Tlength <- dim(TS)[2]
+    dimensionsN <- dim(TS)[3]
+    dyNetBinMat <- array(0, dim = c(invN, invN, Tlength))
+    dyNetWeightedMat <- array(0, dim = c(invN, invN, Tlength))
+    dyNetBinDensityVec <- array(0, dim = c(1, Tlength))
+    dyNetWeightedDensityVec <- array(0, dim = c(1, Tlength))
+    if (missing(timeWindow)) {
+        timeWindow <- ceiling(0.1 * Tlength)
+    }
+    if (missing(timeShift)) {
+        timeShift <- max(1, ceiling(0.1 * timeWindow))
+    }
+    for (t in seq(1, Tlength, by = timeShift)) {
+        if (t + timeWindow >= Tlength) {
+            dyNetBinMat[, , t:Tlength] <- follOut$adjBinMat
+            dyNetWeightedMat[, , t:Tlength] <- follOut$adjWeightedMat
+            dyNetBinDensityVec[t:Tlength] <- dval1
+            dyNetWeightedDensityVec[t:Tlength] <- dval2
+            break
+        }
+        else {
+            currTWInterval <- t:(t + timeWindow - 1)
+            currTS <- TS[, currTWInterval, ]
+            follOut <- followingNetwork(TS = currTS, sigma = sigma, 
+                lagWindow = lagWindow)
+            dyNetBinMat[, , currTWInterval] <- follOut$adjBinMat
+            dyNetWeightedMat[, , currTWInterval] <- follOut$adjWeightedMat
+            dval1 <- getADJNetDen(follOut$adjBinMat)
+            dval2 <- getADJNetDen(follOut$adjWeightedMat)
+            dyNetBinDensityVec[currTWInterval] <- dval1
+            dyNetWeightedDensityVec[currTWInterval] <- dval2
+            if (silentFlag == FALSE) 
+                print(sprintf("TW%d shift-%d - t%d", timeWindow, 
+                  timeShift, t))
+        }
+    }
+    return(list(dyNetBinMat = dyNetBinMat, dyNetWeightedMat = dyNetWeightedMat, 
+        dyNetBinDensityVec = dyNetBinDensityVec, dyNetWeightedDensityVec = dyNetWeightedDensityVec))
+}
+<bytecode: 0x401293aa40>
+<environment: namespace:mFLICA>

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'EOF'\nload('../data/ratingData5')\n# mimic script\nratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == 'p', 'positive', 'negative')\nratingData5$USval <- as.factor(ratingData5$USval)\nratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean)\nratingData5AggrW <- reshape(ratingData5Aggr, idvar=c('ParticipantNumber','correspondingTime'), timevar='USval', direction='wide')\n# merge vis data and exclusions from script\nload('../data/visData5')\nload('../data/DemoData5')\nExclList5 <- c(4,5,7,13,30,66,160,116)\n# process vis\nvisData5Aggr <- aggregate(correctAnswer ~ ParticipantNumber * Length, visData5, mean)\ntmpVis <- subset(visData5Aggr, !Length %in% c(158,170))\ntmpVis <- subset(tmpVis, !(ParticipantNumber %in% ExclList5))\ntmpVis <- aggregate(correctAnswer ~ ParticipantNumber * Length, tmpVis, FUN=sum)\nnames(tmpVis)[names(tmpVis)=='Length'] <- 'correspondingTime'\nratingData5AggrW <- merge(ratingData5AggrW, tmpVis, by=c('ParticipantNumber','correspondingTime'))\nratingData5AggrW$EC <- ratingData5AggrW$likingRating.positive - ratingData5AggrW$likingRating.negative\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, mean))\nprint(aggregate(EC ~ correspondingTime, ratingData5AggrW, function(x) c(mean=mean(x), n=length(x))))\nEOF",
+  "exit_code": 0,
+  "seconds": 0.6928463749936782,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

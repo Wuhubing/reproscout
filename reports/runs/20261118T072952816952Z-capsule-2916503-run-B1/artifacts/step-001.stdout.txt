@@ -1,0 +1,93 @@
+total 60
+drwxr-xr-x 3 root root  4096 Nov 18 07:29 .
+drwxr-xr-x 1 root root  4096 Nov 18 07:29 ..
+-rwxr-xr-x 1 root root   705 Jan  1  1970 code.R
+-rwxr-xr-x 1 root root 35147 Jan  1  1970 LICENSE
+-rwxr-xr-x 1 root root  2076 Jan  1  1970 README.md
+drwxr-xr-x 4 root root  4096 Nov 18 07:29 .Rproj.user
+-rwxr-xr-x 1 root root   165 Jan  1  1970 run
+--- README ---
+# An Example of Compute Capsule
+
+_This is an example compute capsule of the book chapter "Developing and Disseminating Data Analysis Tools for Open Science" in L. Plonsky (Ed.), Open Science in Applied Linguistics._
+
+## Article
+Mizumoto, A. (2021, December 14). Developing and disseminating data analysis tools for open science. https://doi.org/10.31219/osf.io/qzawb
+
+## Code, Data, Results
+On the left hand column, you can see folders `/code`, `/data`, and `/results`, where code and data are saved. You can upload your own files to the `/code` or `/data` folders using the buttons at the top of the left-side **Files pane**.
+
+Any plots, figures, and results data should be saved in the `/results` directory. At the end of each run, these files will appear in the right-side **Reproducibility pane**, where you can view and download them. When you publish a capsule, the most recent set of results will be preserved as part of the capsule.
+
+## Environment and Dependencies
+
+Click **Environment** on the left to find a computational environment to accommodate your software (languages, frameworks) or hardware (GPU) requirements. You can then further customize the environment by installing additional packages. The changes you make will be applied the next time your capsule runs. See Code Ocean's help articles on [the computational environment](https://help.codeocean.com/getting-started/the-computational-environment/configuring-your-computational-environment-an-overview) for more information.
+
+## Environment Caching
+
+The next time you run your capsule after making changes to any part of the environment, a custom environment will be built and cached for future runs.
+
+When you publish a capsule, its computational environment will be preserved with it, thereby ensuring computational reproducibility.
+
+## Author
+
+[Atsushi MIZUMOTO, Ph.D.](http://mizumot.com "HP")  
+email: mizumoto[at]kansai-u.ac.jp  
+Professor of Applied Linguistics  
+Faculty of Foreign Language Studies  
+Graduate School of Foreign Language Education and Research  
+Kansai University, Osaka, Japan
+--- REPRODUCING ---
+This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.
+
+<sup>1</sup> You may need access to additional hardware and/or software licenses.
+
+# Prerequisites
+
+- [Docker Community Edition (CE)](https://www.docker.com/community-edition)
+- MATLAB/MOSEK/Stata licenses where applicable
+
+# Instructions
+
+## The computational environment (Docker image)
+
+This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:
+`registry.codeocean.com/published/72fae0b0-b870-48e9-8173-1e803d5d8c54:v1`
+
+## Running the capsule to reproduce the results
+
+In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:
+```shell
+docker run --platform linux/amd64 --rm \
+  --workdir /code \
+  --volume "$PWD/data":/data \
+  --volume "$PWD/code":/code \
+  --volume "$PWD/results":/results \
+  registry.codeocean.com/published/72fae0b0-b870-48e9-8173-1e803d5d8c54:v1 bash run
+```
+--- code.R head ---
+# read the csv
+dat <- read.csv("../data/semlavaan.csv", header=TRUE, fileEncoding="CP932")
+
+library(lavaan)
+# https://lavaan.ugent.be/
+model <- '
+Achievement =~ Midterm + Final + Quiz
+Proficiency =~ Exam1 + Exam2 + Exam3
+Proficiency ~ Achievement
+'
+
+fit <- sem(model, data=dat)
+summary(fit, standardized=TRUE, fit.measures=TRUE)
+
+# Path diagram
+library(semPlot)
+
+# Standardized estimates
+png("../results/plot1.png", width = 600, height = 600)
+semPaths(fit, "std", style="lisrel", # LISREL style
+         mar=c(6,1,3,1), # margin (bottom, left, up, right)
+         edge.label.cex=.8, # font size for coefficients
+         fade=F, # keep the arrow size the same
+         theme="gray") # gray color
+dev.off()

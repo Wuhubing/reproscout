@@ -78,3 +78,15 @@ remain evidence of an invalid infrastructure-limited comparison.
 See [the network protocol](network-recovery-protocol.md),
 [updated comparison](controller-comparison.md), and
 [development evidence](../reports/development-v4-validation.json).
+
+## v0.5.0 completed lesson-revision study
+
+The revised lesson candidate passed the amended development
+gate after a rejected first candidate; twenty training outcomes are retained. All sixty formal scientific outcomes completed under an unchanged freeze:
+A 20/30, B 26/30, with 0 separately retained infrastructure
+attempts. This is test-informed method revision on an exposed cohort. Original-file
+hashes do not audit scientific changes to new copies; supplemental trajectory review
+and the original scorer remain separate. The v0.4.0 release and all failures persist.
+
+See [the four-pair diagnosis](lesson-pair-analysis-v4.md),
+[revision protocol](lesson-revision-protocol.md), and [comparison](controller-comparison.md).

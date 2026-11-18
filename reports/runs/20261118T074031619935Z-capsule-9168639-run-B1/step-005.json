@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript -e \"rec<-read.csv(file.path('..','data','rec_data_raw.csv')); us<-subset(rec, country=='us' & !is.na(expenditure_rank)); uk<-subset(rec, country=='uk' & !is.na(expenditure_rank)); rec_flowchart<-function(df){data.frame(item=c('Institutions sampled','Public forms identified','Institutions contacted','Public forms identified after contact','Private forms provided','Forms indicated as not available to share','No response'),count=c(nrow(df),sum(df$included == 1 & df$contacted == 0),sum(df$contacted == T),sum(df$contacted == 1 & df$form_available == 'public', na.rm = T),sum(sum(df$contacted == 1 & df$form_available == 'private', na.rm = T)),sum(grepl('declined', df$form_available)),sum(df$form_available == 'noreply' | is.na(df$form_available))))}; rec_outcomes<-function(df){data.frame(item=c('Sample size','Justification','Calculation','Calculation (indirectly)'),count=c(sum(df$sample_size, na.rm = TRUE),sum(df$justification, na.rm = TRUE),sum(df$calculation == 1, na.rm = TRUE),sum(df$calculation == 99, na.rm = TRUE)))}; us_combined<-rbind(rec_flowchart(us), rec_outcomes(us)); uk_combined<-rbind(rec_flowchart(uk), rec_outcomes(uk)); rec_results<-cbind(us_combined, uk_combined$count); print(rec_results, row.names=FALSE)\"",
+  "exit_code": 1,
+  "seconds": 0.9964765830081888,
+  "stdout": "artifacts/step-005.stdout.txt",
+  "stderr": "artifacts/step-005.stderr.txt"
+}

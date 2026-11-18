@@ -1,0 +1,113 @@
+# make dataframe with discipline data. We will use this for the characteristics table (Table 1) via kable
+# this code is a bit round-about, but it works.
+
+set_table <- function(df, var_name){
+  df_group <- df %>% 
+    group_by({{var_name}}) %>%
+    summarize(k_articles = n(), n_studies = sum(denom, na.rm = T)) %>%
+    arrange(desc(k_articles), desc(n_studies)) %>% 
+    rename(var1 = {{var_name}})
+  return(df_group)
+}
+
+# 1. disciplines
+disciplineFrame <- set_table(df, discipline)
+# rename items so the table is cleaner
+disciplineFrame$var1 <- c("medicine",
+                "dentistry",
+                "psychology",
+                "economics",
+                "physical therapy")
+
+# 2. Registry assessed
+comparatorFrame <- set_table(df, comparator)
+comparatorFrame$var1<- c("registry",
+                "ethics application",
+                "other protocol",
+                "marketing application",
+                "grant application")
+
+# 3. Source from which the studies were identified
+# Calculate using grepl() rather than set_table() because some artices used multiple sources...On second thought, I'm just gonna present this with each category
+sourceFrame <- set_table(df, source)
+sourceFrame$var1 <- c("journals",
+                "registries",
+                "search engines",
+                "ethics boards",
+                "funders",
+                "registries and search engines",
+                "regulators",
+                "research group",
+                "registries and journals"
+                )
+
+# 4. Observational
+observationalFrame <- set_table(df, observational)
+observationalFrame$var1 <- c("solely observational",
+                "observational and study authors were contacted",
+                "observational and interventional"
+                )
+
+# 5. registration version compared to
+versionFrame <- set_table(df, version)
+# move 'not reported' row to the bottom of the dataframe
+versionFrame <- versionFrame %>% slice(-1) %>% bind_rows(versionFrame[1,])
+  
+versionFrame$var1 <- c("original",
+                "most recent",
+                "other version/unclear",
+                "not reported"
+                )
+
+# 6. disclosures
+disclosedFrame <- set_table(df, disclosed)
+# move 'not reported' row to the bottom of the dataframe
+disclosedFrame <- disclosedFrame %>% slice(-1) %>% bind_rows(disclosedFrame[1,])
+
+disclosedFrame$var1 <- c("one or more",
+                         "none",
+                         "article excluded publications with disclosed discrepancies",
+                         "not reported"
+                )
+
+# create dataframe that combines the dataframes above that will be used to produce Table 1
+charFrame <- bind_rows(disciplineFrame,
+                       comparatorFrame,
+                       sourceFrame,
+                       observationalFrame,
+                       versionFrame,
+                       disclosedFrame)
+# name columns to appear in table
+colnames(charFrame) <- c("Article characteristic", paste("k = ", nrow(df)), paste("n = ", sum(df$denom, na.rm = T)))
+
+# This code provides the numbers that insert table sections in the right spot for Table 1
+g1 <- nrow(disciplineFrame)
+g2 <- g1 + nrow(comparatorFrame)
+g3 <- g2 + nrow(sourceFrame)
+g4 <- g3 + nrow(observationalFrame)
+g5 <- g4 + nrow(versionFrame)
+g6 <- g5 + nrow(disclosedFrame)
+```
+
+```{r years}
+# calculate data on the year range that the *studies* were published (not when the *articles* were published). 
+
+# Filter to only include the articles which report the year the *studies* were *published* (rather than registered)
+yearPub <- dfAll %>% filter(yearItem=="pub")
+
+# using dfAll because I will run a correlation with the results from the two main figures later.
+# calculate median and IQR for the oldest studies that were included in each article ('firstYear')
+
+# some years are coded as '0'. This was done when there appeared to be no limit on the earliest year. Remove rows coded as '0' before calculating the median and IQR. 
+yearFirst <- yearPub %>% filter(yearFirst > 0)
+yearFirstMedian <- median(yearFirst$yearFirst)
+yearFirstQ1 <- round(quantile(yearFirst$yearFirst)[2],0)
+yearFirstQ3 <- round(quantile(yearFirst$yearFirst)[4],0)
+# median and IQR for last year
+yearLast <- yearPub %>% filter(yearLast > 0)
+yearLastMedian <- median(yearLast$yearLast)
+yearLastQ1 <- round(quantile(yearLast$yearLast)[2],0)
+yearLastQ3 <- round(quantile(yearLast$yearLast)[4],0)
+# 2 extracts the 25% quartile, and 4 extracts the 75% quartile value.
+
+```

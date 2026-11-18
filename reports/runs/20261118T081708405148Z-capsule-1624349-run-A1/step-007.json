@@ -1,0 +1,7 @@
+{
+  "command": "cd /results && python - <<'PY'\nfrom bs4 import BeautifulSoup\nhtml=open('FS-Filters.html').read()\nsoup=BeautifulSoup(html,'html.parser')\n# print all outputs around cells containing best_acc or df table.\ntexts=soup.get_text('\\n')\nfor needle in ['best_acc','best_k','Mutual Info.', 'Feature', '0.']:\n    pass\n# Let's just find pre tags near relevant cell numbers? Simpler: print all pre blocks text with numeric outputs.\nfor pre in soup.find_all('pre'):\n    txt=pre.get_text('\\n').strip()\n    if txt:\n        if 'best_k' in txt or 'acc' in txt or 'Mutual Info' in txt:\n            print('---PRE---')\n            print(txt[:1000])\nPY",
+  "exit_code": 1,
+  "seconds": 0.24850891600362957,
+  "stdout": "artifacts/step-007.stdout.txt",
+  "stderr": "artifacts/step-007.stderr.txt"
+}

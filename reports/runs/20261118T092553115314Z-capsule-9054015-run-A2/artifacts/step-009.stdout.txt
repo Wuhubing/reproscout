@@ -1,0 +1,31 @@
+   380	    dset <- dset %>% mutate(site=factor(site, levels=c('Breast',
+   381	                                                       'Colorectal',
+   382	                                                       'Liver',
+   383	                                                       'Lung',
+   384	                                                       'Ovary',
+   385	                                                       'Pancreas')),
+   386	                            age=sub('-[567]4', '', age),
+   387	                            prevalence=sprintf(fmt, 100*prevalence),
+   388	                            mortality=sprintf(fmt, 100*mortality))
+   389	    dset <- dset %>% arrange(site, age)
+   390	    dset <- dset %>% rename('Tissue of origin'='site',
+   391	                            'Age, y'='age',
+   392	                            '5-year probability of diagnosis, %'=prevalence,
+   393	                            '15-year probability of death, %'=mortality)
+   394	    if(saveit){
+   395	        filename <- str_glue('table1_{datestamp}.csv')
+   396	        write_csv(dset, file.path(resupath, filename))
+   397	    }
+   398	}
+   399	
+   400	##################################################
+   401	# Format table for six cancers in Liu et al
+   402	##################################################
+   403	format_inputs <- function(dset, saveit=FALSE){
+   404	    dset <- dset %>% rename('Tissue of origin'='site',
+   405	                            'Test sensitivity, %'='sensitivity',
+   406	                            'Localization probability, %'='localization',
+   407	                            'Marginal sensitivity, %'='marginal',
+   408	                            'Mortality reduction, %'='effect')
+   409	    if(saveit){
+   410	        filename <- str_glue('table2_{datestamp}.csv')

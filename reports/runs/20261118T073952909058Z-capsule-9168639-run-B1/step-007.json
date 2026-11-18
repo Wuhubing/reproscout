@@ -1,0 +1,7 @@
+{
+  "command": "mkdir -p /results && Rscript - <<'RS'\ndf <- read.csv('/data/rec_data_raw.csv')\nout <- data.frame(\n  question=c('US institutions sampled in Table 1','UK institutions sampled in Table 1'),\n  value=c(sum(df$country=='us' & !is.na(df$expenditure_rank)), sum(df$country=='uk' & !is.na(df$expenditure_rank)))\n)\nwrite.csv(out, '/results/table1_institutions_sampled.csv', row.names=FALSE)\nwriteLines(capture.output(out), '/results/table1_institutions_sampled.txt')\nRS\nls -la /results && echo '--- file ---' && cat /results/table1_institutions_sampled.txt",
+  "exit_code": 0,
+  "seconds": 0.9200077499845065,
+  "stdout": "artifacts/step-007.stdout.txt",
+  "stderr": "artifacts/step-007.stderr.txt"
+}

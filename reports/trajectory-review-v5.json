@@ -1,0 +1,534 @@
+{
+  "scope": "Heuristic scan of executed shell commands followed by manual review of flagged operations. This is a locator for possible scientific edits/copies, not a complete semantic audit; unflagged runs are not certified faithful. Original hashes and scoring remain unchanged.",
+  "executed_commands_scanned": 521,
+  "run_count": 60,
+  "reviewed_or_flagged_run_count": 13,
+  "flagged_run_count": 10,
+  "manual_review_pending": 0,
+  "patterns": {
+    "text_replacement": "\\.replace\\(|re\\.sub\\(|gsub\\(|sub\\(",
+    "inplace_edit": "\\b(?:sed|perl)\\b[^\\n]*(?:-i|-0pi)",
+    "code_copy": "\\bcp\\s|shutil\\.copy|copyfile\\(",
+    "notebook_code_assignment": "(?:\\.source|\\[.[Ss]ource.\\])\\s*=",
+    "python_file_write": "write_text\\(|write_bytes\\(|open\\([^\\n]*[\\x27\\x22][wa][bt]?[\\x27\\x22]",
+    "code_extraction": "knitr::purl|eval\\(parse|exec\\(",
+    "monkeypatch": "__globals__|monkeypatch|\\.load_dataset\\s*=|assignInNamespace"
+  },
+  "runs": [
+    {
+      "run_id": "20261118T081708405148Z-capsule-1624349-run-A1",
+      "task_id": "capsule-1624349",
+      "condition": "A",
+      "repeat": 1,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 22,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-004.json",
+          "signals": [
+            "text_replacement"
+          ],
+          "command": "cd /code && sed -n '1,200p' run && python - <<'PY'\nimport json, nbformat\nnb=nbformat.read('FS-Filters.ipynb', as_version=4)\nprint('cells', len(nb.cells))\nfor i,c in enumerate(nb.cells):\n    if c.cell_type=='code':\n        print('CELL',i, c.source[:200].replace('\\n',' '))\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "benign_read_only_formatting",
+        "findings": "Step 004 replaces newline characters only in printed notebook-cell excerpts. This does not edit the notebook or analytical code.",
+        "evidence": [
+          "step-004.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T081843203363Z-capsule-1624349-run-B1",
+      "task_id": "capsule-1624349",
+      "condition": "B",
+      "repeat": 1,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 22,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-002.json",
+          "signals": [
+            "python_file_write"
+          ],
+          "command": "cd /code && python - <<'PY'\nimport nbformat, json, os\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\nnb_path='FS-Filters.ipynb'\nout_dir=Path('/results')\nout_dir.mkdir(exist_ok=True)\nwith open(nb_path) as f:\n    nb=nbformat.read(f, as_version=4)\nep=ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\nep.preprocess(nb, {'metadata': {'path': '/code'}})\nhtml_exporter=HTMLExporter()\n(body, resources)=html_exporter.from_notebook_node(nb)\nout_file=out_dir/'FS-Filters.html'\nout_file.write_text(body, encoding='utf-8')\nprint(out_file)\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "presentation_output_only",
+        "findings": "Step 002 loads the original notebook, executes its cells without assigning or substituting their sources, and writes an HTML rendering under /results. The flagged write is an output artifact, not a scientific-code edit. allow_errors=True means notebook completion does not by itself certify every cell succeeded.",
+        "evidence": [
+          "step-002.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T082236563632Z-capsule-9054015-run-B1",
+      "task_id": "capsule-9054015",
+      "condition": "B",
+      "repeat": 1,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 19,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [],
+      "manual_review": {
+        "status": "scientific_reimplementation_despite_score_success",
+        "findings": "The original full R script runs in step 005 and is sourced again in step 007. For q1, step 010 then implements its own CD=1000*(0.005+0.01)*sensitivity*0.8 grid rather than querying the author hypothetical_test output. Its numeric 90 is correct and the formula matches the displayed author model for these conditions, but this is reimplementation, contrary to the new lesson rule. Original source hashes and the primary score remain unchanged; do not present this as complete compliance or a fidelity-qualified lesson win. q2 is read from the author-generated Table 1.",
+        "evidence": [
+          "step-002.json",
+          "step-005.json",
+          "step-007.json",
+          "step-009.json",
+          "step-010.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T085150930191Z-capsule-2708693-run-B1",
+      "task_id": "capsule-2708693",
+      "condition": "B",
+      "repeat": 1,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 16,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-013.json",
+          "signals": [
+            "code_copy"
+          ],
+          "command": "cd /code && ls -l preregSR_manuscript.pdf && file preregSR_manuscript.pdf && cp preregSR_manuscript.pdf ../results/preregSR_manuscript.pdf && ls -l ../results/preregSR_manuscript.pdf"
+        }
+      ],
+      "manual_review": {
+        "status": "targeted_arithmetic_and_failed_artifact_copy",
+        "findings": "Step 013 attempts to copy a manuscript PDF, but the command fails at the initial ls and copies nothing. After rendering fails, steps 008/012 read the author dataset and compute requested counts directly. Step 012 reproduces the disclosedDenom numeric conversion and sum used by the author, rather than executing the full manuscript pipeline. It returns 620; 21 is the distinct nonmissing-study count. This is score-correct targeted arithmetic, not successful full-document reproduction or verbatim execution of all author blocks.",
+        "evidence": [
+          "step-004.json",
+          "step-010.json",
+          "step-011.json",
+          "step-012.json",
+          "step-013.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T085405675915Z-capsule-4671827-run-B1",
+      "task_id": "capsule-4671827",
+      "condition": "B",
+      "repeat": 1,
+      "answer_solved": false,
+      "source_audit": {
+        "checked_files": 8,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-008.json",
+          "signals": [
+            "python_file_write"
+          ],
+          "command": "cd /code && python3 - <<'PY'\nimport nbformat, base64\nfrom pathlib import Path\nnb=nbformat.read('../results/PerformanveEval-executed.ipynb', as_version=4)\ncell=nb.cells[1]\nfor j,o in enumerate(cell.outputs):\n    if o.output_type=='display_data' or o.output_type=='execute_result':\n        data=o.data\n        if 'image/png' in data:\n            img=base64.b64decode(data['image/png'])\n            p=Path('../results/cell1.png')\n            p.write_bytes(img)\n            print(p)\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "presentation_output_only",
+        "findings": "Step 008 writes an image extracted from the executed notebook output. Step 005 executes unchanged notebook cells and saves that notebook. The image write does not modify scientific code. The submitted categorical label fails the unchanged scorer; this review does not reinterpret that score. Targeted failure review: the question asks for the higher-time mapping at 44 elements, but the cited step-009 figure compares Greedy/Combination only over 2\u201312 elements. The submitted Combination label therefore uses the wrong figure family, not just a different spelling of the correct mapping. A submits Semantic-based. The image was visually checked.",
+        "evidence": [
+          "step-005.json",
+          "step-008.json",
+          "artifacts/step-009.png",
+          "manifest.json",
+          "submission.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T092227539943Z-capsule-1624349-run-A2",
+      "task_id": "capsule-1624349",
+      "condition": "A",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 22,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-004.json",
+          "signals": [
+            "python_file_write"
+          ],
+          "command": "cd /code && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = Path('FS-Filters.ipynb')\noutdir = Path('../results')\noutdir.mkdir(exist_ok=True)\nexecuted = nbformat.read(infile, as_version=4)\n\n\u10d4\u10de = ExecutePreprocessor(timeout=-1, kernel_name='python3')\n# allow errors by letting execution continue? nbclient/nbconvert preprocessors have allow_errors attr\n\u10d4\u10de.allow_errors = True\n\u10d4\u10de.preprocess(executed, {'metadata': {'path': '/code'}})\n\n# save executed notebook and html\nnb_path = outdir / 'FS-Filters-executed.ipynb'\nnbformat.write(executed, nb_path)\nhtml_exporter = HTMLExporter()\n(body, resources) = html_exporter.from_notebook_node(executed)\n(html_path := outdir / 'FS-Filters.html').write_text(body, encoding='utf-8')\nprint(html_path)\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "presentation_output_only",
+        "findings": "Step 004 executes original notebook cells without source assignment, saves the executed notebook and renders HTML under /results. The flagged write_text writes HTML only. allow_errors=True permits cell errors, so execution completion alone does not certify all computations.",
+        "evidence": [
+          "step-004.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T092341047794Z-capsule-9054015-run-B2",
+      "task_id": "capsule-9054015",
+      "condition": "B",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 19,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [],
+      "manual_review": {
+        "status": "targeted_review_no_scientific_edit_observed",
+        "findings": "Executed the original R script and queried the author function; no replacement formula observed. The query display is truncated and does not supply the cited numeric evidence. q1 instead cites the generated figure, visually checked in this review: 90% is the highest curve at prevalence 1%. q2 cites generated Table 1. This is a bounded review of this trajectory, not a universal semantic certification.",
+        "evidence": [
+          "step-005.json",
+          "step-006.json",
+          "step-007.json",
+          "artifacts/step-008.png"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T092553115314Z-capsule-9054015-run-A2",
+      "task_id": "capsule-9054015",
+      "condition": "A",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 19,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-012.json",
+          "signals": [
+            "text_replacement"
+          ],
+          "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse)\nd<-read_csv('../data/seer_merged_2000-2002_followup=15_2021-05-13.csv', col_types='ccddddddddd') %>% rename(age='Age', site='Site') %>% select(site, age, prevalence='Diagnosis.Rate', mortality='Death.Rate') %>% mutate(site=factor(site, levels=c('Breast','Colon and Rectum','Liver and Intrahepatic Bile Duct','Lung and Bronchus','Ovary','Pancreas')), age=sub('-[567]4', '', age), prevalence=sprintf('%5.2f', 100*prevalence), mortality=sprintf('%5.2f', 100*mortality)) %>% arrange(site, age) %>% rename('Tissue of origin'=site,'Age, y'=age,'5-year probability of diagnosis, %'=prevalence,'15-year probability of death, %'=mortality)\nprint(d %>% filter(`Tissue of origin`=='Breast', `Age, y`=='50'))\nRS"
+        }
+      ],
+      "manual_review": {
+        "status": "modified_inline_scientific_copy",
+        "findings": "Step 010 redefines the author k_cancer_test inline, omitting the lives-saved computation and LS return column; hypothetical_test is also copied inline. This is not unchanged execution, even though the queried CD calculation retains its formula. Step 012 rebuilds the Table 1 formatting/selection pipeline from input data. The original script is run later in step 013, but the submitted evidence cites the inline computations. Correct answers and unchanged original hashes do not erase this distinction.",
+        "evidence": [
+          "step-010.json",
+          "step-012.json",
+          "step-013.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T092741473572Z-capsule-7716865-run-B2",
+      "task_id": "capsule-7716865",
+      "condition": "B",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 15,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-005.json",
+          "signals": [
+            "code_extraction"
+          ],
+          "command": "cd /code && Rscript -e \"knitr::purl('manuscript.Rmd', output='/results/manuscript_extracted.R', documentation=0)\" && Rscript -e \"source('/results/manuscript_extracted.R')\""
+        }
+      ],
+      "manual_review": {
+        "status": "native_extraction_without_observed_scientific_edit",
+        "findings": "After rendering fails, step 005 uses knitr::purl to extract author R chunks and sources the extracted script. Step 006 sources it again and queries generated tMRI tables. No manual source substitutions appear in these commands. This is native chunk extraction rather than full manuscript rendering.",
+        "evidence": [
+          "step-004.json",
+          "step-005.json",
+          "step-006.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T093113458234Z-capsule-0504157-run-B2",
+      "task_id": "capsule-0504157",
+      "condition": "B",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 16,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [],
+      "manual_review": {
+        "status": "scientific_reimplementation_with_omitted_preprocessing",
+        "findings": "After rendering fails, step 012 constructs its own aggregation from ratingData5. It omits the author visibility-data filtering and merge shown in step 011 (author lines 584-594), and does not execute the author pipeline verbatim. The answer string \"1000\" passes the unchanged float parser but violates the lesson requiring a JSON number. Author Figure 1 maps internal time 250 to displayed 1000 ms, so 250 is not itself a contradictory answer. Score success does not establish compliance with scientific-fidelity or typed-output rules.",
+        "evidence": [
+          "step-003.json",
+          "step-006.json",
+          "step-011.json",
+          "step-012.json",
+          "submission.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T093218449941Z-capsule-0504157-run-A2",
+      "task_id": "capsule-0504157",
+      "condition": "A",
+      "repeat": 2,
+      "answer_solved": false,
+      "source_audit": {
+        "checked_files": 16,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-006.json",
+          "signals": [
+            "inplace_edit"
+          ],
+          "command": "cd /code && find . -maxdepth 3 -type d | sort | sed -n '1,120p' && find . -maxdepth 3 -type f | grep -i cached | head -50"
+        },
+        {
+          "step": "step-009.json",
+          "signals": [
+            "text_replacement",
+            "code_copy",
+            "python_file_write"
+          ],
+          "command": "cd /code && cp manuscript_croco4_5.Rmd /tmp/manuscript.Rmd && python - <<'PY'\nfrom pathlib import Path\np=Path('/tmp/manuscript.Rmd')\ntext=p.read_text()\ntext=text.replace('cacheGitData <- TRUE','cacheGitData <- FALSE')\np.write_text(text)\nPY\nRscript -e \"rmarkdown::render('/tmp/manuscript.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\""
+        },
+        {
+          "step": "step-010.json",
+          "signals": [
+            "inplace_edit",
+            "code_copy"
+          ],
+          "command": "cd /code && cp manuscript_croco4_5.Rmd /tmp/manuscript.Rmd && sed -i 's/cacheGitData <- TRUE/cacheGitData <- FALSE/' /tmp/manuscript.Rmd && grep -n 'cacheGitData' /tmp/manuscript.Rmd | head && Rscript -e \"rmarkdown::render('/tmp/manuscript.Rmd', output_dir='/results', output_file='manuscript.pdf', clean=TRUE)\""
+        }
+      ],
+      "manual_review": {
+        "status": "scientific_copy_edit_attempt_no_submission",
+        "findings": "Steps 009/010 copy the manuscript to /tmp and issue replacements changing cacheGitData from TRUE to FALSE, then attempt rendering the edited copy. Changing data-loading mode is a scientific-input intervention and not unchanged execution, even though original hashes remain intact. The run ends at the twenty-call cap without submitting. The step 006 regex signal is a false positive from read-only directory inspection.",
+        "evidence": [
+          "step-006.json",
+          "step-009.json",
+          "step-010.json",
+          "summary.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T095802492783Z-capsule-4671827-run-B2",
+      "task_id": "capsule-4671827",
+      "condition": "B",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 8,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-002.json",
+          "signals": [
+            "text_replacement"
+          ],
+          "command": "cd /code && cat run && echo '---'; python - <<'PY'\nimport nbformat, json\nnb = nbformat.read('PerformanveEval.ipynb', as_version=4)\nprint('cells', len(nb.cells))\nfor i,c in enumerate(nb.cells[:10]):\n    print('CELL',i,c.cell_type, c.source[:200].replace('\\n',' '))\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "benign_read_only_formatting",
+        "findings": "Step 002 replaces newlines in printed notebook excerpts only. It does not edit notebook source.",
+        "evidence": [
+          "step-002.json"
+        ]
+      }
+    },
+    {
+      "run_id": "20261118T095927649568Z-capsule-4671827-run-A2",
+      "task_id": "capsule-4671827",
+      "condition": "A",
+      "repeat": 2,
+      "answer_solved": true,
+      "source_audit": {
+        "checked_files": 8,
+        "unchanged": true,
+        "changed_or_missing": [],
+        "stderr": ""
+      },
+      "signals": [
+        {
+          "step": "step-006.json",
+          "signals": [
+            "python_file_write"
+          ],
+          "command": "cd /code && mkdir -p ../results && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = Path('PerformanveEval.ipynb')\nout_html = Path('../results/PerformanveEval.html')\n\nwith infile.open() as f:\n    nb = nbformat.read(f, as_version=4)\n\n# set kernel metadata if needed already present\n# Execute with no timeout and allow errors\nep = ExecutePreprocessor(timeout=None, kernel_name='python3', allow_errors=True)\nresources = {'metadata': {'path': '/code'}}\nexecuted_nb, _ = ep.preprocess(nb, resources)\n\nhtml_exporter = HTMLExporter()\nhtml_exporter.exclude_input_prompt = False\nhtml_exporter.exclude_output_prompt = False\nbody, _ = html_exporter.from_notebook_node(executed_nb)\nout_html.write_text(body, encoding='utf-8')\nprint(f'Wrote {out_html}')\nPY"
+        }
+      ],
+      "manual_review": {
+        "status": "presentation_output_only",
+        "findings": "Step 006 loads and executes original notebook cells without source assignment, then writes HTML under /results. The flagged write_text writes the rendered artifact. allow_errors=True means notebook completion alone does not certify every cell succeeded.",
+        "evidence": [
+          "step-006.json"
+        ]
+      }
+    }
+  ],
+  "all_annotations": {
+    "20261118T081708405148Z-capsule-1624349-run-A1": {
+      "status": "benign_read_only_formatting",
+      "findings": "Step 004 replaces newline characters only in printed notebook-cell excerpts. This does not edit the notebook or analytical code.",
+      "evidence": [
+        "step-004.json"
+      ]
+    },
+    "20261118T081843203363Z-capsule-1624349-run-B1": {
+      "status": "presentation_output_only",
+      "findings": "Step 002 loads the original notebook, executes its cells without assigning or substituting their sources, and writes an HTML rendering under /results. The flagged write is an output artifact, not a scientific-code edit. allow_errors=True means notebook completion does not by itself certify every cell succeeded.",
+      "evidence": [
+        "step-002.json"
+      ]
+    },
+    "20261118T085150930191Z-capsule-2708693-run-B1": {
+      "status": "targeted_arithmetic_and_failed_artifact_copy",
+      "findings": "Step 013 attempts to copy a manuscript PDF, but the command fails at the initial ls and copies nothing. After rendering fails, steps 008/012 read the author dataset and compute requested counts directly. Step 012 reproduces the disclosedDenom numeric conversion and sum used by the author, rather than executing the full manuscript pipeline. It returns 620; 21 is the distinct nonmissing-study count. This is score-correct targeted arithmetic, not successful full-document reproduction or verbatim execution of all author blocks.",
+      "evidence": [
+        "step-004.json",
+        "step-010.json",
+        "step-011.json",
+        "step-012.json",
+        "step-013.json"
+      ]
+    },
+    "20261118T082236563632Z-capsule-9054015-run-B1": {
+      "status": "scientific_reimplementation_despite_score_success",
+      "findings": "The original full R script runs in step 005 and is sourced again in step 007. For q1, step 010 then implements its own CD=1000*(0.005+0.01)*sensitivity*0.8 grid rather than querying the author hypothetical_test output. Its numeric 90 is correct and the formula matches the displayed author model for these conditions, but this is reimplementation, contrary to the new lesson rule. Original source hashes and the primary score remain unchanged; do not present this as complete compliance or a fidelity-qualified lesson win. q2 is read from the author-generated Table 1.",
+      "evidence": [
+        "step-002.json",
+        "step-005.json",
+        "step-007.json",
+        "step-009.json",
+        "step-010.json"
+      ]
+    },
+    "20261118T085405675915Z-capsule-4671827-run-B1": {
+      "status": "presentation_output_only",
+      "findings": "Step 008 writes an image extracted from the executed notebook output. Step 005 executes unchanged notebook cells and saves that notebook. The image write does not modify scientific code. The submitted categorical label fails the unchanged scorer; this review does not reinterpret that score. Targeted failure review: the question asks for the higher-time mapping at 44 elements, but the cited step-009 figure compares Greedy/Combination only over 2\u201312 elements. The submitted Combination label therefore uses the wrong figure family, not just a different spelling of the correct mapping. A submits Semantic-based. The image was visually checked.",
+      "evidence": [
+        "step-005.json",
+        "step-008.json",
+        "artifacts/step-009.png",
+        "manifest.json",
+        "submission.json"
+      ]
+    },
+    "20261118T092341047794Z-capsule-9054015-run-B2": {
+      "status": "targeted_review_no_scientific_edit_observed",
+      "findings": "Executed the original R script and queried the author function; no replacement formula observed. The query display is truncated and does not supply the cited numeric evidence. q1 instead cites the generated figure, visually checked in this review: 90% is the highest curve at prevalence 1%. q2 cites generated Table 1. This is a bounded review of this trajectory, not a universal semantic certification.",
+      "evidence": [
+        "step-005.json",
+        "step-006.json",
+        "step-007.json",
+        "artifacts/step-008.png"
+      ]
+    },
+    "20261118T092227539943Z-capsule-1624349-run-A2": {
+      "status": "presentation_output_only",
+      "findings": "Step 004 executes original notebook cells without source assignment, saves the executed notebook and renders HTML under /results. The flagged write_text writes HTML only. allow_errors=True permits cell errors, so execution completion alone does not certify all computations.",
+      "evidence": [
+        "step-004.json"
+      ]
+    },
+    "20261118T092553115314Z-capsule-9054015-run-A2": {
+      "status": "modified_inline_scientific_copy",
+      "findings": "Step 010 redefines the author k_cancer_test inline, omitting the lives-saved computation and LS return column; hypothetical_test is also copied inline. This is not unchanged execution, even though the queried CD calculation retains its formula. Step 012 rebuilds the Table 1 formatting/selection pipeline from input data. The original script is run later in step 013, but the submitted evidence cites the inline computations. Correct answers and unchanged original hashes do not erase this distinction.",
+      "evidence": [
+        "step-010.json",
+        "step-012.json",
+        "step-013.json"
+      ]
+    },
+    "20261118T092741473572Z-capsule-7716865-run-B2": {
+      "status": "native_extraction_without_observed_scientific_edit",
+      "findings": "After rendering fails, step 005 uses knitr::purl to extract author R chunks and sources the extracted script. Step 006 sources it again and queries generated tMRI tables. No manual source substitutions appear in these commands. This is native chunk extraction rather than full manuscript rendering.",
+      "evidence": [
+        "step-004.json",
+        "step-005.json",
+        "step-006.json"
+      ]
+    },
+    "20261118T093113458234Z-capsule-0504157-run-B2": {
+      "status": "scientific_reimplementation_with_omitted_preprocessing",
+      "findings": "After rendering fails, step 012 constructs its own aggregation from ratingData5. It omits the author visibility-data filtering and merge shown in step 011 (author lines 584-594), and does not execute the author pipeline verbatim. The answer string \"1000\" passes the unchanged float parser but violates the lesson requiring a JSON number. Author Figure 1 maps internal time 250 to displayed 1000 ms, so 250 is not itself a contradictory answer. Score success does not establish compliance with scientific-fidelity or typed-output rules.",
+      "evidence": [
+        "step-003.json",
+        "step-006.json",
+        "step-011.json",
+        "step-012.json",
+        "submission.json"
+      ]
+    },
+    "20261118T093218449941Z-capsule-0504157-run-A2": {
+      "status": "scientific_copy_edit_attempt_no_submission",
+      "findings": "Steps 009/010 copy the manuscript to /tmp and issue replacements changing cacheGitData from TRUE to FALSE, then attempt rendering the edited copy. Changing data-loading mode is a scientific-input intervention and not unchanged execution, even though original hashes remain intact. The run ends at the twenty-call cap without submitting. The step 006 regex signal is a false positive from read-only directory inspection.",
+      "evidence": [
+        "step-006.json",
+        "step-009.json",
+        "step-010.json",
+        "summary.json"
+      ]
+    },
+    "20261118T095802492783Z-capsule-4671827-run-B2": {
+      "status": "benign_read_only_formatting",
+      "findings": "Step 002 replaces newlines in printed notebook excerpts only. It does not edit notebook source.",
+      "evidence": [
+        "step-002.json"
+      ]
+    },
+    "20261118T095927649568Z-capsule-4671827-run-A2": {
+      "status": "presentation_output_only",
+      "findings": "Step 006 loads and executes original notebook cells without source assignment, then writes HTML under /results. The flagged write_text writes the rendered artifact. allow_errors=True means notebook completion alone does not certify every cell succeeded.",
+      "evidence": [
+        "step-006.json"
+      ]
+    }
+  }
+}

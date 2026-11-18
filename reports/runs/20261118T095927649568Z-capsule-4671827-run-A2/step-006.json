@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && mkdir -p ../results && python - <<'PY'\nimport nbformat\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\n\ninfile = Path('PerformanveEval.ipynb')\nout_html = Path('../results/PerformanveEval.html')\n\nwith infile.open() as f:\n    nb = nbformat.read(f, as_version=4)\n\n# set kernel metadata if needed already present\n# Execute with no timeout and allow errors\nep = ExecutePreprocessor(timeout=None, kernel_name='python3', allow_errors=True)\nresources = {'metadata': {'path': '/code'}}\nexecuted_nb, _ = ep.preprocess(nb, resources)\n\nhtml_exporter = HTMLExporter()\nhtml_exporter.exclude_input_prompt = False\nhtml_exporter.exclude_output_prompt = False\nbody, _ = html_exporter.from_notebook_node(executed_nb)\nout_html.write_text(body, encoding='utf-8')\nprint(f'Wrote {out_html}')\nPY",
+  "exit_code": 0,
+  "seconds": 47.60233366698958,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

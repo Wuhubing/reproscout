@@ -1,0 +1,288 @@
+This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.
+
+<sup>1</sup> You may need access to additional hardware and/or software licenses.
+
+# Prerequisites
+
+- [Docker Community Edition (CE)](https://www.docker.com/community-edition)
+- MATLAB/MOSEK/Stata licenses where applicable
+
+# Instructions
+
+## The computational environment (Docker image)
+
+This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:
+`registry.codeocean.com/published/a8bd4c5f-7e2a-4184-99b1-a15f16a372dd:v1`
+
+## Running the capsule to reproduce the results
+
+In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:
+```shell
+docker run --platform linux/amd64 --rm \
+  --workdir /code \
+  --volume "$PWD/data":/data \
+  --volume "$PWD/code":/code \
+  --volume "$PWD/results":/results \
+  registry.codeocean.com/published/a8bd4c5f-7e2a-4184-99b1-a15f16a372dd:v1 bash run.sh
+```
+---RMD---
+---
+title             : "Excess significance and power miscalculations in neurofeedback research"
+author: |
+  | Robert T. Thibault^1,2^ (0000-0002-6561-3962) & Hugo Pedder^3^ (0000-0002-7813-3749)
+  | </br>
+  | ^1^Meta-Research Innovation Center at Stanford (METRICS), Stanford University
+  | ^2^School of Psychological Science, University of Bristol
+  | ^3^Department Population Health Sciences, Bristol Medical School, University of Bristol
+  | </br>
+  | Address correspondence to robert.thibault@stanford.edu
+  | </br>
+  | This manuscript has been accepted for publication in *NeuroImage: Clinical* 
+  | This is the authors' version of the mauscript which was accepted for publication
+
+output: 
+  pdf_document:
+    citation_package: natbib
+  
+header-includes:
+    - \usepackage{setspace}
+  
+bibliography: references.bib
+csl: apa.csl
+---
+
+\onehalfspacing
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r packages}
+library(tidyverse) # for cleaner code
+library(knitr) # for knitting and kable function
+library(kableExtra) # for kable table styling
+library(WebPower) # for power calculations
+library(scales) # to output numbers as percentages
+```
+
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+```{r output}
+# create a function to output the power and sensitivity of each study included in the reviews.
+output <- function(d){
+  
+for (i in 1:nrow(d)){
+  
+# calculate power for small, medium, and large cohen's effect sizes, using d = f*2. Also calculate sensitivity for power = 0.8 and 0.95. The type of anova to run is coded in the data, where type = 2 is for interactions, and type = 1 is for between groups. 
+  if (d$test[i] == "anova"){
+    d$small[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.1, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$medium[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.25, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$large[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = 0.4, nscor = 1, alpha = 0.05, power = NULL, type = d$type[i])$power
+    d$p80[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .80, type = d$type[i])$f*2
+    d$p95[i] <- wp.rmanova(d$n[i], d$ng[i], d$nm[i], f = NULL, nscor = 1, alpha = 0.05, power = .95, type = d$type[i])$f*2
+    #the *2 is to convert effect sizes of type "f" to effect sizes in Cohen's d
+    
+  # as for above for independent sample t-tests.  
+  # floor() rounds down and ceiling() rounds up for studies with an uneven number of participants
+  } else if (d$test[i] == "ttest2") {
+    d$small[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = floor(d$n[i]/2), n2 = ceiling(d$n[i]/2), d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for one sample t-tests and paired sample t-tests
+  } else if (d$test[i] == "ttest1"){
+    d$small[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .2, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$medium[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .5, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$large[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = .8, alpha = 0.05, power = NULL, type = d$type[i], alternative = d$tails[i])$power
+    d$p80[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .80, type = d$type[i], alternative = d$tails[i])$d
+    d$p95[i] <- wp.t(n1 = d$n[i], n2 = NULL, d = NULL, alpha = 0.05, power = .95, type = d$type[i], alternative = d$tails[i])$d
+    
+  # as for above for correlations, using d = 2*r / sqrt(1 - r^2)
+  } else if (d$test[i] == "corr"){
+    d$small[i] <- wp.correlation(n = d$n[i], r = 0.1, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$medium[i] <- wp.correlation(n = d$n[i], r = 0.243, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    d$large[i] <- wp.correlation(n = d$n[i], r = 0.371, power = NULL, alpha = 0.05, alternative = d$tails[i])$power
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .80, alpha = 0.05, alternative = d$tails[i])$r
+    d$p80[i] <- 2*r / sqrt(1 - r^2)
+    r <- wp.correlation(n = d$n[i], r = NULL, power = .95, alpha = 0.05, alternative = d$tails[i])$r
+    d$p95[i] <- 2*r / sqrt(1 - r^2)
+    
+    
+  # as for above for linear regression, using f2 small medium and large effect size according to Cohen 1992
+  } else if (d$test[i] == "regression"){
+    d$small[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.1^2, power = NULL, alpha = 0.05)$power
+    d$medium[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.25^2, power = NULL, alpha = 0.05)$power
+    d$large[i] <- wp.regression(n = d$n[i], p1 = 1, f2 = 0.4^2, power = NULL, alpha = 0.05)$power
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .80, alpha = 0.05)$f2
+    d$p80[i] <- sqrt(f2) * 2 
+    f2 <- wp.regression(n = d$n[i], p1 = 1, f2 = NULL, power = .95, alpha = 0.05)$f2
+    d$p95[i] <-  sqrt(f2) * 2
+    
+    
+  } else {
+    warning(paste("The test for", d$Publication, "cannot be identified"))
+  }
+}
+
+# return the dataframe with all the powers and sensitivities filled in
+  return(d)
+}
+
+```
+
+```{r tableMRI}
+#create function to make a the table output for the fMRI summary data.
+tableMRI <- function(d){
+  
+# t for table  
+  t <- data.frame(matrix(ncol = 6, nrow = 4))
+  # distinguish between summary data that includes vs excludes studies marker as "pilot"
+  rownames(t) <- c("mean no pilot", "median no pilot", "mean all", "median all")
+  colnames(t) <- c("n", "small", "medium", "large", "p80", "p95")
+  
+  # filter out pilot studies
+  dTrial <- d %>% filter(pilot=="N")
+  
+  # summarize data excluding pilot studies
+  t[1,]<- dTrial %>% summarize(mean(n), mean(small), mean(medium), mean(large), mean(p80), mean(p95))
+  t[2,]<- dTrial %>% summarize(median(n), median(small), median(medium), median(large), median(p80), median(p95))
+  
+  # summarize data including pilot studies
+  t[3,]<- d %>% summarize(mean(n), mean(small), mean(medium), mean(large), mean(p80), mean(p95))
+  t[4,]<- d %>% summarize(median(n), median(small), median(medium), median(large), median(p80), median(p95))
+
+  # return summarized data
+return(t)
+}
+```
+
+```{r tableNIRS}
+# create function to output table for fNIRS summary data. This code differs from the fMRI table because the data does not include a column to distinguish pilot studies from non-pilot studies.
+tableNIRS <- function(d){
+  
+  t <- data.frame(matrix(ncol = 6, nrow = 2))
+  rownames(t) <- c("mean", "median")
+  colnames(t) <- c("n", "small", "medium", "large", "p80", "p95")
+  
+  t[1,]<- d %>% summarize(mean(n), mean(small), mean(medium), mean(large), mean(p80), mean(p95))
+  t[2,]<- d %>% summarize(median(n), median(small), median(medium), median(large), median(p80), median(p95))
+
+return(t)
+  }
+```
+
+```{r importData}
+# Import the samples sizes and types of analyses for the fMRI review. Two separate tables: one for behvaiour/clinical measurements, and one for neurofeedback regulation ability.
+dMRIreg <- read.csv("/data/fMRInf_regulation.csv", header = TRUE)
+dMRIbeh <- read.csv("/data/fMRInf_behaviour.csv", header = TRUE)
+
+# Import the same data for the fNIRS review.
+dNIRSreg <- read.csv("/data/fNIRSnf_regulation.csv", header = TRUE)
+dNIRSbeh <- read.csv("/data/fNIRSnf_behaviour.csv", header = TRUE)
+```
+
+```{r makeTables}
+# Recalculate power and sensitivity using the funcion output() we defined earlier
+dMRIreg <- output(dMRIreg)
+dMRIbeh <- output(dMRIbeh)
+dNIRSreg <- output(dNIRSreg)
+dNIRSbeh <- output(dNIRSbeh)
+
+# Create tabular data using the tableMRI() and tableNIRS() function we defined earlier
+tMRIreg <- tableMRI(dMRIreg)
+tMRIbeh <- tableMRI(dMRIbeh)
+tNIRSreg <- tableNIRS(dNIRSreg)
+tNIRSbeh <- tableNIRS(dNIRSbeh)
+
+# remove pilot studies from the MRI numbers so that it matches Table 3 of the review
+tMRIout <- rbind(tMRIreg[1:2,], tMRIbeh[1:2,])
+
+# assign names to rows and columns so it matches Table 3 of the review
+rownames(tMRIout) <- c("Mean (regulation)", "Median (regulation)", "Mean (clinical)", "Median (clinical)")
+colnames(tMRIout) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+# import original data for to compare with recalculated values and to calculate the 'overestimation factor'
+tMRIoriginal <- read.csv("/data/fMRInf_originalSummary.csv", row.names=1, header = TRUE)
+colnames(tMRIoriginal) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+# calculate the 'overestimation factor'. It is inversed for the sensitivity calucations
+tMRIdif <- (tMRIoriginal/tMRIout)
+tMRIdif[,5:6] <-  tMRIdif[,5:6]^-1
+
+# assign row names for the tables which include the recalculated values, original values, and overestimation factors. Note, we use blank spaces beacuse R doesn't allow 2 rows to have the same name.
+tMRI <- rbind(tMRIout, tMRIoriginal, tMRIdif)
+rownames(tMRI) <- c("Mean (regulation)", "Median (regulation)", "Mean (clinical)", "Median (clinical)","Mean (regulation) ", "Median (regulation) ", "Mean (clinical) ", "Median (clinical) ","Mean (regulation)  ", "Median (regulation)  ", "Mean (clinical)  ", "Median (clinical)  ")
+
+# calculate the mean overestimation factor across all the power calculations 
+difMRIPower <- tMRI[9:12,2:4] %>% as.vector() %>% colMeans() %>% mean()
+# calculate the mean overestimation factor across all the sensitivity calculations 
+difMRISensitivity <- tMRI[9:12,5:6] %>% as.vector() %>% colMeans() %>% mean()
+
+##### fNIRS. The code below is the same as for the first half of this chunk, but for the fNIRS data.
+
+tNIRSout <- rbind(tNIRSreg[1:2,], tNIRSbeh[1:2,])
+rownames(tNIRSout) <- c("Mean (regulation)", "Median (regulation)", "Mean (behavioural)", "Median (behavioural)")
+colnames(tNIRSout) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+tNIRSoriginal <- read.csv("/data/fNIRSnf_originalSummary.csv", row.names=1, header = TRUE)
+colnames(tNIRSoriginal) <- c("N", "d = 0.2", "d = 0.5", "d = 0.8", "Power = 80%", "Power = 95%")
+
+tNIRSdif <- (tNIRSoriginal/tNIRSout) 
+tNIRSdif[,5:6] <-  tNIRSdif[,5:6]^-1 
+
+tNIRS <- rbind(tNIRSout, tNIRSoriginal, tNIRSdif)
+rownames(tNIRS) <- c("Mean (regulation)", "Median (regulation)", "Mean (behavioural)", "Median (behavioural)","Mean (regulation) ", "Median (regulation) ", "Mean (behavioural) ", "Median (behavioural) ","Mean (regulation)  ", "Median (regulation)  ", "Mean (behavioural)  ", "Median (behavioural)  ")
+
+difNIRSPower <- tNIRS[9:12,2:4] %>% as.vector() %>% colMeans() %>% mean()
+difNIRSSensitivity <- tNIRS[9:12,5:6] %>% as.vector() %>% colMeans() %>% mean()
+
+# round the values in the tables to two decimal places
+tMRI <- round(tMRI, 2)
+tNIRS <- round(tNIRS, 2)
+
+```
+
+```{r other}
+# power calculations for median sample sizes with t-tests
+medMRI02 <- wp.t(n1 = 14, n2 = 13, d = .2, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+medMRI05 <- wp.t(n1 = 14, n2 = 13, d = .5, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+medMRI08 <- wp.t(n1 = 14, n2 = 13, d = .8, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+medMRI80 <- wp.t(n1 = 14, n2 = 13, d = NULL, alpha = 0.05, power = .80, type = "two.sample", alternative = "two.sided")$d
+medMRI95 <- wp.t(n1 = 14, n2 = 13, d = NULL, alpha = 0.05, power = .95, type = "two.sample", alternative = "two.sided")$d
+
+medNIRS02 <- wp.t(n1 = 10, n2 = 10, d = .2, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+med05NIRS <- wp.t(n1 = 10, n2 = 10, d = .5, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+medNIRS08 <- wp.t(n1 = 10, n2 = 10, d = .8, alpha = 0.05, power = NULL, type = "two.sample", alternative = "two.sided")$power
+medNIRS80 <- wp.t(n1 = 10, n2 = 10, d = NULL, alpha = 0.05, power = .80, type = "two.sample", alternative = "two.sided")$d
+medNIRS95 <- wp.t(n1 = 10, n2 = 10, d = NULL, alpha = 0.05, power = .95, type = "two.sample", alternative = "two.sided")$d
+
+# effect size calculation (cohen's d) for height in US adults from Table 9 and Table 11 of https://www.cdc.gov/nchs/data/series/sr_03/sr03-046-508.pdf
+esHeight <- (175.3 - 161.3) /  sqrt( ((0.19*sqrt(5092))^2 + (0.19*sqrt(5510))^2) /2 )
+
+# numbers taken from Fig 1 of Leucht et al. (2015). Used to calculate mean and median.
+leucht <- c(1.39, 1.04, .99, .93, .87, .03, .83, .77, .65, .56, .16, .56, .51, .41, .39, .38, .23, .15, .12)
+
+# sample size for median effect size from leucht's pharmaceuticals review, multiply by 2 because the number is per group. Multiplied by 2 because this function outputs the number of participants per group.
+nLeucht <- wp.t(n1 = NULL, n2 = NULL, d = median(leucht), alpha = 0.05, power = .80, type = "two.sample", alternative = "two.sided")$n * 2
+
+# sample size for antidepressant effect size of, multiply by 2 because the number is per group
+nAntiDep <- wp.t(n1 = NULL, n2 = NULL, d = .30, alpha = 0.05, power = .80, type = "two.sample", alternative = "two.sided")$n * 2
+
+```
+
+```{r supplementaryTables}
+# write csvs with the power analyses for each individual study
+write.csv(dMRIreg,"/results/fMRInf_recalculatedRegulation.csv", row.names = F)
+write.csv(dMRIbeh,"/results/fMRInf_recalculatedBehaviour.csv", row.names = F)
+write.csv(dNIRSreg,"/results/fNIRSnf_recalculatedRegulation.csv", row.names = F)
+write.csv(dNIRSbeh,"/results/fNIRSnf_recalculatedBehaviour.csv", row.names = F)
+```
+
+Recent systematic reviews of neurofeedback with functional magnetic resonance imaging (fMRI-nf) [@tursic2020] and neurofeedback with functional near infrared spectroscopy (fNIRS-nf) [@kohl2020] miscalculate the statistical power and statistical sensitivity of several studies they review. The fMRI-nf review overestimates the mean and median statistical power of included studies by about `r difMRIPower %>% round(0)` times and the statistical sensitivity by about `r difMRISensitivity %>% round(0)` times (see Table 1 for recalculated values and comparisons). The fNIRS-nf review, on which I (RTT) was a coauthor, overestimates power by about `r difNIRSPower %>% round(0)` times and sensitivity by about `r round(difNIRSSensitivity/.5)*.5` times (see Table 2). 
+
+The miscalculations arise from an easy-to-miss default option for repeated measures (mixed)^[We use the term “repeated measures (mixed) ANOVA” to describe a study design with one independent measure and one repeated measure (e.g., two independent groups measured at two time points). GPower uses the term “ANOVA: Repeated measures” for this type of design.] ANOVAs in the statistical software program GPower [@faul2007], which both reviews used (see Figure 1 for a depiction)^[Kohl and coauthors (including me—RTT) were unaware of this default option in GPower. I was only led to become aware of this issue when reading the fMRI-nf review and noticing a surprising amount of statistical power.]. The default option defines a variable in the effect size calculation $\eta$^2^~p~ in such a way that the common usage of small, medium, and large effects sizes for the interaction of repeated measures (mixed) ANOVAs (*f*) doesn’t hold true. If unaware of the default option, the power calculations will account for the correlations between repeated measures a second time, and in turn substantially—but erroneously—increase power. The GPower software itself highlights that @cohen1988 recommended another option (as viewable in Figure 1). While @lakens2013 explained this issue almost 10 years ago, it remains likely that researchers continue to use GPower without awareness of this default option and its implications^[@kieslich2020 provides a detailed explanation of how GPower calculates *f* for the different options for repeated measures (mixed) ANOVAs. The GPower team informed us that Cohen proposed Cohen’s *f* for between-subjects designs and that this is how GPower defines *f* when using the default option, regardless of the ANOVA design the user selects.]. Fortunately, the authors of both reviews published their data as supplementary material, making reanalysis possible.
+

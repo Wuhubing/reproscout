@@ -1,8 +1,7 @@
 # ReproScout
 
 ReproScout runs authors' scientific code in isolated containers, submits answers
-with execution evidence, and tests whether frozen development lessons help on
-held-out tasks. This is an independently authored MIT 1.125 project by Weibing Wang.
+with execution evidence, and evaluates whether frozen lessons help subsequent attempts. This is an independently authored MIT 1.125 project by Weibing Wang.
 
 It uses **Inspect AI as infrastructure**, not an existing benchmark task. It does
 not fork or invoke `inspect_evals/core_bench` or the original CORE-Agent harness.
@@ -23,50 +22,52 @@ See [implementation references](docs/research-references.md).
 not an unchanged CORE-Bench Medium result. Image downloads occur before the sample
 clock and are recorded separately. A successful pilot is not a benchmark-wide score.
 
-## v0.4.0: completed scientific matrix after network recovery
+## v0.5.0: evaluated lesson revision
 
-**All sixty scientific A/B cells completed under one unchanged freeze.**
-The scheduler distinguishes scientific outcomes from infrastructure attempts.
-It retains every failed attempt, checks connectivity before each cell, and applies
-bounded audited retries with shared cell budgets. Scientific failures are final;
-they are never rerun to improve scores.
+All sixty scientific A/B cells completed under one unchanged freeze. A solved
+**20/30**, B solved **26/30**. B scored higher than A in this rerun. This is a descriptive result,
+not evidence of statistical significance or unseen generalization.
+V4 scored A 25/30 and B 21/30: B gains five while A loses five, leaving the
+combined score unchanged at 46/60. Two of the four recovered B scores still involve
+reimplemented computations; one also violates the numeric-type reminder.
 
-A solved 12/15 and 13/15; B solved
-10/15 and 11/15. Total answer success was
-46/60; 46 attempts combined
-correct answers with unchanged prepared inputs. Average B-minus-A solved count:
--2.0. This is a descriptive result on fifteen previously evaluated tasks,
-not a significance claim or unseen generalization.
+The [four-pair analysis](docs/lesson-pair-analysis-v4.md) found two numeric-format
+failures, one wrong-output-family selection, and one exhausted submission budget.
+It also found an A run that altered a scientific copy while original-file hashes
+remained unchanged. Hash integrity and answer scoring do not establish full fidelity.
+Revision 2 adds conditional execution, evidence selection, submission-budget and
+JSON-type reminders, with an explicit prohibition on changing scientific copies.
+The scorer, base prompt, scientific tools, model and limits remain unchanged.
 
-All-attempt estimated model cost was $1.84094.
-Retained infrastructure attempts: 1; terminal native-count
-failures: 0; measured-token stops: 0.
-All 721 generations are auditable; native counts matched returned
-input usage on 721. Source integrity, answer scoring,
-and semantic evidence support remain separate properties.
+Before the formal freeze, a fifteen-outcome three-arm training comparison rejected
+the first candidate for a scientific-copy edit. A second candidate was then run
+on all five training tasks, for twenty development outcomes in total. New B solved 3/5; old B
+4/5; A 3/5. The final candidate submissions, numeric
+formats, input hashes and manual scientific-copy checks passed the amended gate.
+The legacy fidelity-qualified count was 3/5.
+Original raw-score floor passed: False. The comparator
+was amended before confirmation after a legacy success modified original code;
+[the amendment is retained](docs/lesson-confirmation-protocol.md).
+This is a limited mechanism check, not proof of superiority.
 
-[Download v0.4.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.4.0) ·
-[Portable results app](reports/index.html) · [Three-version comparison](docs/controller-comparison.md) ·
-[Per-run results](docs/results.md) · [Lessons analysis](docs/lessons-analysis.md) ·
-[English demo](deliverables/reproscout-demo.mp4)
+**Exposure disclosure:** the revision was informed by prior test trajectories.
+The same fifteen test tasks were rerun twice. This is test-informed method development
+and an exposed-cohort regression study, not a fresh held-out test.
 
-The delivery preserves 217 agent records and all earlier experiments. Before
-freezing, thirty real counting probes passed, two injected DNS failures recovered,
-and ten A/B training outcomes produced 82 generations with exact native counting
-and no network failures. One container startup failure was retained and retried.
-Thirteen deterministic environment checks and 31 software tests passed.
+All 60 formal attempts are retained, including 0
+infrastructure failures outside the sixty-cell scientific denominator. Total estimated
+model cost: $1.50081; calendar interval:
+134.55 minutes. Original-input audits across all attempts:
+`{'unchanged': 60}`. All old releases and 297 portable run records are preserved.
 
-The [historical power-state investigation](docs/network-incident-analysis.md) records a sleep/wake association without claiming a proven resolver cause.
+[Download v0.5.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.5.0) ·
+[Results app](reports/index.html) · [Four-version comparison](docs/controller-comparison.md) · [Four-pair follow-up](docs/adverse-pair-followup-v5.md) ·
+[Full results](docs/results.md) · [Lessons analysis](docs/lessons-analysis.md) · [Development results](docs/lesson-development-results.md) ·
+[English video](deliverables/reproscout-demo.mp4) · [Reproduction guide](docs/delivery-guide.md)
 
-The previous v3 matrix was **infrastructure-invalid**, with 59 DNS failures and
-55 zero-generation attempts. Its 1/60 success and low cost/time do not establish a
-lesson effect or efficiency. V2 had 20/60 successes and 39 byte-bound controller
-stops. Original v0.1.0, v0.2.0, and v0.3.0 releases remain available.
-
-See the [frozen network protocol](docs/network-recovery-protocol.md),
-[development evidence](reports/development-v4-validation.json),
-[project overview](docs/project-overview.md), and [reproduction guide](docs/delivery-guide.md).
-No API key is needed to inspect saved evidence.
+33 software tests passed. Source and dependency integrity, browser navigation,
+artifact hashes and release checks are recorded in reports/delivery-validation.json.
+Reading the saved evidence requires no API key.
 
 ## Install
 

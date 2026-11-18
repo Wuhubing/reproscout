@@ -168,3 +168,15 @@ protocol and complete comparison for exact results. No frozen file changed durin
 or after v4 evaluation; report narratives are separate delivery artifacts.
 
 The request JSONL ledger records application-level operations. The pinned underlying HTTP transport may retry a connection internally; the ledger is not a packet-level or individual TCP-attempt trace. The historical sleep/DarkWake correlation and successful control are documented separately in [the incident analysis](network-incident-analysis.md).
+
+## v0.5.0 completed lesson-revision study
+
+The revised lesson candidate passed the amended development
+gate after a rejected first candidate; twenty training outcomes are retained. All sixty formal scientific outcomes completed under an unchanged freeze:
+A 20/30, B 26/30, with 0 separately retained infrastructure
+attempts. This is test-informed method revision on an exposed cohort. Original-file
+hashes do not audit scientific changes to new copies; supplemental trajectory review
+and the original scorer remain separate. The v0.4.0 release and all failures persist.
+
+See [the four-pair diagnosis](lesson-pair-analysis-v4.md),
+[revision protocol](lesson-revision-protocol.md), and [comparison](controller-comparison.md).

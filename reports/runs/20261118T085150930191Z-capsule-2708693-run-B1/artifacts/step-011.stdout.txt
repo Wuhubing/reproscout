@@ -1,0 +1,31 @@
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# non-outcome discrepancies
+for (i in grep("discProOtherElig", colnames(df))[1]:grep("discOtherResultsDenom", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# exploratory analyses
+for (i in grep("industryDisc", colnames(df))[1]:grep("retroNonDiscSec", colnames(df))){
+  df[,i] <- df[,i] %>% as.numeric()
+}
+# The code above throws the warning: "NAs introduced by coercion". This is no problem. It occurs because some values are 'x' rather than numbers. The 'x' values are present if our original coding labeled that an article had information on this exploratory item, but when reviewing the articles in more detail, we found that it did not have this information. The warning tells us that instances of "x" have been converted to NA.
+
+# count articles that explicitly state they excluded studies with disclosed discrepancies by searching for the phrase "excludedDisclosed" 
+excludedDisclosedDiscrepancies = sum(grepl("excludedDisclosed", df$disclosedNum))
+# convert disclosedNum/Denom to numeric
+df$disclosedNum <- df$disclosedNum %>% as.numeric()
+df$disclosedDenom <- df$disclosedDenom %>% as.numeric()
+
+df <- df %>% mutate(denom = ifelse(is.na(discDenom), discProDenom, discDenom))
+# note some NAs will persist because a few studies don't check for outcome discrepancies. I don't need to combine the denom columns for the few studies that have both prospective and unclear, because we did this already during data collection/cleaning.
+
+# output a 'clean' dataset. 
+write.csv(df, "/data/dataClean.csv")
+```
+
+```{r perform_meta_analyses}
+# This chunk runs 40 meta-analyses [2 (pro & unclear) x 20 (10 outcome measures & 10 non-outcome measures)]. metaDisc() is a function I wrote specifically for this purpose. We reuse it when conducting meta-analyses on the combined pro and unclear coding later.
+
+temp <- metaDisc(df)
+estim <- temp[[1]]
+metaList <- temp[[2]]

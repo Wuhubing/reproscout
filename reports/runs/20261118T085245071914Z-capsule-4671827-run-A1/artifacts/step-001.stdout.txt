@@ -1,0 +1,70 @@
+total 772
+drwxr-xr-x 2 root root   4096 Nov 18 08:52 .
+drwxr-xr-x 1 root root   4096 Nov 18 08:52 ..
+-rw-r--r-- 1 root root  31152 Jan  1  1970 FullCode-With-PerformanceEval.ipynb
+-rw-r--r-- 1 root root   1071 Jan  1  1970 LICENSE
+-rw-r--r-- 1 root root  79558 Jan  1  1970 PerformanveEval.ipynb
+-rw-r--r-- 1 root root    963 Jan  1  1970 README.md
+-rw-r--r-- 1 root root 651463 Jan  1  1970 i2nsf-spt-main.zip
+-rw-r--r-- 1 root root    336 Jan  1  1970 run
+---README---
+# SPT: Security Policy Translator for Network Security Functions in Cloud-Based Security Services
+
+
+To run the translation server, make sure MongoDB is installed.
+The code was tested using MongoDB Version 3.6.8
+To install MongoDB follow: https://www.mongodb.com/docs/manual/installation/
+
+Installation Steps:
+1. Change the IP address & port in translator/i2nsfMongoDB.py (i.e., "mongodb://115.145.178.185:27017/") according to the IP address that provides MongoDB
+
+2. Run MongoDB and insert the data to the database in translator/insertMongoDB.py:
+```sh
+cd translator
+python3 insertMongoDB.py
+```
+
+3. Make the unique indexes for the collections in MongoDB:
+```
+# Connect to the MongoDB
+~ $ mongo
+> use endpoint
+> db.user.createIndex({"name":1},{unique:true})
+> db.url.createIndex({"name":1},{unique:true})
+```
+
+4. Run the REST API for the Translator
+```sh
+cd translator
+python3 RestAPI.py
+```
+
+5. Run the Webserver in the "react" directory (Read the README file)
+---REPRODUCING---
+This [Code Ocean](https://codeocean.com) Compute Capsule will allow you to reproduce the results published by the author on your local machine<sup>1</sup>. Follow the instructions below, or consult [our knowledge base](https://help.codeocean.com/user-manual/sharing-and-finding-published-capsules/exporting-capsules-and-reproducing-results-on-your-local-machine) for more information. Don't hesitate to reach out to [Support](mailto:support@codeocean.com) if you have any questions.
+
+<sup>1</sup> You may need access to additional hardware and/or software licenses.
+
+# Prerequisites
+
+- [Docker Community Edition (CE)](https://www.docker.com/community-edition)
+- MATLAB/MOSEK/Stata licenses where applicable
+
+# Instructions
+
+## The computational environment (Docker image)
+
+This capsule has been published and its environment has been archived and made available on Code Ocean's Docker registry:
+`registry.codeocean.com/published/74a2b572-8b37-4201-b80f-91fd81e19ac9:v1`
+
+## Running the capsule to reproduce the results
+
+In your terminal, navigate to the folder where you've extracted the capsule and execute the following command, adjusting parameters as needed:
+```shell
+docker run --platform linux/amd64 --rm \
+  --workdir /code \
+  --volume "$PWD/data":/data \
+  --volume "$PWD/code":/code \
+  --volume "$PWD/results":/results \
+  registry.codeocean.com/published/74a2b572-8b37-4201-b80f-91fd81e19ac9:v1 bash run
+```

@@ -1,0 +1,213 @@
+             comb.fixed = FALSE,
+             plotwidth = "11cm",
+             xlim = c(0,1),
+             fontsize = 12
+             )
+dev.off()
+
+```
+
+```{r articles_per_coder}
+# calculate the number of included articles each coder coded.
+RTT <- sum(grepl("RTT", df$coder))
+RC <- sum(grepl("RC", df$coder))
+SW <- sum(grepl("SW", df$coder))
+OvdA <- sum(grepl("OvdA", df$coder))
+```
+
+```{r make_article_characteristics_table}
+# make dataframe with discipline data. We will use this for the characteristics table (Table 1) via kable
+# this code is a bit round-about, but it works.
+
+set_table <- function(df, var_name){
+  df_group <- df %>% 
+    group_by({{var_name}}) %>%
+    summarize(k_articles = n(), n_studies = sum(denom, na.rm = T)) %>%
+    arrange(desc(k_articles), desc(n_studies)) %>% 
+    rename(var1 = {{var_name}})
+  return(df_group)
+}
+
+# 1. disciplines
+disciplineFrame <- set_table(df, discipline)
+# rename items so the table is cleaner
+disciplineFrame$var1 <- c("medicine",
+                "dentistry",
+                "psychology",
+                "economics",
+                "physical therapy")
+
+# 2. Registry assessed
+comparatorFrame <- set_table(df, comparator)
+comparatorFrame$var1<- c("registry",
+                "ethics application",
+                "other protocol",
+                "marketing application",
+                "grant application")
+
+# 3. Source from which the studies were identified
+# Calculate using grepl() rather than set_table() because some artices used multiple sources...On second thought, I'm just gonna present this with each category
+sourceFrame <- set_table(df, source)
+sourceFrame$var1 <- c("journals",
+                "registries",
+                "search engines",
+                "ethics boards",
+                "funders",
+                "registries and search engines",
+                "regulators",
+                "research group",
+                "registries and journals"
+                )
+
+# 4. Observational
+observationalFrame <- set_table(df, observational)
+observationalFrame$var1 <- c("solely observational",
+                "observational and study authors were contacted",
+                "observational and interventional"
+                )
+
+# 5. registration version compared to
+versionFrame <- set_table(df, version)
+# move 'not reported' row to the bottom of the dataframe
+versionFrame <- versionFrame %>% slice(-1) %>% bind_rows(versionFrame[1,])
+  
+versionFrame$var1 <- c("original",
+                "most recent",
+                "other version/unclear",
+                "not reported"
+                )
+
+# 6. disclosures
+disclosedFrame <- set_table(df, disclosed)
+# move 'not reported' row to the bottom of the dataframe
+disclosedFrame <- disclosedFrame %>% slice(-1) %>% bind_rows(disclosedFrame[1,])
+
+disclosedFrame$var1 <- c("one or more",
+                         "none",
+                         "article excluded publications with disclosed discrepancies",
+                         "not reported"
+                )
+
+# create dataframe that combines the dataframes above that will be used to produce Table 1
+charFrame <- bind_rows(disciplineFrame,
+                       comparatorFrame,
+                       sourceFrame,
+                       observationalFrame,
+                       versionFrame,
+                       disclosedFrame)
+# name columns to appear in table
+colnames(charFrame) <- c("Article characteristic", paste("k = ", nrow(df)), paste("n = ", sum(df$denom, na.rm = T)))
+
+# This code provides the numbers that insert table sections in the right spot for Table 1
+g1 <- nrow(disciplineFrame)
+g2 <- g1 + nrow(comparatorFrame)
+g3 <- g2 + nrow(sourceFrame)
+g4 <- g3 + nrow(observationalFrame)
+g5 <- g4 + nrow(versionFrame)
+g6 <- g5 + nrow(disclosedFrame)
+```
+
+```{r years}
+# calculate data on the year range that the *studies* were published (not when the *articles* were published). 
+
+# Filter to only include the articles which report the year the *studies* were *published* (rather than registered)
+yearPub <- dfAll %>% filter(yearItem=="pub")
+
+# using dfAll because I will run a correlation with the results from the two main figures later.
+# calculate median and IQR for the oldest studies that were included in each article ('firstYear')
+
+# some years are coded as '0'. This was done when there appeared to be no limit on the earliest year. Remove rows coded as '0' before calculating the median and IQR. 
+yearFirst <- yearPub %>% filter(yearFirst > 0)
+yearFirstMedian <- median(yearFirst$yearFirst)
+yearFirstQ1 <- round(quantile(yearFirst$yearFirst)[2],0)
+yearFirstQ3 <- round(quantile(yearFirst$yearFirst)[4],0)
+# median and IQR for last year
+yearLast <- yearPub %>% filter(yearLast > 0)
+yearLastMedian <- median(yearLast$yearLast)
+yearLastQ1 <- round(quantile(yearLast$yearLast)[2],0)
+yearLastQ3 <- round(quantile(yearLast$yearLast)[4],0)
+# 2 extracts the 25% quartile, and 4 extracts the 75% quartile value.
+
+```
+
+```{r perform_meta_regressions}
+# run meta-regressions on the articles characteristics for the two main analyses
+
+# set the reference categories for the meta-regressions
+dfAll$discipline <- relevel(dfAll$discipline, ref = "Medicine (MEDI)") 
+dfAll$source<- relevel(as.factor(dfAll$source), ref = "journal") 
+dfAll$disclosed <- relevel(as.factor(dfAll$disclosed), ref = "Yes, and SOME or ALL of the discrepancies were disclosed") 
+dfAll$comparator <- relevel(as.factor(dfAll$comparator), ref = "reg") 
+dfAll$version <- relevel(as.factor(dfAll$version), ref = "Original version") 
+
+# make dfs that only contain non-NA rows for the two main analyses. This is necessary to run the meta-regressions
+df1 <- filter(dfAll, !is.na(disc1))
+df2 <- filter(dfAll, !is.na(disc2))
+
+# remove levels with no data
+df1$source <- droplevels(df1$source)
+df1$comparator <- droplevels(df1$comparator)
+df2$source <- droplevels(df2$source)
+df2$comparator <- droplevels(df2$comparator)
+df2$discipline <- droplevels(df2$discipline)
+
+# extract the two main meta-analyses from larger list of meta-analyses
+meta1 <- metaListAll[grep("disc1", colnames(df))[[1]]][[1]]
+meta2 <- metaListAll[grep("disc2", colnames(df))[[1]]][[1]]
+
+# 1. perform a meta-regression to test whether the publication year of an article impacts the proportion of discrepancies
+modPubYear1 <- metareg(meta1, ~df1$pubYear)
+modPubYear2 <- metareg(meta2, ~df2$pubYear)
+
+--- table3 section ---
+
+temp <- metaRR(dfMeta$proDisc, 
+               dfMeta$proDisc + dfMeta$proNonDisc, 
+               dfMeta$retroDisc, 
+               dfMeta$retroDisc + dfMeta$retroNonDisc, 
+               dfMeta)
+meta <- temp[[1]]
+CIexpTime <- temp[[2]]
+PIexpTime <- temp[[3]]
+nexpTime <- sum(meta$n.e, meta$n.c)
+
+png("forestExpTime.png", width = 850)
+meta::forest(meta,
+             leftlabs = c("Article", "discrepant", "total", "discrepant", "total"),
+             lab.e = "Prospective",
+             lab.c = "Retrospective",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.1,10),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+             )
+dev.off()
+
+```
+
+```{r exploratory_meta_analyses_table}
+# create table to summarize the exploratory analyses
+#\n is a line break because they become very long and small font when knitted to a pdf
+addTable <- c("Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy",
+              "Percentage of outcome discrepancies that favored statistically significant results",
+              "Likelihood ratio of a study with versus without an outcome discrepancy to contain statistically significant results",
+              "*Likelihood ratio of a study with versus without a statistically significant results to contain an outcome discrepancy",
+              "Likelihood ratio of a study with versus without industry funded to contain an outcome discrepancy",
+              "Likelihood ratio of a prospectively registered study versus retrospectively registered study to contain a primary outcome discrepancy"
+)
+
+addCIs <- c(CIdisclosed,
+                CIexpFavorSig,
+                CIexpStatSig,
+                CIexpStatSig2,
+                CIexpIndustry,
+                CIexpTime)
+
+addPIs <- c(PIdisclosed,
+                PIexpFavorSig,
+                PIexpStatSig,
+                PIexpStatSig2,
+                PIexpIndustry,

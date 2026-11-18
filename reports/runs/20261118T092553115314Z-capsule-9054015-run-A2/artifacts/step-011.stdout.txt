@@ -1,0 +1,21 @@
+   360	                            prevalence=sprintf('%5.2f', 100*prevalence),
+   361	                            EUC=sprintf('%4.1f', EUC),
+   362	                            CD=sprintf('%3.1f', CD))
+   363	    dset <- dset %>% rename('Sensitivity, %'='sensitivity',
+   364	                            'Localization, %'='localization',
+   365	                            'Specificity, %'='specificity',
+   366	                            'Prevalence, %'='prevalence',
+   367	                            'Exposed to unnecessary confirmation, n'='EUC',
+   368	                            'Cancers detected, n'='CD')
+   369	    if(saveit){
+   370	        filename <- str_glue('supplemental_table1_{datestamp}.csv')
+   371	        write_csv(dset, file.path(resupath, filename))
+   372	    }
+   373	}
+   374	
+   375	##################################################
+   376	# Format table of SEER incidence and mortality rates
+   377	##################################################
+   378	format_seer <- function(dset, fmt='%5.2f', saveit=FALSE){
+   379	    dset <- dset %>% select(site, age, prevalence, mortality)
+   380	    dset <- dset %>% mutate(site=factor(site, levels=c('Breast',

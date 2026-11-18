@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && cat > /tmp/calc2.R <<'EOF'\nlibrary(WebPower)\nd<-read.csv('/data/fMRInf_regulation.csv')\nd<-subset(d, test=='anova')\nd$type<-as.numeric(d$type)\nvals<-sapply(1:nrow(d), function(i) wp.rmanova(d$n[i], d$ng[i], d$nm[i], f=NULL, nscor=1, alpha=0.05, power=.80, type=d$type[i])$f*2)\ncat('mean_p80=', mean(vals), '\\n')\ncat('first=', vals[1], '\\n')\nEOF\nRscript /tmp/calc2.R",
+  "exit_code": 0,
+  "seconds": 3.965615707973484,
+  "stdout": "artifacts/step-014.stdout.txt",
+  "stderr": "artifacts/step-014.stderr.txt"
+}

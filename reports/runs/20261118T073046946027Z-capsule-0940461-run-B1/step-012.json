@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, copy\nnb=nbformat.read('FGBR_OC.ipynb', as_version=4)\ncell=nb.cells[0]\nsrc=cell.source\nsrc=src.replace('X_train,X_test,y_train,y_test = my_load_iris()','from sklearn.datasets import load_iris\\n    data=load_iris()\\n    X_train, X_test, y_train, y_test = train_test_split(data.data, data.target, random_state=0, test_size=0.1)')\ncell.source=src\nnbformat.write(nb, '/results/FGBR_OC_local.ipynb')\nprint('written')\nPY\njupyter nbconvert --to notebook --execute /results/FGBR_OC_local.ipynb --output FGBR_OC_local_executed.ipynb --output-dir /results --ExecutePreprocessor.timeout=-1 --ExecutePreprocessor.allow_errors=True >/tmp/nb2.log 2>&1; tail -20 /tmp/nb2.log\npython - <<'PY'\nimport nbformat\nnb=nbformat.read('/results/FGBR_OC_local_executed.ipynb', as_version=4)\nfor i,cell in enumerate(nb.cells):\n    if cell.cell_type=='code' and cell.outputs:\n        for out in cell.outputs:\n            if out.output_type=='stream' and 'c = 1.0' in out.text:\n                print('CELL',i)\n                print(out.text)\nPY",
+  "exit_code": 0,
+  "seconds": 13.662339417031035,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript -e 'load(\"../data/ratingData5\"); ExclList5 <- c(4,5,7,13,30,66,160,116); ratingData5 <- subset(ratingData5, !(ParticipantNumber %in% ExclList5)); ratingData5$correspondingTime <- as.factor(ratingData5$correspondingTime); ratingData5$USval <- ifelse(substr(as.character(ratingData5$correspondingUS), 1, 1) == \"p\", \"positive\", \"negative\"); ratingData5$USval <- as.factor(ratingData5$USval); ratingData5Aggr <- aggregate(likingRating ~ ParticipantNumber * USval * correspondingTime, ratingData5, mean); ratingData5AggrW <- reshape(ratingData5Aggr, idvar=c(\"ParticipantNumber\",\"correspondingTime\"), timevar=\"USval\", direction=\"wide\"); ratingData5AggrW$EC <- ratingData5AggrW$likingRating.positive - ratingData5AggrW$likingRating.negative; print(with(ratingData5AggrW, tapply(EC, correspondingTime, mean))); print(with(ratingData5AggrW, tapply(EC, correspondingTime, median)));'",
+  "exit_code": 0,
+  "seconds": 0.5681980830268003,
+  "stdout": "artifacts/step-013.stdout.txt",
+  "stderr": "artifacts/step-013.stderr.txt"
+}

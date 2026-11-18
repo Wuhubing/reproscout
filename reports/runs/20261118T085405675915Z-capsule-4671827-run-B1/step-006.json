@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python3 - <<'PY'\nimport nbformat, re\nnb=nbformat.read('../results/PerformanveEval-executed.ipynb', as_version=4)\nfor i,c in enumerate(nb.cells):\n    src=''.join(c.get('source',[]))\n    if '44' in src or '44 elements' in src.lower():\n        print('CELL',i)\n        print(src[:2000])\n        print('outputs:')\n        for o in c.get('outputs',[]):\n            if o.output_type=='stream':\n                print(o.text[:1000])\n            elif o.output_type=='execute_result':\n                print(o['data'].get('text/plain','')[:1000])\n            elif o.output_type=='display_data':\n                print(o['data'].keys())\nPY",
+  "exit_code": 0,
+  "seconds": 1.0344527499983087,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

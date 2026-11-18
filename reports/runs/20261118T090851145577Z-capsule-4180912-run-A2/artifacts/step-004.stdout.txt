@@ -1,0 +1,220 @@
+     1	"""
+     2	Diabetes classification with ANN, SVM and logit
+     3	Copyright (C) 2019  Antonio Alvarez
+     4	
+     5	This program is free software: you can redistribute it and/or modify
+     6	it under the terms of the GNU General Public License as published by
+     7	the Free Software Foundation, either version 3 of the License, or
+     8	(at your option) any later version.
+     9	
+    10	This program is distributed in the hope that it will be useful,
+    11	but WITHOUT ANY WARRANTY; without even the implied warranty of
+    12	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    13	GNU General Public License for more details.
+    14	
+    15	You should have received a copy of the GNU General Public License
+    16	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    17	"""
+    18	
+    19	import pandas as pd
+    20	import numpy as np 
+    21	from sklearn.cluster import KMeans
+    22	from sklearn.svm import SVC
+    23	from sklearn.neural_network import MLPClassifier
+    24	from sklearn.linear_model import LogisticRegression
+    25	from sklearn.preprocessing import scale
+    26	import sklearn.metrics as mt
+    27	from sklearn.model_selection import GridSearchCV
+    28	from sklearn.model_selection import train_test_split
+    29	from sklearn.model_selection import cross_validate
+    30	#import matplotlib.pyplot as plt
+    31	from imblearn.over_sampling import SMOTE
+    32	import collections
+    33	#from sklearn.externals import joblib
+    34	from joblib import dump, load
+    35	
+    36	if __name__ == '__main__':
+    37	
+    38	    NUM_TRIALS = 10
+    39	
+    40	    table = pd.read_csv('/data/diabeticos2.csv')
+    41	    table_results = table['Tipo']
+    42	    del table['Tipo']
+    43	    del table['G120']
+    44	    del table['I120']
+    45	    #del table['I0']
+    46	    #del table['G0']
+    47	    #del table['Edad']
+    48	
+    49	    #Convert to numpy array for sklearn
+    50	    table2 = table.to_numpy()
+    51	    table_results2 = table_results.to_numpy()
+    52	    
+    53	    X_res_scaled = scale(table2)
+    54	    #X_res_scaled = table2
+    55	    
+    56	    logit_accu = np.zeros(NUM_TRIALS)
+    57	    logit_pre_weighted = np.zeros(NUM_TRIALS)
+    58	    logit_rec_weighted = np.zeros(NUM_TRIALS)
+    59	    logit_f1_weighted = np.zeros(NUM_TRIALS)
+    60	    logit_pre_micro = np.zeros(NUM_TRIALS)
+    61	    logit_rec_micro = np.zeros(NUM_TRIALS)
+    62	    logit_f1_micro = np.zeros(NUM_TRIALS)
+    63	    logit_pre_macro = np.zeros(NUM_TRIALS)
+    64	    logit_rec_macro = np.zeros(NUM_TRIALS)
+    65	    logit_f1_macro = np.zeros(NUM_TRIALS)
+    66	
+    67	    nn_accu = np.zeros(NUM_TRIALS)
+    68	    nn_pre_weighted = np.zeros(NUM_TRIALS)
+    69	    nn_rec_weighted = np.zeros(NUM_TRIALS)
+    70	    nn_f1_weighted = np.zeros(NUM_TRIALS)
+    71	    nn_pre_micro = np.zeros(NUM_TRIALS)
+    72	    nn_rec_micro = np.zeros(NUM_TRIALS)
+    73	    nn_f1_micro = np.zeros(NUM_TRIALS)
+    74	    nn_pre_macro = np.zeros(NUM_TRIALS)
+    75	    nn_rec_macro = np.zeros(NUM_TRIALS)
+    76	    nn_f1_macro = np.zeros(NUM_TRIALS)
+    77	
+    78	    svm_accu = np.zeros(NUM_TRIALS)
+    79	    svm_pre_weighted = np.zeros(NUM_TRIALS)
+    80	    svm_rec_weighted = np.zeros(NUM_TRIALS)
+    81	    svm_f1_weighted = np.zeros(NUM_TRIALS)
+    82	    svm_pre_micro = np.zeros(NUM_TRIALS)
+    83	    svm_rec_micro = np.zeros(NUM_TRIALS)
+    84	    svm_f1_micro = np.zeros(NUM_TRIALS)
+    85	    svm_pre_macro = np.zeros(NUM_TRIALS)
+    86	    svm_rec_macro = np.zeros(NUM_TRIALS)
+    87	    svm_f1_macro = np.zeros(NUM_TRIALS)
+    88	
+    89	    for i in range(NUM_TRIALS):
+    90	
+    91	
+    92	        #Splitting in training-test sets
+    93	        X_train, X_test, y_train, y_test = train_test_split(X_res_scaled, table_results2,stratify=table_results2, test_size=0.20)
+    94	
+    95	        #counter = collections.Counter(y_test)
+    96	        #print(counter)
+    97	        #print(sum(counter.values()))
+    98	
+    99	        #sm = SMOTE(random_state=42,k_neighbors=1)
+   100	        #X_res, y_res = sm.fit_resample(X_train,y_train)
+   101	        X_res,y_res = X_train,y_train
+   102	
+   103	      
+   104	        
+   105	
+   106	        #Model construction and training, only left the best paramaters, extend the param_xx with other parameters to do a grid search
+   107	        
+   108	        param_nn = {'learning_rate_init':[0.001],'alpha': [0.0005], 'hidden_layer_sizes': [(50,)], 'max_iter':[10000]}
+   109	        nn = MLPClassifier()
+   110	        cv_nn = GridSearchCV(nn,param_nn,cv=5)
+   111	        cv_nn.fit(X_res,y_res)
+   112	        print("Entrenado nn\n")
+   113	
+   114	        param_logit = {'solver':['lbfgs'],'multi_class':['multinomial'],'max_iter':[10000]}
+   115	        logit = LogisticRegression()
+   116	        cv_logit = GridSearchCV(logit,param_logit,cv=5)
+   117	        cv_logit.fit(X_res,y_res)
+   118	        print("entrenado logit\n")
+   119	
+   120	        param_svm = {'C': [1], 'gamma': ['auto'], 'kernel': ['rbf']}
+   121	        svm = SVC()
+   122	        cv_svm = GridSearchCV(svm,param_svm,cv=5)
+   123	        cv_svm.fit(X_res,y_res)
+   124	
+   125	        #print("terminado los entrenamientos\n")
+   126	
+   127	
+   128	        #Saving the models  
+   129	        #dump(cv_nn, 'nn.joblib')
+   130	        #dump(cv_svm, 'svm.joblib')
+   131	        #dump(cv_logit, 'logit.joblib')
+   132	     
+   133	        #print(cv_svm.best_score_)
+   134	        #print(cv_nn.best_score_)
+   135	
+   136	    
+   137	        predicted_nn = cv_nn.predict(X_test)
+   138	        conf_matrix_nn = mt.confusion_matrix(y_test,predicted_nn)
+   139	        nn_accu[i] = mt.accuracy_score(y_test,predicted_nn)
+   140	        nn_pre_weighted[i] = mt.precision_score(y_test,predicted_nn,average='weighted')
+   141	        nn_rec_weighted[i] = mt.recall_score(y_test,predicted_nn,average='weighted')
+   142	        nn_pre_micro[i] = mt.precision_score(y_test,predicted_nn,average='micro')
+   143	        nn_rec_micro[i] = mt.recall_score(y_test,predicted_nn,average='micro')
+   144	        nn_pre_macro[i] = mt.precision_score(y_test,predicted_nn,average='macro')
+   145	        nn_rec_macro[i] = mt.recall_score(y_test,predicted_nn,average='macro')
+   146	        nn_f1_weighted[i] = mt.f1_score(y_test,predicted_nn,average='weighted')
+   147	        nn_f1_micro[i] = mt.f1_score(y_test,predicted_nn,average='micro')
+   148	        nn_f1_macro[i] = mt.f1_score(y_test,predicted_nn,average='macro')
+   149	
+   150	
+   151	
+   152	        predicted_svm = cv_svm.predict(X_test)
+   153	        conf_matrix_svm = mt.confusion_matrix(y_test,predicted_svm)
+   154	        svm_accu[i] = mt.accuracy_score(y_test,predicted_svm)
+   155	        svm_pre_weighted[i] = mt.precision_score(y_test,predicted_svm,average='weighted')
+   156	        svm_rec_weighted[i] = mt.recall_score(y_test,predicted_svm,average='weighted')
+   157	        svm_pre_micro[i] = mt.precision_score(y_test,predicted_svm,average='micro')
+   158	        svm_rec_micro[i] = mt.recall_score(y_test,predicted_svm,average='micro')
+   159	        svm_pre_macro[i] = mt.precision_score(y_test,predicted_svm,average='macro')
+   160	        svm_rec_macro[i] = mt.recall_score(y_test,predicted_svm,average='macro')
+   161	        svm_f1_weighted[i] = mt.f1_score(y_test,predicted_svm,average='weighted')
+   162	        svm_f1_micro[i] = mt.f1_score(y_test,predicted_svm,average='micro')
+   163	        svm_f1_macro[i] = mt.f1_score(y_test,predicted_svm,average='macro')
+   164	
+   165	
+   166	        predicted_logit = cv_logit.predict(X_test)
+   167	        conf_matrix_logit = mt.confusion_matrix(y_test,predicted_logit)
+   168	        logit_accu[i] = mt.accuracy_score(y_test,predicted_logit)
+   169	        logit_pre_weighted[i] = mt.precision_score(y_test,predicted_logit,average='weighted')
+   170	        logit_rec_weighted[i] = mt.recall_score(y_test,predicted_logit,average='weighted')
+   171	        logit_pre_micro[i] = mt.precision_score(y_test,predicted_logit,average='micro')
+   172	        logit_rec_micro[i] = mt.recall_score(y_test,predicted_logit,average='micro')
+   173	        logit_pre_macro[i] = mt.precision_score(y_test,predicted_logit,average='macro')
+   174	        logit_rec_macro[i] = mt.recall_score(y_test,predicted_logit,average='macro')
+   175	        logit_f1_weighted[i] = mt.f1_score(y_test,predicted_logit,average='weighted')
+   176	        logit_f1_micro[i] = mt.f1_score(y_test,predicted_logit,average='micro')
+   177	        logit_f1_macro[i] = mt.f1_score(y_test,predicted_logit,average='macro')
+   178	
+   179	
+   180	    accuracy_logit = logit_accu.mean()
+   181	    precision_logit = logit_pre_weighted.mean()
+   182	    recall_logit = logit_rec_weighted.mean()
+   183	    precision_logit2 = logit_pre_micro.mean()
+   184	    recall_logit2 = logit_rec_micro.mean()
+   185	    precision_logit3 = logit_pre_macro.mean()
+   186	    recall_logit3 = logit_rec_macro.mean()
+   187	    f1score_logit = logit_f1_weighted.mean()
+   188	    f1score_logit2 = logit_f1_micro.mean()
+   189	    f1score_logit3 = logit_f1_macro.mean()
+   190	
+   191	    accuracy_nn = nn_accu.mean()
+   192	    precision_nn = nn_pre_weighted.mean()
+   193	    recall_nn = nn_rec_weighted.mean()
+   194	    precision_nn2 = nn_pre_micro.mean()
+   195	    recall_nn2 = nn_rec_micro.mean()
+   196	    precision_nn3 = nn_pre_macro.mean()
+   197	    recall_nn3 = nn_rec_macro.mean()
+   198	    f1score_nn = nn_f1_weighted.mean()
+   199	    f1score_nn2 = nn_f1_micro.mean()
+   200	    f1score_nn3 = nn_f1_macro.mean()
+   201	
+   202	    accuracy_svm = svm_accu.mean()
+   203	    precision_svm = svm_pre_weighted.mean()
+   204	    recall_svm = svm_rec_weighted.mean()
+   205	    precision_svm2 = svm_pre_micro.mean()
+   206	    recall_svm2 = svm_rec_micro.mean()
+   207	    precision_svm3 = svm_pre_macro.mean()
+   208	    recall_svm3 = svm_rec_macro.mean()
+   209	    f1score_svm = svm_f1_weighted.mean()
+   210	    f1score_svm2 = svm_f1_micro.mean()
+   211	    f1score_svm3 = svm_f1_macro.mean()    
+   212	
+   213	    #showing metrics
+   214	    print("The accuracy for the classifiers are\n")
+   215	    print("neural network: ", accuracy_nn)
+   216	    print("SVM: ", accuracy_svm)
+   217	    print("Logistic Regression: ", accuracy_logit)
+   218	    print("\n")
+   219	    
+   220	    print("The weighted precision for the classifiers are\n")

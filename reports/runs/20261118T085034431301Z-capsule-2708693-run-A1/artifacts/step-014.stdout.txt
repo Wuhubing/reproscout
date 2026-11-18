@@ -1,0 +1,71 @@
+
+png("forestExpTime.png", width = 850)
+meta::forest(meta,
+             leftlabs = c("Article", "discrepant", "total", "discrepant", "total"),
+             lab.e = "Prospective",
+             lab.c = "Retrospective",
+             pooled.events = TRUE,
+             squaresize = 0,
+             sortvar = TE,
+             comb.fixed = FALSE,
+             xlim = c(.1,10),
+             fontsize = 12,
+             smlab = "Likelihood ratio"
+             )
+dev.off()
+
+```
+
+```{r exploratory_meta_analyses_table}
+# create table to summarize the exploratory analyses
+#\n is a line break because they become very long and small font when knitted to a pdf
+addTable <- c("Percentage of studies with at least one outcome discrepancy that disclose an outcome discrepancy",
+              "Percentage of outcome discrepancies that favored statistically significant results",
+              "Likelihood ratio of a study with versus without an outcome discrepancy to contain statistically significant results",
+              "*Likelihood ratio of a study with versus without a statistically significant results to contain an outcome discrepancy",
+              "Likelihood ratio of a study with versus without industry funded to contain an outcome discrepancy",
+              "Likelihood ratio of a prospectively registered study versus retrospectively registered study to contain a primary outcome discrepancy"
+)
+
+addCIs <- c(CIdisclosed,
+                CIexpFavorSig,
+                CIexpStatSig,
+                CIexpStatSig2,
+                CIexpIndustry,
+                CIexpTime)
+
+addPIs <- c(PIdisclosed,
+                PIexpFavorSig,
+                PIexpStatSig,
+                PIexpStatSig2,
+                PIexpIndustry,
+                PIexpTime)
+
+addk <- c(sum(!is.na(df$disclosedNum)),
+          sum(!is.na(df$favorSig)),
+          sum(!is.na(df$sigDisc)),
+          sum(!is.na(df$sigDisc)),
+          sum(!is.na(df$industryDisc)),
+          sum(!is.na(df$proDisc))
+)
+
+addn <- c(ndisclosed,
+          nexpFavorSig,
+          nexpStatSig,
+          nexpStatSig2,
+          nexpIndustry,
+          nexpTime
+          )
+
+addFrame <- data.frame(addTable, addCIs, addPIs, addk, addn)
+colnames(addFrame) <- c("Analysis", "95% CI", "95% PI", "k", "n")
+```
+
+```{r gaps}
+
+gapsIssues <- c("Many studies are never registered",
+                "Registrations are imprecise",
+                "Consumers of research should be aware of outcome switching",
+                "Registration should be mandated or enforced",
+                "Additional initiatives are needed to reduce reporting discrepancies",
+                "Analysis plans should be registered"

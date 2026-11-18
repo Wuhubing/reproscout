@@ -1,0 +1,20 @@
+16:d_long <- melt(d, id.vars = c("id","dx"), 
+17:               measure.vars = c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV"), 
+21:  mutate(measure = str_replace(measure, "concentricity", "Concentricity"))
+25:dummy = data.frame(ics=NA, dx=NA, measure=rep(c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","Concentricity","Septal thickness","PWV"), each=2), 
+49:(g <- ggplot(data = d_long, mapping = aes(y = value, x=dx, fill = dx)) +
+50:  geom_blank(data=dummy, aes(x=ics,y=value, fill = dx)) +
+53:  geom_point(aes(y = value, x = dx, color = dx), position = position_jitter(width = .15), size = 1, alpha = 0.8) +
+72:lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+73:       function(x) summary(aov(x ~ d$dx)))
+77:lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")], 
+78:       function(x) cohen.d(x, d$dx))
+83:res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+84:        function(x) glm(x ~ d$dx  + d$Hvq_Activityscore ))
+85:vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+90:res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+91:        function(x) glm(x ~ d$dx  + d$cigarettes_day ))
+92:vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])
+97:res<-lapply(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")],
+98:        function(x) glm(x ~ d$dx  + d$scanner ))
+99:vars<-names(d[,c("LVEDVi","LVESVi","LVSVi","LVMi","RVEDVi","RVESVi","RVSVi","LVEF","RVEF","concentricity","septalthhickness","PWV")])

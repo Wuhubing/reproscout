@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nfrom bs4 import BeautifulSoup\nhtml=open('../results/FS-Filters.html').read()\nsoup=BeautifulSoup(html,'html.parser')\n# find code cell containing print(best_k,best_acc)\nfor pre in soup.find_all('pre'):\n    txt=pre.get_text('\\n')\n    if 'print(best_k, best_acc)' in txt:\n        print('FOUND CODE CELL')\n        parent=pre.parent\n        # print following siblings text maybe outputs in same cell container\n        for sib in parent.next_siblings:\n            if getattr(sib,'name',None):\n                t=sib.get_text('\\n', strip=True)\n                if t:\n                    print('SIB', sib.name, t[:500])\n                if sib.name=='div' and 'output' in sib.get('class',[]):\n                    pass\n        break\n# search for output text containing just numbers\nfor string in soup.stripped_strings:\n    if string.strip()=='0.9180451127819549' or string.strip()=='0.92':\n        print('match',string)\nPY",
+  "exit_code": 1,
+  "seconds": 0.22912199998972937,
+  "stdout": "artifacts/step-006.stdout.txt",
+  "stderr": "artifacts/step-006.stderr.txt"
+}

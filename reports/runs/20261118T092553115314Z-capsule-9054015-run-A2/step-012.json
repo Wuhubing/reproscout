@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && Rscript - <<'RS'\nlibrary(tidyverse)\nd<-read_csv('../data/seer_merged_2000-2002_followup=15_2021-05-13.csv', col_types='ccddddddddd') %>% rename(age='Age', site='Site') %>% select(site, age, prevalence='Diagnosis.Rate', mortality='Death.Rate') %>% mutate(site=factor(site, levels=c('Breast','Colon and Rectum','Liver and Intrahepatic Bile Duct','Lung and Bronchus','Ovary','Pancreas')), age=sub('-[567]4', '', age), prevalence=sprintf('%5.2f', 100*prevalence), mortality=sprintf('%5.2f', 100*mortality)) %>% arrange(site, age) %>% rename('Tissue of origin'=site,'Age, y'=age,'5-year probability of diagnosis, %'=prevalence,'15-year probability of death, %'=mortality)\nprint(d %>% filter(`Tissue of origin`=='Breast', `Age, y`=='50'))\nRS",
+  "exit_code": 0,
+  "seconds": 3.781346665986348,
+  "stdout": "artifacts/step-012.stdout.txt",
+  "stderr": "artifacts/step-012.stderr.txt"
+}

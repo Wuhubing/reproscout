@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python - <<'PY'\nimport nbformat, json, os\nfrom nbconvert.preprocessors import ExecutePreprocessor\nfrom nbconvert import HTMLExporter\nfrom pathlib import Path\nnb_path='FS-Filters.ipynb'\nout_dir=Path('/results')\nout_dir.mkdir(exist_ok=True)\nwith open(nb_path) as f:\n    nb=nbformat.read(f, as_version=4)\nep=ExecutePreprocessor(timeout=-1, kernel_name='python3', allow_errors=True)\nep.preprocess(nb, {'metadata': {'path': '/code'}})\nhtml_exporter=HTMLExporter()\n(body, resources)=html_exporter.from_notebook_node(nb)\nout_file=out_dir/'FS-Filters.html'\nout_file.write_text(body, encoding='utf-8')\nprint(out_file)\nPY",
+  "exit_code": 0,
+  "seconds": 36.544253333995584,
+  "stdout": "artifacts/step-002.stdout.txt",
+  "stderr": "artifacts/step-002.stderr.txt"
+}

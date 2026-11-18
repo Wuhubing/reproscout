@@ -1,0 +1,7 @@
+{
+  "command": "cd /code && python3 - <<'PY'\nimport nbformat, base64\nfrom pathlib import Path\nnb=nbformat.read('../results/PerformanveEval-executed.ipynb', as_version=4)\ncell=nb.cells[1]\nfor j,o in enumerate(cell.outputs):\n    if o.output_type=='display_data' or o.output_type=='execute_result':\n        data=o.data\n        if 'image/png' in data:\n            img=base64.b64decode(data['image/png'])\n            p=Path('../results/cell1.png')\n            p.write_bytes(img)\n            print(p)\nPY",
+  "exit_code": 0,
+  "seconds": 0.9710955420159735,
+  "stdout": "artifacts/step-008.stdout.txt",
+  "stderr": "artifacts/step-008.stderr.txt"
+}
