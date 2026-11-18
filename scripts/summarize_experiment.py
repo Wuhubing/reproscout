@@ -90,8 +90,10 @@ an unchanged CORE-Bench Medium score. Model and limits are recorded in the freez
 {totals}
 
 Average B-minus-A solved count: **{result["average_solved_difference_B_minus_A"]:+.1f}**.
-All **{len(runs)}** planned records are present; no missing cells. Total formal model
-cost: **${cost:.5f}**. A receives no lessons; B receives the original frozen rules.
+All **{len(runs)}** planned scientific outcomes are present; no missing cells.
+Retained infrastructure attempts: **{len(result.get("infrastructure_attempts", []))}**; these do not fill scientific cells.
+Total selected-outcome model cost: **${cost:.5f}**. A receives no lessons; B receives the original frozen rules.
+All-attempt cost, including infrastructure retries: **${result.get("all_attempt_cost_estimated_usd", cost):.5f}**.
 No earlier experiment run is counted in these totals. Costs exclude image
 preparation, host compute, and development assistance.
 
@@ -103,8 +105,7 @@ preparation, host compute, and development assistance.
 
 Counts combine two repetitions; repeats are not independent scientific tasks.
 Previously evaluated capsules: {len(prior)}; newly evaluated capsules: {len(cohort["heldout"]) - len(prior)}.
-Prior exposure is disclosed rather than treating repeated evaluation as new data. No lessons or agent policy were changed after their
-previous outcomes were observed. Task modality labels do not establish image-tool use.
+Prior exposure is disclosed rather than treating repeated evaluation as new data. The original lessons remain unchanged; controller changes were validated on development tasks before the new freeze. Task modality labels do not establish image-tool use.
 
 ## Per-task records
 
@@ -112,7 +113,7 @@ previous outcomes were observed. Task modality labels do not establish image-too
 |---|---|---:|---|---:|---:|---|
 {chr(10).join(rows)}
 
-No submission or execution/context/budget failure counts as unsolved, rather than
+A missing submission or scientific execution/context/budget failure counts as unsolved, rather than
 being excluded. Source integrity and answer correctness are separate properties.
 Where inputs changed, the audit must be inspected before claiming faithful reproduction.
 

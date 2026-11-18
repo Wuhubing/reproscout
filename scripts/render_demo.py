@@ -61,7 +61,7 @@ notes = [
     [],
     [
         "Runnable repo + pinned dependencies + reports",
-        "22 software tests • 13 environment checks",
+        "31 software tests • 13 environment checks",
         "Small cohort; no significance claim",
         "Prepared environments, not unchanged Medium",
         "Codex-assisted implementation; synthetic narration",

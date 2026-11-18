@@ -13,6 +13,7 @@ from inspect_ai.util import sandbox
 
 from .budget import Budget
 from .evidence import validate_submission
+from .network import transport_retry
 from .request_count import count_request
 from .tasks import digest, write_json
 
@@ -244,7 +245,9 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
             reasoning_effort=config["reasoning_effort"],
         )
         try:
-            counts = await count_request(get_model(), state.messages, tools, generation_config)
+            counts = await count_request(
+                get_model(), state.messages, tools, generation_config, run / "network-events.jsonl"
+            )
         except Exception as exc:
             budget.request_checks.append(
                 {"status": "count_failed", "error_type": type(exc).__name__}
@@ -255,7 +258,12 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
             budget.reserve(counts["native_input_tokens"], counts)
         finally:
             write_json(run / "budget.json", budget.__dict__)
-        output = await get_model().generate(state.messages, tools=tools, config=generation_config)
+        output = await transport_retry(
+            lambda: get_model().generate(state.messages, tools=tools, config=generation_config),
+            kind="generation",
+            audit_path=run / "network-events.jsonl",
+            request_sha256=counts["request_sha256"],
+        )
         if output.usage is None:
             raise ValueError("Provider returned no usage; reserved cost retained and run stopped")
         budget.settle(output.usage.model_dump(), output.model)

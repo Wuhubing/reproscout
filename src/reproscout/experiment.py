@@ -66,14 +66,19 @@ def aggregate(root: Path, experiment: Path) -> dict:
         if s.get("experiment_id") == payload["experiment_id"]:
             s["task_id"] = json.loads((p.parent / "manifest.json").read_text())["task_id"]
             results.append(s)
+    retry_policy = payload.get("infrastructure_retry_policy")
+    all_attempts = results
     by_key = {}
     for result in results:
         key = (result["task_id"], result["condition"], result["repeat"])
+        if retry_policy and result.get("infrastructure_failure"):
+            continue
         if key in by_key:
             raise ValueError(
                 "Duplicate formal run; apply an explicit retry policy before aggregation"
             )
         by_key[key] = result
+    results = list(by_key.values())
     expected = [
         (cid, condition, repeat)
         for cid in payload["cohort"]["heldout"]
@@ -96,6 +101,21 @@ def aggregate(root: Path, experiment: Path) -> dict:
         "totals": totals,
         "missing": [list(key) for key in expected if key not in by_key],
         "runs": results,
+        **(
+            {
+                "all_attempts": all_attempts,
+                "infrastructure_attempts": [
+                    r for r in all_attempts if r.get("infrastructure_failure")
+                ],
+                "scientific_matrix_complete": set(by_key) == set(expected),
+                "all_attempt_cost_estimated_usd": sum(
+                    r["cost_estimated_usd"] for r in all_attempts
+                ),
+                "all_attempt_seconds": sum(r["seconds"] for r in all_attempts),
+            }
+            if retry_policy
+            else {}
+        ),
         "average_solved_difference_B_minus_A": sum(
             totals[f"B{i}"]["solved"] - totals[f"A{i}"]["solved"] for i in [1, 2]
         )

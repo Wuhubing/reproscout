@@ -58,7 +58,10 @@ def main():
         target = destination / "runs" / run.name
         target.mkdir(parents=True, exist_ok=True)
         for p in run.iterdir():
-            if p.suffix in {".json", ".html", ".md"} and "before-accounting-fix" not in p.name:
+            if (
+                p.suffix in {".json", ".jsonl", ".html", ".md"}
+                and "before-accounting-fix" not in p.name
+            ):
                 shutil.copyfile(p, target / p.name)
         if (run / "artifacts").exists():
             shutil.copytree(run / "artifacts", target / "artifacts", dirs_exist_ok=True)
@@ -125,17 +128,27 @@ def main():
         comparison += f"</table><p>Average B minus A solved count: <strong>{results['average_solved_difference_B_minus_A']:+.1f}</strong>. Missing planned runs: {len(results['missing'])}.</p>"
         comparison += f'<p>Experiment: {html.escape(results["experiment_id"])}. A: baseline. B: frozen development lessons. <a href="experiment/freeze.json">Freeze manifest</a> | <a href="experiment/results.json">Full comparison data</a></p>'
         context_stops = sum(
-            "Pilot context limit reached" in (r.get("sample_error") or "") for r in results["runs"]
+            any(
+                message in (r.get("sample_error") or "")
+                for message in [
+                    "Pilot context limit reached",
+                    "Measured request token limit reached",
+                ]
+            )
+            for r in results["runs"]
         )
         startup_failures = sum(r.get("model_calls") == 0 for r in results["runs"])
-        comparison += f"<p>{len({r['task_id'] for r in results['runs']})} unique held-out tasks; {len(results['runs'])} recorded formal attempts. Application request-bound stops: {context_stops}. Zero-model-call initialization failures: {startup_failures}. All remain in the primary denominator.</p>"
+        comparison += f"<p>{len({r['task_id'] for r in results['runs']})} unique held-out tasks; {len(results['runs'])} recorded formal attempts. Application request-bound stops: {context_stops}. Zero-model-call attempts: {startup_failures}. All remain in the primary denominator.</p>"
         exposure = json.loads((args.experiment / "freeze.json").read_text()).get(
             "previously_evaluated_task_ids", []
         )
         task_ids = {r["task_id"] for r in results["runs"]}
         prior_count = len(task_ids & set(exposure))
         comparison += f'<p>Previously evaluated tasks: {prior_count}; newly evaluated tasks: {len(task_ids) - prior_count}. <a href="../docs/results.md">Detailed interpretation and exposure breakdown</a> | <a href="../docs/registry-recovery.md">Image recovery evidence</a></p>'
-        formal = [r for r in run_records if r.get("experiment_id") == results["experiment_id"]]
+        if "scientific_matrix_complete" in results:
+            comparison += f'<p class="note">Scientific matrix complete: {results["scientific_matrix_complete"]}. Retained infrastructure attempts: {len(results["infrastructure_attempts"])}. Infrastructure attempts do not fill scientific cells. <a href="../docs/controller-comparison.md">Cross-version comparison and limitations</a> | <a href="../docs/network-recovery-protocol.md">Frozen retry policy</a></p>'
+        selected_ids = {r["run_id"] for r in results["runs"]}
+        formal = [r for r in run_records if r["run_id"] in selected_ids]
         groups = "<h2>Language and modality</h2><table><tr><th>Group</th><th>A solved / runs</th><th>B solved / runs</th></tr>"
         for field, value in [
             ("language", "Python"),

@@ -10,6 +10,8 @@ import json
 from inspect_ai.model._openai_responses import openai_responses_inputs, openai_responses_tools
 from inspect_ai.tool import ToolDef, ToolInfo
 
+from .network import transport_retry
+
 
 def request_sizes(messages, schemas):
     """Measure the historical byte bound without exposing opaque payload contents."""
@@ -34,7 +36,7 @@ def request_sizes(messages, schemas):
     }
 
 
-async def count_request(model, messages, tools, config):
+async def count_request(model, messages, tools, config, audit_path=None):
     """Count messages, images, encrypted reasoning and tool schemas together."""
     api = model.api
     if not getattr(api, "responses_api", False):
@@ -58,9 +60,14 @@ async def count_request(model, messages, tools, config):
         "reasoning": {"effort": config.reasoning_effort},
         "parallel_tool_calls": False,
     }
-    response = await api.client.with_options(
-        max_retries=0, timeout=60
-    ).responses.input_tokens.count(**wire)
+    request_digest = hashlib.sha256(json.dumps(wire, sort_keys=True).encode()).hexdigest()
+    client = api.client.with_options(max_retries=0, timeout=60)
+    response = await transport_retry(
+        lambda: client.responses.input_tokens.count(**wire),
+        kind="count",
+        audit_path=audit_path,
+        request_sha256=request_digest,
+    )
     schemas = [
         {
             "name": t.name,
@@ -72,6 +79,6 @@ async def count_request(model, messages, tools, config):
     return {
         "native_input_tokens": response.input_tokens,
         "count_method": "responses.input_tokens.count/full-request",
-        "request_sha256": hashlib.sha256(json.dumps(wire, sort_keys=True).encode()).hexdigest(),
+        "request_sha256": request_digest,
         **request_sizes([m.model_dump(mode="json") for m in messages], schemas),
     }

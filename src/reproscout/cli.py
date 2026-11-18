@@ -77,6 +77,40 @@ def execute(
         },
         setup=SETUP,
     )
+    # Retries share the original cell budgets; failed attempts are never erased.
+    prior = []
+    if mode == "run" and experiment_id and experiment_id.endswith("v4"):
+        for previous in sorted((root / "runs").glob("*/summary.json")):
+            old = json.loads(previous.read_text())
+            if (old.get("experiment_id"), old.get("condition"), old.get("repeat")) != (
+                experiment_id,
+                condition,
+                repeat,
+            ):
+                continue
+            old_manifest = json.loads((previous.parent / "manifest.json").read_text())
+            if old_manifest["task_id"] == manifest["task_id"]:
+                prior.append(old)
+        if any(not old.get("infrastructure_failure", False) for old in prior):
+            raise ValueError("A scientific outcome already exists for this cell")
+        budget.limit -= sum(old["cost_uncached_upper_usd"] for old in prior)
+        config["max_model_calls"] -= sum(
+            old["model_calls"] + old.get("unsettled_model_requests", 0) for old in prior
+        )
+        config["wall_time_seconds"] = int(
+            config["wall_time_seconds"] - sum(old["seconds"] for old in prior)
+        )
+        if min(budget.limit, config["max_model_calls"], config["wall_time_seconds"]) <= 0:
+            raise ValueError("Cell budget exhausted by retained infrastructure attempts")
+        write_json(
+            run / "retry-context.json",
+            {
+                "prior_attempts": [old["run_id"] for old in prior],
+                "remaining_cost_upper_usd": budget.limit,
+                "remaining_model_calls": config["max_model_calls"],
+                "remaining_wall_seconds": config["wall_time_seconds"],
+            },
+        )
     started = time.monotonic()
     if mode == "run":
         load_key(key_file)
@@ -142,6 +176,7 @@ def execute(
         "cost_estimated_usd": budget.estimated_billed,
         "cost_uncached_upper_usd": budget.spent_upper,
         "model_calls": len(budget.calls),
+        "unsettled_model_requests": int(budget.reserved > 0),
         "evaluation": {},
         "framework": importlib.metadata.version("inspect-ai"),
         "limitations": [
@@ -150,6 +185,28 @@ def execute(
             "Artifact validity is not semantic evidence verification",
         ],
     }
+    network_path = run / "network-events.jsonl"
+    events = (
+        [json.loads(line) for line in network_path.read_text().splitlines()]
+        if network_path.exists()
+        else []
+    )
+    terminal_network = bool(events and events[-1]["status"] == "failed")
+    startup_failure = (
+        summary["status"] == "error"
+        and not budget.calls
+        and not (run / "source-audit.json").exists()
+    )
+    summary["infrastructure_failure"] = terminal_network or startup_failure
+    summary["infrastructure_reason"] = (
+        "terminal_network_failure"
+        if terminal_network
+        else "sandbox_startup_failure"
+        if startup_failure
+        else None
+    )
+    summary["attempt_number"] = len(prior) + 1
+    summary["network_attempt_failures"] = sum(e["status"] == "failed" for e in events)
     if (run / "submission.json").exists():
         answers = json.loads((run / "submission.json").read_text())
         references = json.loads(
