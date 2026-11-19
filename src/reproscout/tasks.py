@@ -31,7 +31,11 @@ def digest(data: bytes) -> str:
 
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    import uuid
+
+    temporary = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, ensure_ascii=True) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def verified_download(url: str, expected: str, destination: Path) -> bytes:

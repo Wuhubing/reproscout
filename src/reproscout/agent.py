@@ -255,6 +255,10 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
             state: Current agent conversation.
             tools: Available tools.
         """
+        if config.get("stop_on_offline_blocker") or config.get("web_job_id"):
+            from .blockers import before_generation
+
+            before_generation(run)
         if len(budget.calls) >= max_calls:
             raise ValueError("Maximum model calls reached")
         generation_config = GenerateConfig(
@@ -295,7 +299,9 @@ def build_agent(run: Path, manifest: dict, config: dict, budget: Budget, lessons
     if constrained:
         from .controlled import ControlledExecution
 
-        controller = ControlledExecution(run, manifest, artifacts, shell())
+        controller = ControlledExecution(
+            run, manifest, artifacts, shell(), config.get("stop_on_offline_blocker", False)
+        )
 
         @tool
         def inspect_file() -> Tool:

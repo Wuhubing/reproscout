@@ -19,3 +19,16 @@ macOS Samantha narration. See `../scripts/render_product_demo.py` for narration
 and regeneration (`uv run --with playwright python scripts/render_product_demo.py`).
 See `../docs/product-guide.md` for commands and `../docs/product-release-v7.md` for
 observed results, limitations, and acceptance evidence.
+
+## v0.8.0 local workspace
+
+Run `uv run reproscout serve` from the repository root, then open
+`http://127.0.0.1:8765`. The repository includes prebuilt frontend assets.
+`workspace-*-v8.png` shows actual desktop, review, lessons, new-run, and mobile
+screens. `../reports/workspace-v8.html` indexes the four retained browser-launched
+acceptance attempts. The earlier videos and reports are preserved.
+
+Read `../docs/workspace-guide-v8.md` for setup and `../docs/workspace-release-v8.md`
+for acceptance results and limitations. An independent-user usability session
+remains pending; the browser checks were automated and reviews are attributed
+to an assistant.

@@ -90,6 +90,8 @@ def report(run: Path) -> Path:
     rows = []
     for qid, item in review["questions"].items():
         candidate = item["candidate"] or {}
+        records = review.get("review_history", []) + [review.get("manual_review") or {}]
+        manual = next((r for r in reversed(records) if qid in r.get("questions", {})), {})
         decision = manual.get("questions", {}).get(qid, {})
         support = decision.get("support", "Needs review")
         if decision:

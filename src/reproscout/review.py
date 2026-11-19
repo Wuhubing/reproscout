@@ -67,7 +67,9 @@ def assess(run: Path) -> dict:
     result = {
         "schema_version": "1.0",
         "run_id": run.name,
-        "outcome": "completed"
+        "outcome": "cancelled"
+        if (run / "cancel.requested").exists()
+        else "completed"
         if complete
         else "partial"
         if succeeded
@@ -91,6 +93,8 @@ def assess(run: Path) -> dict:
             "Completed means execution and submission completed; semantic review is separate.",
         ],
         "manual_review": read(run, "manual-review.json", None),
+        "review_history": read(run, "review-history.json", []),
+        "blocker": read(run, "blocker.json", None),
     }
     write_json(run / "review-assessment.json", result)
     return result

@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+import time
 from pathlib import Path
 
 from .review import read
@@ -17,6 +18,27 @@ def lesson_path(directory, lesson_id):
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,79}", lesson_id):
         raise ValueError("Lesson ID must be a safe lowercase identifier")
     return directory / (lesson_id + ".json")
+
+
+def transition(directory, record, action, previous=None, content=None):
+    write_json(
+        directory / "history" / record["id"] / f"{time.time_ns()}.json",
+        {
+            "action": action,
+            "record": record,
+            "previous": previous,
+            "content": content,
+            "recorded_at_unix_ns": time.time_ns(),
+        },
+    )
+
+
+def edit(directory, lesson_id, content):
+    path = lesson_path(directory, lesson_id)
+    record = json.loads(path.read_text())
+    previous = path.with_suffix(".md").read_text()
+    path.with_suffix(".md").write_text(content)
+    transition(directory, record, "edit", {"content": previous}, content)
 
 
 def propose(
@@ -44,18 +66,21 @@ def propose(
         "approved_sha256": None,
     }
     write_json(path, record)
+    transition(directory, record, "propose", content=md.read_text())
     return record
 
 
 def change(directory, lesson_id, status, reviewer):
     path = lesson_path(directory, lesson_id)
     record = json.loads(path.read_text())
+    previous = dict(record)
     record.update(
         status=status,
         reviewer=reviewer,
         approved_sha256=content_hash(path.with_suffix(".md")) if status == "approved" else None,
     )
     write_json(path, record)
+    transition(directory, record, status, previous, path.with_suffix(".md").read_text())
     return record
 
 

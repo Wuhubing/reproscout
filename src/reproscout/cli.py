@@ -37,6 +37,7 @@ def execute(
     experiment_id: str | None = None,
     config_path: Path | None = None,
     lesson_ids: list[str] | None = None,
+    on_run_created=None,
 ) -> Path:
     from inspect_ai import Task, eval
     from inspect_ai.dataset import Sample
@@ -56,6 +57,7 @@ def execute(
         config.update(json.loads(config_path.read_text()))
     product = not experiment_id and mode == "run"
     if product:
+        config.setdefault("stop_on_offline_blocker", True)
         policy = config.get("execution_policy", "author_only")
         if policy not in ("author_only", "unrestricted"):
             raise ValueError("Unknown execution_policy")
@@ -84,6 +86,8 @@ def execute(
             "tasks"
         ][manifest["task_id"]]
     write_json(run / "config.json", config)
+    if on_run_created:
+        on_run_created(run)
     budget = Budget(
         limit=config["model_budget_usd"],
         max_output=config["max_output_tokens"],
@@ -294,6 +298,9 @@ def main() -> None:
     sub.add_parser("doctor")
     sub.add_parser("prepare")
     sub.add_parser("validate")
+    serve = sub.add_parser("serve")
+    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument("--key-file", type=Path)
     run = sub.add_parser("run")
     run.add_argument("--key-file", type=Path)
     run.add_argument("--manifest", type=Path)
@@ -316,7 +323,11 @@ def main() -> None:
     lessons.add_argument("--reviewer")
     args = parser.parse_args()
     root = args.root.resolve()
-    if args.command == "lessons":
+    if args.command == "serve":
+        from .web import serve
+
+        serve(root, args.port, args.key_file)
+    elif args.command == "lessons":
         from .lessons import change, propose
 
         directory = root / "lessons/registry"

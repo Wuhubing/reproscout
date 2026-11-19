@@ -112,8 +112,9 @@ def validate_provenance(answers: dict, artifacts: dict) -> None:
 
 
 class ControlledExecution:
-    def __init__(self, run: Path, manifest: dict, artifacts: dict, execute):
+    def __init__(self, run: Path, manifest: dict, artifacts: dict, execute, stop_on_blocker=False):
         self.run, self.artifacts, self.execute = run, artifacts, execute
+        self.stop_on_blocker = stop_on_blocker
         self.inventory = {"/" + x["path"]: x["sha256"] for x in manifest["input_inventory"]}
         self.generated = {}
         self.events = []
@@ -162,6 +163,12 @@ class ControlledExecution:
                 Args:
                     path: Directory under /code, /data or /results.
                 """
+                if (self.run / "cancel.requested").exists():
+                    raise ToolError("Cancellation requested; do not start another execution")
+                if self.stop_on_blocker and (self.run / "blocker.json").exists():
+                    raise ToolError(
+                        "Known offline dependency blocker. Inspect evidence and submit null for unresolved questions; further execution is stopped."
+                    )
                 try:
                     real = await self.resolve(path)
                     result = await sandbox().exec(
@@ -238,6 +245,15 @@ class ControlledExecution:
                     execution_id=execution_id,
                     status="succeeded" if success else "failed",
                 )
+                if self.stop_on_blocker and not success:
+                    from .blockers import detect_offline_blocker
+
+                    blocker = detect_offline_blocker(self.run, self.artifacts, execution_id)
+                    if blocker:
+                        result += (
+                            "\nKnown offline dependency blocker. Do not retry or substitute data. Two finalization calls remain; submit null for unresolved questions with this evidence:\n"
+                            + json.dumps(blocker)
+                        )
                 return result
 
             return execute
