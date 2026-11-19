@@ -496,7 +496,11 @@ class Workspace:
 
 
 def handler(workspace):
+    default_workspace = workspace
+
     class Handler(BaseHTTPRequestHandler):
+        workspace = default_workspace
+
         def log_message(self, *_):
             pass
 
@@ -530,23 +534,23 @@ def handler(workspace):
                 if parts == ["api", "bootstrap"]:
                     return self.send(
                         {
-                            "csrf": workspace.token,
-                            "version": "0.9.0",
+                            "csrf": self.workspace.token,
+                            "version": "0.10.0",
                             "credential_ready": bool(os.environ.get("OPENAI_API_KEY")),
-                            "projects": workspace.projects(),
-                            "runs": workspace.runs(),
-                            "lessons": workspace.lessons(),
-                            "jobs": workspace.jobs(),
+                            "projects": self.workspace.projects(),
+                            "runs": self.workspace.runs(),
+                            "lessons": self.workspace.lessons(),
+                            "jobs": self.workspace.jobs(),
                         }
                     )
                 if parts == ["api", "runs"]:
-                    return self.send({"runs": workspace.runs(), "jobs": workspace.jobs()})
+                    return self.send({"runs": self.workspace.runs(), "jobs": self.workspace.jobs()})
                 if len(parts) >= 3 and parts[:2] == ["api", "runs"]:
                     key = parts[2]
                     if len(parts) == 3:
-                        return self.send(workspace.details(key))
+                        return self.send(self.workspace.details(key))
                     if parts[3] == "evidence":
-                        path, meta = workspace.evidence(
+                        path, meta = self.workspace.evidence(
                             key, parse_qs(url.query).get("artifact", [""])[0]
                         )
                         if meta.get("kind") == "image":
@@ -564,14 +568,14 @@ def handler(workspace):
                         )
                     if parts[3] == "export":
                         return self.send(
-                            workspace.export(key),
+                            self.workspace.export(key),
                             kind="application/zip",
                             attachment=f"{identifier(key)}.zip",
                         )
                     if parts[3] == "trace":
                         return self.send(
                             read(
-                                workspace.source(key),
+                                self.workspace.source(key),
                                 "trajectory.json",
                                 {
                                     "messages": [],
@@ -580,7 +584,7 @@ def handler(workspace):
                             )
                         )
                 if parts[:1] == ["archive"]:
-                    base = workspace.root / "reports"
+                    base = self.workspace.root / "reports"
                     path = (base / "/".join(parts[1:])).resolve()
                     if not path.is_relative_to(base) or not path.is_file():
                         return self.send({"error": "Not found"}, 404)
@@ -601,14 +605,17 @@ def handler(workspace):
             except (ValueError, FileNotFoundError, KeyError) as exc:
                 self.send({"error": str(exc)}, 400)
 
-        def do_POST(self):
+        def valid_mutation(self):
             port = self.server.server_port
-            if (
-                not self.allowed()
-                or self.headers.get("X-ReproScout-CSRF") != workspace.token
-                or self.headers.get("Origin")
-                not in (f"http://127.0.0.1:{port}", f"http://localhost:{port}")
-            ):
+            return (
+                self.allowed()
+                and self.headers.get("X-ReproScout-CSRF") == self.workspace.token
+                and self.headers.get("Origin")
+                in (f"http://127.0.0.1:{port}", f"http://localhost:{port}")
+            )
+
+        def do_POST(self):
+            if not self.valid_mutation():
                 return self.send({"error": "Same-origin workspace request required"}, 403)
             try:
                 parts = unquote(urlsplit(self.path).path).strip("/").split("/")
@@ -618,23 +625,23 @@ def handler(workspace):
 
                     if not 0 < size <= MAX_UPLOAD:
                         raise ValueError("Project ZIP must be between 1 byte and 50 MiB")
-                    return self.send(workspace.import_bundle(self.rfile.read(size)), 201)
+                    return self.send(self.workspace.import_bundle(self.rfile.read(size)), 201)
                 if not 0 < size <= 500_000:
                     raise ValueError("Invalid request size")
                 data = json.loads(self.rfile.read(size))
                 parts = unquote(urlsplit(self.path).path).strip("/").split("/")
                 if parts == ["api", "runs"]:
-                    return self.send(workspace.start(data), 201)
+                    return self.send(self.workspace.start(data), 201)
                 if parts == ["api", "projects"]:
-                    return self.send(workspace.register_project(data), 201)
+                    return self.send(self.workspace.register_project(data), 201)
                 if len(parts) == 4 and parts[:2] == ["api", "jobs"] and parts[3] == "cancel":
-                    return self.send(workspace.cancel(parts[2]))
+                    return self.send(self.workspace.cancel(parts[2]))
                 if len(parts) == 4 and parts[:2] == ["api", "runs"] and parts[3] == "review":
-                    return self.send(workspace.review(parts[2], data), 201)
+                    return self.send(self.workspace.review(parts[2], data), 201)
                 if parts == ["api", "lessons"]:
-                    source = workspace.source(data["source_run"])
+                    source = self.workspace.source(data["source_run"])
                     result = propose(
-                        workspace.registry,
+                        self.workspace.registry,
                         source,
                         data["id"],
                         data["action"],
@@ -643,9 +650,9 @@ def handler(workspace):
                     )
                     return self.send(result, 201)
                 if len(parts) == 4 and parts[:2] == ["api", "lessons"]:
-                    with workspace.lock:
+                    with self.workspace.lock:
                         key, action = parts[2:]
-                        path = lesson_path(workspace.registry, key)
+                        path = lesson_path(self.workspace.registry, key)
                         if not path.exists():
                             raise ValueError("Unknown lesson")
                         if action == "edit":
@@ -654,7 +661,7 @@ def handler(workspace):
                                 or not 1 <= len(data["content"]) <= 20_000
                             ):
                                 raise ValueError("Lesson must contain 1–20,000 characters")
-                            edit(workspace.registry, key, data["content"])
+                            edit(self.workspace.registry, key, data["content"])
                             return self.send(
                                 {"saved": True, "note": "Changed content requires approval again."}
                             )
@@ -665,7 +672,7 @@ def handler(workspace):
                             raise ValueError("Valid action and reviewer identity are required")
                         return self.send(
                             change(
-                                workspace.registry,
+                                self.workspace.registry,
                                 key,
                                 "approved" if action == "approve" else "disabled",
                                 data["reviewer"],

@@ -1,0 +1,22 @@
+[Unit]
+Description=ReproScout authenticated research workspace
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=reproscout
+Group=reproscout
+SupplementaryGroups=docker
+WorkingDirectory=/opt/reproscout
+EnvironmentFile=/etc/reproscout/server.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/reproscout/.venv/bin/python -m reproscout.online --state /var/lib/reproscout --template /opt/reproscout --origin ${REPROSCOUT_ORIGIN} --images /etc/reproscout/images.json --monthly-model-budget ${REPROSCOUT_MONTHLY_MODEL_BUDGET}
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

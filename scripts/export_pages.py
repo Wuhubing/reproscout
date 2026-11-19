@@ -76,7 +76,7 @@ def export(root, output):
         write(
             output / "snapshot/bootstrap.json",
             {
-                "version": "0.9.0",
+                "version": "0.10.0",
                 "read_only": True,
                 "credential_ready": False,
                 "projects": list(projects.values()),

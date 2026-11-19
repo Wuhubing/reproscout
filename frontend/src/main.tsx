@@ -61,6 +61,7 @@ async function api(path: string, data?: any) {
           body: JSON.stringify(data),
         },
   );
+  if (response.status === 401) window.dispatchEvent(new Event("reproscout-login"));
   const value = await response.json();
   if (!response.ok) throw new Error(value.error || "Request failed");
   return value;
@@ -155,7 +156,26 @@ function useModalFocus(enabled: boolean) {
   }, [enabled]);
 }
 
+function SignIn({onLogin}: {onLogin: () => Promise<void>}) {
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  return <main className="signin"><section className="panel padded">
+    <FlaskConical size={32}/><h1>Sign in to ReproScout</h1>
+    <p>Upload original research code, run it in an isolated environment, and review the evidence in your private workspace.</p>
+    <form onSubmit={async e => {e.preventDefault(); setBusy(true); setError(""); try {
+      await api("/login", {code}); setCode(""); await onLogin();
+    } catch (e) {setError((e as Error).message);} finally {setBusy(false);}}}>
+      <label className="field">Workspace access code<input type="password" autoComplete="current-password" required value={code} onChange={e=>setCode(e.target.value)}/></label>
+      <p className="fine-print">Ask the workspace operator for an invitation. This is not an OpenAI API key.</p>
+      {error && <p role="alert">{error}</p>}
+      <button className="button primary" disabled={busy || !code.trim()}>{busy ? "Signing in…" : "Sign in"}</button>
+    </form>
+  </section></main>;
+}
+
 function App() {
+  const [loginRequired, setLoginRequired] = useState(false);
   const [boot, setBoot] = useState<Data | null>(null),
     [page, setPage] = useState("overview"),
     [selected, setSelected] = useState<string | null>(null),
@@ -165,6 +185,11 @@ function App() {
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [search, setSearch] = useState("");
+  useEffect(() => {
+    const login = () => {setLoginRequired(true); setBoot(null); setDetail(null); setSelected(null); setNewRun(false);};
+    window.addEventListener("reproscout-login", login);
+    return () => window.removeEventListener("reproscout-login", login);
+  }, []);
   async function refresh() {
     const b = await api("/bootstrap");
     csrf = b.csrf;
@@ -184,7 +209,7 @@ function App() {
     refresh().catch((e) => setError(e.message));
   }, []);
   useEffect(() => {
-    if (READ_ONLY) return;
+    if (READ_ONLY || loginRequired) return;
     const timer = setInterval(async () => {
       try {
         const b = await api("/runs");
@@ -195,7 +220,7 @@ function App() {
       } catch {}
     }, 2500);
     return () => clearInterval(timer);
-  }, [selected]);
+  }, [selected, loginRequired]);
   function navigate(next: string) {
     setSelected(null);
     setPage(next);
@@ -206,6 +231,7 @@ function App() {
     setProject(id);
     setNewRun(true);
   }
+  const online = Boolean(boot?.online);
   const runs: Data[] = boot?.runs || [],
     projects: Data[] = boot?.projects || [],
     lessons: Data[] = boot?.lessons || [];
@@ -226,6 +252,7 @@ function App() {
     ["runs", "Runs & reviews", ListChecks],
     ["lessons", "Lessons", BookOpen],
   ] as const;
+  if (loginRequired) return <SignIn onLogin={async () => {await refresh(); setLoginRequired(false); setError(""); setPage("overview");}}/>;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -240,13 +267,13 @@ function App() {
           <span className="brand-icon">
             <FlaskConical size={21} />
           </span>
-          ReproScout<span className="version">0.9</span>
+          ReproScout<span className="version">0.10</span>
         </a>
         <div className="workspace-switch">
           <span className="workspace-avatar">R</span>
           <div>
             <b>Research workspace</b>
-            <small>{READ_ONLY ? "Published evidence" : "Local environment"}</small>
+            <small>{READ_ONLY ? "Published evidence" : online ? "Private online workspace" : "Local environment"}</small>
           </div>
           <MoreHorizontal size={17} />
         </div>
@@ -273,7 +300,7 @@ function App() {
         <div className="nav-label second">REFERENCE</div>
         <a
           className="nav-item"
-          href={BASE + "archive/experiments-v6.html"}
+          href={online ? "https://wuhubing.github.io/reproscout/archive/experiments-v6.html" : BASE + "archive/experiments-v6.html"}
           target="_blank"
           rel="noreferrer"
         >
@@ -285,7 +312,7 @@ function App() {
           <div className="environment">
             <span className="status-light" />
             <div>
-              <b>{READ_ONLY ? "Read-only website" : "Running locally"}</b>
+              <b>{READ_ONLY ? "Read-only website" : online ? "Online execution" : "Running locally"}</b>
               <small>{READ_ONLY ? "Execution requires local app" : "Author sandbox stays offline"}</small>
             </div>
           </div>
@@ -296,8 +323,8 @@ function App() {
           <div className="profile">
             <span>RS</span>
             <div>
-              <b>{READ_ONLY ? "Public workspace" : "Local researcher"}</b>
-              <small>{READ_ONLY ? "Real retained evidence" : "No cloud account required"}</small>
+              <b>{READ_ONLY ? "Public workspace" : online ? boot?.account : "Local researcher"}</b>
+              <small>{READ_ONLY ? "Real retained evidence" : online ? "Signed-in researcher" : "No cloud account required"}</small>
             </div>
           </div>
         </div>
@@ -324,6 +351,7 @@ function App() {
           </div>
         </header>
         <main>
+          {online && <div className="callout compact"><ShieldCheck size={19}/><p>Private workspace · One server run at a time · Up to $0.10 per run. Monthly model reservations: {money(boot?.monthly_reserved_usd)} / {money(boot?.monthly_limit_usd)}. Reservations are conservative limits, not billed costs. <a href="https://wuhubing.github.io/reproscout/downloads/sklearn-diabetes-ols-102.zip">Download an importable example</a>.</p><button className="button" onClick={async () => {await api("/logout", {}); window.location.reload();}}>Sign out</button></div>}
           {READ_ONLY && <div className="callout compact"><ShieldCheck size={19}/><p>Published evidence workspace · Read-only. Explore real runs, inspect evidence, and download reports. Import, execution, and review editing require the <a href={LOCAL_GUIDE} target="_blank" rel="noreferrer">local app</a>. <a href={BASE + "downloads/sklearn-diabetes-ols-102.zip"}>Download example project</a>.</p></div>}
           {error && (
             <div className="toast error" role="alert">
@@ -674,7 +702,7 @@ function App() {
               {page === "run" &&
                 (detail ? (
                   <RunDetail
-                    data={detail}
+                    data={{...detail, account: boot.account}}
                     onChange={async () => {
                       await refresh();
                       setDetail(await api("/runs/" + selected));
@@ -760,6 +788,7 @@ function App() {
         <NewRun
           projects={projects}
           lessons={lessons}
+          maxBudget={boot.max_run_budget_usd || 1}
           initial={project}
           blocked={jobActive || !boot.credential_ready}
           onClose={() => setNewRun(false)}
@@ -941,6 +970,7 @@ function ImportProject({
 }
 
 function NewRun({
+  maxBudget,
   projects,
   lessons,
   initial,
@@ -949,6 +979,7 @@ function NewRun({
   onStart,
   onError,
 }: {
+  maxBudget: number;
   projects: Data[];
   lessons: Data[];
   initial: string;
@@ -962,7 +993,7 @@ function NewRun({
     [types, setTypes] = useState<Record<string, string>>({}),
     [calls, setCalls] = useState(20),
     [seconds, setSeconds] = useState(1800),
-    [cost, setCost] = useState(1),
+    [cost, setCost] = useState(maxBudget),
     [chosen, setChosen] = useState<string[]>([]),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -1111,7 +1142,7 @@ function NewRun({
                   <input
                     type="number"
                     min={0.01}
-                    max={1}
+                    max={maxBudget}
                     step={0.01}
                     value={cost}
                     onChange={(e) => setCost(+e.target.value)}
@@ -1213,7 +1244,7 @@ function RunDetail({
     [qid, setQid] = useState(""),
     [evidence, setEvidence] = useState<Data | null>(null),
     [preview, setPreview] = useState<Data | null>(null),
-    [reviewer, setReviewer] = useState(""),
+    [reviewer, setReviewer] = useState(data.account || ""),
     [kind, setKind] = useState("human"),
     [support, setSupport] = useState("uncertain"),
     [rationale, setRationale] = useState(""),

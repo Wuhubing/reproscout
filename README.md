@@ -1,5 +1,7 @@
 # ReproScout
 
+**v0.10 authenticated execution pilot:** browser login, private ZIP uploads, real Docker runs, saved reviews, and report export. [Setup, validation, and deployment status](docs/online-pilot-v10.md). Public execution hosting is pending a server; the existing Pages site remains read-only.
+
 **Live website:** [Open ReproScout](https://wuhubing.github.io/reproscout/). Explore published runs, inspect evidence, and download reports. GitHub Pages is read-only; import, execution, and review editing run locally. [New project walkthrough](docs/new-project-walkthrough-v9.md) · [Website deployment](docs/github-pages.md).
 
 **v0.8 local App:** run `uv run reproscout serve` and open `http://127.0.0.1:8765`. [Workspace guide](docs/workspace-guide-v8.md) · [Validation](docs/workspace-release-v8.md) · [Frontend references](docs/frontend-references-v8.md).
