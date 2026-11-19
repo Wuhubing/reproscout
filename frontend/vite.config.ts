@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 export default defineConfig({
+  base: process.env.VITE_READ_ONLY === "true" ? "/reproscout/" : "/",
   plugins: [react()],
-  build: { outDir: "../src/reproscout/static", emptyOutDir: true },
+  build: { outDir: process.env.VITE_READ_ONLY === "true" ? "dist-pages" : "../src/reproscout/static", emptyOutDir: true },
   server: {
     host: "127.0.0.1",
     port: 5173,

@@ -32,10 +32,24 @@ import {
 import "./style.css";
 
 type Data = Record<string, any>;
+const READ_ONLY = import.meta.env.VITE_READ_ONLY === "true";
+const BASE = import.meta.env.BASE_URL;
+const LOCAL_GUIDE = "https://github.com/Wuhubing/reproscout/blob/main/docs/workspace-guide-v8.md";
+function resource(path: string, image = false): string {
+  if (!READ_ONLY) return "/api" + path;
+  const [route, query] = path.split("?");
+  if (route.endsWith("/export")) return BASE + "downloads/" + route.split("/")[2] + ".zip";
+  if (route.endsWith("/evidence")) {
+    const artifact = new URLSearchParams(query).get("artifact") || "";
+    return BASE + "snapshot/runs/" + route.split("/")[2] + "/" + artifact + (image ? "" : ".json");
+  }
+  return BASE + "snapshot" + route + (route.startsWith("/runs/") && route.split("/").length === 3 ? "/details" : "") + ".json";
+}
 let csrf = "";
 async function api(path: string, data?: any) {
+  if (READ_ONLY && data !== undefined) throw new Error("Published workspace is read-only. Run ReproScout locally to make changes.");
   const response = await fetch(
-    "/api" + path,
+    resource(path),
     data === undefined
       ? {}
       : {
@@ -170,6 +184,7 @@ function App() {
     refresh().catch((e) => setError(e.message));
   }, []);
   useEffect(() => {
+    if (READ_ONLY) return;
     const timer = setInterval(async () => {
       try {
         const b = await api("/runs");
@@ -187,6 +202,7 @@ function App() {
     setSearch("");
   }
   function openNew(id = "") {
+    if (READ_ONLY) { window.open(LOCAL_GUIDE, "_blank", "noopener,noreferrer"); return; }
     setProject(id);
     setNewRun(true);
   }
@@ -224,13 +240,13 @@ function App() {
           <span className="brand-icon">
             <FlaskConical size={21} />
           </span>
-          ReproScout<span className="version">0.8</span>
+          ReproScout<span className="version">0.9</span>
         </a>
         <div className="workspace-switch">
           <span className="workspace-avatar">R</span>
           <div>
             <b>Research workspace</b>
-            <small>Local environment</small>
+            <small>{READ_ONLY ? "Published evidence" : "Local environment"}</small>
           </div>
           <MoreHorizontal size={17} />
         </div>
@@ -257,7 +273,7 @@ function App() {
         <div className="nav-label second">REFERENCE</div>
         <a
           className="nav-item"
-          href="/archive/experiments-v6.html"
+          href={BASE + "archive/experiments-v6.html"}
           target="_blank"
           rel="noreferrer"
         >
@@ -269,8 +285,8 @@ function App() {
           <div className="environment">
             <span className="status-light" />
             <div>
-              <b>Running locally</b>
-              <small>Author sandbox stays offline</small>
+              <b>{READ_ONLY ? "Read-only website" : "Running locally"}</b>
+              <small>{READ_ONLY ? "Execution requires local app" : "Author sandbox stays offline"}</small>
             </div>
           </div>
           <button className="help-link" onClick={() => navigate("help")}>
@@ -280,8 +296,8 @@ function App() {
           <div className="profile">
             <span>RS</span>
             <div>
-              <b>Local researcher</b>
-              <small>No cloud account required</small>
+              <b>{READ_ONLY ? "Public workspace" : "Local researcher"}</b>
+              <small>{READ_ONLY ? "Real retained evidence" : "No cloud account required"}</small>
             </div>
           </div>
         </div>
@@ -308,6 +324,7 @@ function App() {
           </div>
         </header>
         <main>
+          {READ_ONLY && <div className="callout compact"><ShieldCheck size={19}/><p>Published evidence workspace · Read-only. Explore real runs, inspect evidence, and download reports. Import, execution, and review editing require the <a href={LOCAL_GUIDE} target="_blank" rel="noreferrer">local app</a>. <a href={BASE + "downloads/sklearn-diabetes-ols-102.zip"}>Download example project</a>.</p></div>}
           {error && (
             <div className="toast error" role="alert">
               <TriangleAlert size={18} />
@@ -363,14 +380,14 @@ function App() {
                       onClick={() => openNew()}
                     >
                       <Plus size={17} />
-                      New reproduction
+                      {READ_ONLY ? "Run locally" : "New reproduction"}
                     </button>
                   </div>
                   <div className="metrics">
                     <Metric
-                      title="Prepared projects"
+                      title={READ_ONLY ? "Published projects" : "Prepared projects"}
                       value={projects.length}
-                      caption={`${projects.filter((p) => p.prepared).length} available on this machine`}
+                      caption={READ_ONLY ? "Project records from published runs" : `${projects.filter((p) => p.prepared).length} available on this machine`}
                       icon={<Box size={18} />}
                     />
                     <Metric
@@ -612,13 +629,13 @@ function App() {
                         Start from verified inputs and a pinned environment.
                       </p>
                     </div>
-                    <ImportProject
+                    {!READ_ONLY && <ImportProject
                       onSave={async () => {
                         await refresh();
                         setNotice("Prepared project registered.");
                       }}
                       onError={setError}
-                    />
+                    />}
                   </div>
                   <div className="project-grid">
                     {projects.map((p) => (
@@ -627,7 +644,7 @@ function App() {
                           <span className="project-icon lavender">
                             <Box size={22} />
                           </span>
-                          <Badge value={p.prepared ? "ready" : "unavailable"} />
+                          <Badge value={READ_ONLY ? "published" : p.prepared ? "ready" : "unavailable"} />
                         </div>
                         <h2>{p.title}</h2>
                         <p>{p.description}</p>
@@ -642,11 +659,11 @@ function App() {
                           <small>{p.task_id}</small>
                           <button
                             className="button"
-                            disabled={!p.prepared}
+                            disabled={!READ_ONLY && !p.prepared}
                             onClick={() => openNew(p.id)}
                           >
                             <Play size={14} />
-                            New run
+                            {READ_ONLY ? "Run locally" : "New run"}
                           </button>
                         </div>
                       </section>
@@ -692,7 +709,7 @@ function App() {
                     {[
                       [
                         "Prepare a project",
-                        "Select a prepared Python or R capsule with original author code, data, questions, and a pinned container. Import an existing manifest to add your own prepared project. Arbitrary repository adaptation is not automatic.",
+                        "Select a prepared Python or R capsule with original author code, data, questions, and a pinned container. Import a ZIP containing manifest.json and prepared.tar, or an existing local manifest, to add your own prepared project. Arbitrary repository adaptation is not automatic.",
                       ],
                       [
                         "Run original code",
@@ -717,7 +734,7 @@ function App() {
                     <ShieldCheck />
                     <div>
                       <b>
-                        {boot.credential_ready
+                        {READ_ONLY ? "Published snapshot: run the local app to execute or edit." : boot.credential_ready
                           ? "API credential configured on the host."
                           : "Browsing is available. Execution needs a host API credential."}
                       </b>
@@ -769,28 +786,157 @@ function ImportProject({
   onSave: () => void;
   onError: (s: string) => void;
 }) {
+  const [open, setOpen] = useState(false),
+    [file, setFile] = useState<File | null>(null),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  useModalFocus(open);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) setOpen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open, busy]);
+  async function submit() {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (file.size > 50 * 1024 * 1024)
+        throw new Error("Project ZIP exceeds the 50 MiB upload limit.");
+      if (file.name.toLowerCase().endsWith(".zip")) {
+        const response = await fetch("/api/projects/import", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/zip",
+            "X-ReproScout-CSRF": csrf,
+          },
+          body: file,
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Import failed");
+      } else {
+        await api("/projects", JSON.parse(await file.text()));
+      }
+      onSave();
+      setOpen(false);
+      setFile(null);
+    } catch (e) {
+      setError((e as Error).message);
+      onError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
-    <label className="button">
-      <FolderOpen size={16} />
-      Import prepared manifest
-      <input
-        className="sr-only"
-        type="file"
-        accept=".json"
-        aria-label="Import prepared manifest"
-        onChange={async (e) => {
-          try {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            await api("/projects", JSON.parse(await file.text()));
-            onSave();
-          } catch (err) {
-            onError((err as Error).message);
-          }
-          e.target.value = "";
+    <>
+      <button
+        className="button"
+        onClick={() => {
+          setError("");
+          setOpen(true);
         }}
-      />
-    </label>
+      >
+        <FolderOpen size={16} />
+        Import project
+      </button>
+      {open && (
+        <div className="modal-backdrop">
+          <section
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="import-title"
+          >
+            <div className="modal-heading">
+              <div>
+                <div className="eyebrow">BRING YOUR OWN PREPARED PROJECT</div>
+                <h2 id="import-title">Import a reproduction project</h2>
+              </div>
+              <IconButton
+                aria-label="Close project import"
+                disabled={busy}
+                onClick={() => setOpen(false)}
+              >
+                <X size={20} />
+              </IconButton>
+            </div>
+            <div className="modal-body">
+              <div className="callout compact">
+                <FolderOpen size={20} />
+                <p>
+                  <b>Recommended: a project ZIP.</b> Include{" "}
+                  <code>manifest.json</code> and <code>prepared.tar</code> at
+                  the root. ReproScout verifies and stores the inputs for you.
+                </p>
+              </div>
+              <label className="field">
+                Project file (.zip or .json)
+                <input
+                  type="file"
+                  accept=".zip,.json"
+                  aria-label="Project import file"
+                  disabled={busy}
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] || null);
+                    setError("");
+                  }}
+                />
+              </label>
+              {file && (
+                <p className="fine-print">
+                  Selected: {file.name} · {(file.size / 1024).toFixed(1)} KiB
+                </p>
+              )}
+              <p className="muted">
+                A JSON-only manifest works when its prepared archive is already
+                under this workspace's data/ directory. A ZIP can bring both
+                files directly from Downloads or another folder.
+              </p>
+              <details className="trace-message">
+                <summary>What does a prepared project need?</summary>
+                <p className="fine-print">
+                  Original author code and data, questions and answer types, a
+                  SHA-256 input inventory, and a pinned Docker image available
+                  on this machine. Import does not infer dependencies or change
+                  scientific code. Maximum ZIP size: 50 MiB; prepared inputs:
+                  128 MiB.
+                </p>
+              </details>
+              {error && (
+                <div role="alert" className="toast error">
+                  <TriangleAlert size={18} />
+                  <span>{error}</span>
+                </div>
+              )}
+            </div>
+            <div className="modal-actions">
+              <button
+                className="button"
+                disabled={busy}
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="button primary"
+                disabled={!file || busy}
+                onClick={submit}
+              >
+                {busy ? (
+                  <LoaderCircle className="spin" size={16} />
+                ) : (
+                  <FolderOpen size={16} />
+                )}
+                Verify & import
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -893,7 +1039,7 @@ function NewRun({
                 autoFocus
               >
                 {projects.map((p) => (
-                  <option key={p.id} value={p.id} disabled={!p.prepared}>
+                  <option key={p.id} value={p.id} disabled={!READ_ONLY && !p.prepared}>
                     {p.title}
                     {!p.prepared ? " — unavailable" : ""}
                   </option>
@@ -1101,7 +1247,7 @@ function RunDetail({
       "/evidence?artifact=" +
       encodeURIComponent(evidence.artifact);
     if (data.artifacts[evidence.artifact]?.kind === "image") {
-      setPreview({ image: "/api" + url });
+      setPreview({ image: resource(url, true) });
       return;
     }
     api(url)
@@ -1162,7 +1308,7 @@ function RunDetail({
                 : "Cancel run"}
             </button>
           ) : (
-            <a className="button" href={"/api/runs/" + r.id + "/export"}>
+            <a className="button" href={resource("/runs/" + r.id + "/export")}>
               <Download size={16} />
               Export report
             </a>
@@ -1371,6 +1517,7 @@ function RunDetail({
               <button
                 className="button primary"
                 disabled={
+                  READ_ONLY ||
                   isActive ||
                   saving ||
                   !evidence ||
@@ -1384,7 +1531,7 @@ function RunDetail({
                 ) : (
                   <Check size={16} />
                 )}
-                Save review
+                {READ_ONLY ? "Review editing requires local app" : "Save review"}
               </button>
             </section>
           </section>
@@ -1764,6 +1911,7 @@ function Lessons({
         </div>
         <button
           className="button primary"
+          disabled={READ_ONLY}
           onClick={() => {
             setProposing(true);
             setSource(runs[0]?.id || "");
@@ -1814,6 +1962,7 @@ function Lessons({
               <label className="field">
                 Editable Markdown
                 <textarea
+                  readOnly={READ_ONLY}
                   className="lesson-editor"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -1822,7 +1971,7 @@ function Lessons({
               </label>
               <button
                 className="button"
-                disabled={busy || content === lesson.content}
+                disabled={READ_ONLY || busy || content === lesson.content}
                 onClick={() => mutate("edit")}
               >
                 Save changes
@@ -1840,7 +1989,7 @@ function Lessons({
                 <button
                   className="button primary"
                   disabled={
-                    busy || !reviewer.trim() || content !== lesson.content
+                    READ_ONLY || busy || !reviewer.trim() || content !== lesson.content
                   }
                   onClick={() => mutate("approve")}
                 >
@@ -1849,7 +1998,7 @@ function Lessons({
                 </button>
                 <button
                   className="button"
-                  disabled={busy || !reviewer.trim()}
+                  disabled={READ_ONLY || busy || !reviewer.trim()}
                   onClick={() => mutate("disable")}
                 >
                   Disable lesson

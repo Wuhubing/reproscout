@@ -121,14 +121,58 @@ class Workspace:
         atomic(self.state / "projects" / f"{key}.json", manifest)
         return {"id": key}
 
+    def import_bundle(self, body):
+        from .project_import import decode_bundle
+
+        manifest, prepared, original = decode_bundle(body)
+        with self.lock:
+            key = identifier(manifest.get("task_id"))
+            if any(p["id"] == key for p in self.projects()):
+                raise ValueError(
+                    "A project with that ID already exists; the existing project was not changed"
+                )
+            folder = self.root / "data/imports" / key
+            if folder.exists():
+                raise ValueError(
+                    "An input directory with that ID already exists; choose a new project ID"
+                )
+            folder.mkdir(parents=True)
+            try:
+                (folder / "prepared.tar").write_bytes(prepared)
+                manifest = {
+                    **manifest,
+                    "prepared_path": str((folder / "prepared.tar").relative_to(self.root)),
+                    "import_provenance": {
+                        "bundle_sha256": digest(body),
+                        "original_manifest_sha256": digest(original),
+                        "input_sha256": digest(prepared),
+                        "method": "browser_zip_upload",
+                    },
+                }
+                result = self.register_project(manifest)
+                (folder / "original-manifest.json").write_bytes(original)
+                return {
+                    **result,
+                    "title": manifest["title"],
+                    "input_files": len(manifest["input_inventory"]),
+                    "note": "Inputs verified and stored locally. Scientific code was not modified.",
+                }
+            except Exception:
+                shutil.rmtree(folder)
+                (self.state / "projects" / f"{key}.json").unlink(missing_ok=True)
+                raise
+
     def validate_manifest(self, manifest):
         prepared = (self.root / manifest["prepared_path"]).resolve()
         if not prepared.is_relative_to(self.root / "data") or not prepared.is_file():
             raise ValueError(
-                "Prepared archive must be a local file under this repository data/ directory"
+                "Prepared archive is not available under data/. Import a ZIP containing manifest.json and prepared.tar, or place the archive under data/ and update prepared_path."
             )
         if digest(prepared.read_bytes()) != manifest["prepared_sha256"]:
             raise ValueError("Prepared input checksum does not match")
+        from .project_import import validate_prepared
+
+        validate_prepared(prepared.read_bytes(), manifest.get("input_inventory"))
         if "@sha256:" not in manifest["image"]:
             raise ValueError("Use an image pinned by SHA-256 digest")
         if not isinstance(manifest["questions"], dict) or not 1 <= len(manifest["questions"]) <= 30:
@@ -487,7 +531,7 @@ def handler(workspace):
                     return self.send(
                         {
                             "csrf": workspace.token,
-                            "version": "0.8.0",
+                            "version": "0.9.0",
                             "credential_ready": bool(os.environ.get("OPENAI_API_KEY")),
                             "projects": workspace.projects(),
                             "runs": workspace.runs(),
@@ -567,7 +611,14 @@ def handler(workspace):
             ):
                 return self.send({"error": "Same-origin workspace request required"}, 403)
             try:
+                parts = unquote(urlsplit(self.path).path).strip("/").split("/")
                 size = int(self.headers.get("Content-Length", 0))
+                if parts == ["api", "projects", "import"]:
+                    from .project_import import MAX_UPLOAD
+
+                    if not 0 < size <= MAX_UPLOAD:
+                        raise ValueError("Project ZIP must be between 1 byte and 50 MiB")
+                    return self.send(workspace.import_bundle(self.rfile.read(size)), 201)
                 if not 0 < size <= 500_000:
                     raise ValueError("Invalid request size")
                 data = json.loads(self.rfile.read(size))
