@@ -32,3 +32,10 @@ Read `../docs/workspace-guide-v8.md` for setup and `../docs/workspace-release-v8
 for acceptance results and limitations. An independent-user usability session
 remains pending; the browser checks were automated and reviews are attributed
 to an assistant.
+
+## Current video production materials
+
+The English four-minute demonstration script and ten-scene storyboard are in
+`video-demo/`. Read [the production guide](../docs/video-demo-production.md).
+The presenter’s voice sample and synthesis outputs are private and are not
+included here. Earlier videos remain unchanged.
