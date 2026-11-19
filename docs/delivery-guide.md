@@ -1,5 +1,7 @@
 # Delivery guide
 
+**Independent project by Weibing Wang (MIT 1.125).** [Watch the current demonstration](https://youtu.be/FWAhCytPl-0) · [First-delivery scope and submission links](first-delivery.md).
+
 ## Review without rerunning
 
 Open `reports/index.html` in a browser. It works as a local static report. Start

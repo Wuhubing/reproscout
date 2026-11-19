@@ -1,5 +1,7 @@
 # Delivery artifacts
 
+**Independent project by Weibing Wang (MIT 1.125).** [Watch the current demonstration](https://youtu.be/FWAhCytPl-0) · [First-delivery scope and submission links](../docs/first-delivery.md).
+
 v0.6.0 includes 368 portable reports, sixty new scientific outcomes, all previous
 studies and failed attempts, source, protocols and an English saved-results video.
 Open `../reports/index.html`. Read `../docs/controller-comparison.md` and the
@@ -35,7 +37,8 @@ to an assistant.
 
 ## Current video production materials
 
-The English four-minute demonstration script and ten-scene storyboard are in
-`video-demo/`. Read [the production guide](../docs/video-demo-production.md).
-The presenter’s voice sample and synthesis outputs are private and are not
-included here. Earlier videos remain unchanged.
+The final solo-project narration, measured ten-scene storyboard, and YouTube
+upload text are in `video-demo/`. Read [the production guide](../docs/video-demo-production.md).
+The 1080p final delivery master runs approximately 4 minutes 26 seconds. Media,
+voice-reference recordings and credentials remain in ignored private storage.
+Earlier videos remain unchanged. The current video is available through the YouTube link above.

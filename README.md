@@ -1,17 +1,22 @@
 # ReproScout
 
+**An independent MIT 1.125 project by Weibing Wang.** I developed ReproScout to help researchers run original scientific code, inspect evidence behind candidate answers, record attributed reviews, and export portable reports.
+
+**[Watch the 4:26 product demonstration](https://youtu.be/FWAhCytPl-0)** · **[Explore the evidence website](https://wuhubing.github.io/reproscout/)** · **[First-delivery guide](docs/first-delivery.md)**
+
+The video shows prepared-project import, bounded execution, evidence inspection, source integrity, assistant-attributed reviews, and offline report export. The website is a read-only evidence archive; the authenticated execution app has been verified on the development host.
+
 **GitHub Actions investigation:** [Feasibility, official limits, and a successful real Docker acceptance run](docs/github-actions-feasibility.md). Suitable for repository CI; not wired as the public application compute backend.
 
 **v0.10 authenticated execution pilot:** browser login, private ZIP uploads, real Docker runs, saved reviews, and report export. [Setup, validation, and deployment status](docs/online-pilot-v10.md). Public execution hosting is pending a server; the existing Pages site remains read-only.
 
-**Live website:** [Open ReproScout](https://wuhubing.github.io/reproscout/). Explore published runs, inspect evidence, and download reports. GitHub Pages is read-only; import, execution, and review editing run locally. [New project walkthrough](docs/new-project-walkthrough-v9.md) · [Website deployment](docs/github-pages.md).
+**Public evidence website:** [Open ReproScout](https://wuhubing.github.io/reproscout/). Explore published runs, inspect evidence, and download reports. GitHub Pages is read-only; import, execution, and review editing run locally. [New project walkthrough](docs/new-project-walkthrough-v9.md) · [Website deployment](docs/github-pages.md).
 
 **v0.8 local App:** run `uv run reproscout serve` and open `http://127.0.0.1:8765`. [Workspace guide](docs/workspace-guide-v8.md) · [Validation](docs/workspace-release-v8.md) · [Frontend references](docs/frontend-references-v8.md).
 
 **v0.7 product workflow:** [User guide](docs/product-guide.md) · [Offline review dashboard](reports/index.html) · [Release validation](docs/product-release-v7.md). Historical experiments remain available from the dashboard.
 
-ReproScout runs authors' scientific code in isolated containers, submits answers
-with execution evidence, and evaluates whether frozen lessons help subsequent attempts. This is an independently authored MIT 1.125 project by Weibing Wang.
+The retained experiments also investigate whether frozen lessons help subsequent attempts. Their results and failure records remain available as supporting research; they do not establish a consistent lesson benefit.
 
 It uses **Inspect AI as infrastructure**, not an existing benchmark task. It does
 not fork or invoke `inspect_evals/core_bench` or the original CORE-Agent harness.
@@ -77,7 +82,7 @@ remained unchanged. Costs exclude development, host and image costs.
 [Download v0.6.0](https://github.com/Wuhubing/reproscout/releases/tag/v0.6.0) ·
 [Results app](reports/index.html) · [Full comparison](docs/controller-comparison.md) ·
 [Fidelity interpretation](docs/lessons-analysis.md) · [Focused B follow-up](docs/controlled-followup-v6.md) · [All outcomes](docs/results.md) ·
-[English video](deliverables/reproscout-demo.mp4) · [Delivery guide](docs/delivery-guide.md)
+[Historical v0.6 video](deliverables/reproscout-demo.mp4) · [Delivery guide](docs/delivery-guide.md)
 
 ## Install
 

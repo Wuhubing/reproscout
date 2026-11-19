@@ -411,6 +411,20 @@ function App() {
                       {READ_ONLY ? "Run locally" : "New reproduction"}
                     </button>
                   </div>
+                  {page === "overview" && (
+                    <section className="project-delivery" aria-label="Project demonstration and authorship">
+                      <div>
+                        <div className="eyebrow">MIT 1.125 · INDEPENDENT PROJECT</div>
+                        <h2>ReproScout, by Weibing Wang</h2>
+                        <p>I developed ReproScout to connect original-code execution, evidence review, and portable reports.</p>
+                        <p className="fine-print">The 4:26 walkthrough shows the development-host app and retained acceptance results. The public evidence website is read-only.</p>
+                      </div>
+                      <div className="delivery-links">
+                        <a className="button primary" href="https://youtu.be/FWAhCytPl-0" target="_blank" rel="noreferrer"><Play size={17} />Watch project video · 4:26</a>
+                        <a className="button" href="https://github.com/Wuhubing/reproscout/blob/main/docs/first-delivery.md" target="_blank" rel="noreferrer"><FileText size={16} />First-delivery guide</a>
+                      </div>
+                    </section>
+                  )}
                   <div className="metrics">
                     <Metric
                       title={READ_ONLY ? "Published projects" : "Prepared projects"}
